@@ -61,7 +61,15 @@
     fm_system: { name: "소방시설의 구조 원리" },
     sa_law: { name: "산업안전보건법령" },
     sa_gen: { name: "산업안전일반" },
-    sa_mgmt: { name: "기업진단·지도" }
+    sa_mgmt: { name: "기업진단·지도" },
+    fr_econ: { name: "경제법" },
+    fr_civil: { name: "민법" },
+    fr_biz: { name: "경영학" },
+    mg_law: { name: "중소기업관계법령" },
+    mg_acct: { name: "회계학개론" },
+    mg_mgmt: { name: "경영학" },
+    mg_diag: { name: "기업진단론" },
+    mg_survey: { name: "조사방법론" }
   };
 
   /* 시험 — 날짜는 예상 */
@@ -79,7 +87,9 @@
       { id: "g3", name: "3급", subs: ["yc_devpsych", "yc_group3", "yc_assess3", "yc_counseltheory", "yc_learning", "yc_youthunderstand", "yc_youthactivity"] }
     ] },
     { id: "firemgr", name: "소방시설관리사", sub: "1차", date: "2027-05-15", subs: ["fm_theory", "fm_hydro", "fm_law", "fm_hazmat", "fm_system"] },
-    { id: "safetyc", name: "산업안전지도사", sub: "1차", date: "2027-03-06", subs: ["sa_law", "sa_gen", "sa_mgmt"] }
+    { id: "safetyc", name: "산업안전지도사", sub: "1차", date: "2027-03-06", subs: ["sa_law", "sa_gen", "sa_mgmt"] },
+    { id: "franchise", name: "가맹거래사", sub: "1차", date: "2027-04-17", subs: ["fr_econ", "fr_civil", "fr_biz"] },
+    { id: "mgmtc",     name: "경영지도사", sub: "1차", date: "2027-05-15", subs: ["mg_law", "mg_acct", "mg_mgmt", "mg_diag", "mg_survey"] }
   ];
 
   function exam(id) { return EXAMS.filter(function (e) { return e.id === id; })[0] || null; }
