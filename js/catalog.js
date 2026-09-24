@@ -18,14 +18,31 @@
     lg_law:       { name: "물류관련법규" },
     ad_civil:     { name: "민법총칙" },
     ad_admin:     { name: "행정법" },
-    ad_pubad:     { name: "행정학개론" }
+    ad_pubad:     { name: "행정학개론" },
+    ia_law:       { name: "상법(보험편)" },
+    ia_agrireg:   { name: "농어업재해보험법령" },
+    ia_crop:      { name: "재배학·원예작물학" },
+    sg_law:       { name: "법학개론" },
+    sg_civ:       { name: "민간경비론" },
+    sw_human:     { name: "인간행동과 사회환경" },
+    sw_research:  { name: "사회복지조사론" },
+    sw_practice:  { name: "사회복지실천론" },
+    sw_skill:     { name: "사회복지실천기술론" },
+    sw_community: { name: "지역사회복지론" },
+    sw_policy:    { name: "사회복지정책론" },
+    sw_admin:     { name: "사회복지행정론" },
+    sw_law:       { name: "사회복지법제론" }
   };
 
   /* 시험 — 날짜는 예상 */
   var EXAMS = [
     { id: "housing", name: "주택관리사보", sub: "1차", date: "2027-07-17", subs: ["hm_acct", "hm_build", "hm_law"] },
     { id: "logi",    name: "물류관리사",   sub: "필기", date: "2027-07-24", subs: ["lg_logi", "lg_transport", "lg_intl", "lg_storage", "lg_law"] },
-    { id: "ad",      name: "행정사",       sub: "1차", date: "2027-05-29", subs: ["ad_civil", "ad_admin", "ad_pubad"] }
+    { id: "ad",      name: "행정사",       sub: "1차", date: "2027-05-29", subs: ["ad_civil", "ad_admin", "ad_pubad"] },
+    { id: "damage",  name: "손해평가사",   sub: "1차", date: "2027-06-12", subs: ["ia_law", "ia_agrireg", "ia_crop"] },
+    { id: "sg",      name: "경비지도사",   sub: "1차", date: "2026-11-07", subs: ["sg_law", "sg_civ"] },
+    { id: "social1", name: "사회복지사",   sub: "1급", date: "2027-01-16",
+      subs: ["sw_human", "sw_research", "sw_practice", "sw_skill", "sw_community", "sw_policy", "sw_admin", "sw_law"] }
   ];
 
   function exam(id) { return EXAMS.filter(function (e) { return e.id === id; })[0] || null; }
