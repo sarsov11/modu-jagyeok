@@ -69,7 +69,14 @@
     mg_acct: { name: "회계학개론" },
     mg_mgmt: { name: "경영학" },
     mg_diag: { name: "기업진단론" },
-    mg_survey: { name: "조사방법론" }
+    mg_survey: { name: "조사방법론" },
+    pt_iplaw: { name: "산업재산권법" },
+    pt_civil: { name: "민법개론" },
+    pt_natsci: { name: "자연과학개론" },
+    ac_econ: { name: "경제학원론" },
+    ac_law: { name: "보험계약법·보험업법·근로자퇴직급여보장법" },
+    ac_math: { name: "보험수학" },
+    ac_acct: { name: "회계원리" }
   };
 
   /* 시험 — 날짜는 예상 */
@@ -89,7 +96,9 @@
     { id: "firemgr", name: "소방시설관리사", sub: "1차", date: "2027-05-15", subs: ["fm_theory", "fm_hydro", "fm_law", "fm_hazmat", "fm_system"] },
     { id: "safetyc", name: "산업안전지도사", sub: "1차", date: "2027-03-06", subs: ["sa_law", "sa_gen", "sa_mgmt"] },
     { id: "franchise", name: "가맹거래사", sub: "1차", date: "2027-04-17", subs: ["fr_econ", "fr_civil", "fr_biz"] },
-    { id: "mgmtc",     name: "경영지도사", sub: "1차", date: "2027-05-15", subs: ["mg_law", "mg_acct", "mg_mgmt", "mg_diag", "mg_survey"] }
+    { id: "mgmtc",     name: "경영지도사", sub: "1차", date: "2027-05-15", subs: ["mg_law", "mg_acct", "mg_mgmt", "mg_diag", "mg_survey"] },
+    { id: "patent",  name: "변리사",     sub: "1차", date: "2027-02-27", subs: ["pt_iplaw", "pt_civil", "pt_natsci"] },
+    { id: "actuary", name: "보험계리사", sub: "1차", date: "2027-05-22", subs: ["ac_econ", "ac_law", "ac_math", "ac_acct"] }
   ];
 
   function exam(id) { return EXAMS.filter(function (e) { return e.id === id; })[0] || null; }
