@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>모두의 자격</title>
+<link rel="icon" href="icons/favicon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<script>try{document.documentElement.dataset.skin=localStorage.getItem("mj.skin")||"white"}catch(e){document.documentElement.dataset.skin="white"}</script>
+<link rel="stylesheet" href="css/app.css">
+<style>
+  /* 홈은 「이거 하세요」 하나 — 모두의 통사 0919 대표님 지시. 카드·통계·목록을 다시 늘리지 않는다. */
+  .exam{padding:26px 0 6px}
+  .exam .k{font-size:15px;color:var(--ink-3);font-weight:700;display:flex;gap:6px;align-items:center}
+  .exam .d{font-size:44px;font-weight:900;letter-spacing:-.06em;line-height:1.05;margin-top:2px}
+  .exam .d small{font-size:17px;color:var(--ink-3);font-weight:700;letter-spacing:-.02em;margin-left:8px}
+  .todo{margin-top:18px;padding:22px 20px;border:1.5px solid var(--ink);border-radius:var(--r3);background:var(--surface);position:relative}
+  .todo h2{font-size:23px}
+  .todo .t{font-size:15.5px;color:var(--ink-3);margin-top:4px}
+  .todo ul{list-style:none;padding:0;margin:16px 0 18px;display:flex;flex-direction:column;gap:8px}
+  .todo li{display:flex;gap:10px;align-items:baseline;font-size:16px}
+  .todo li b{min-width:52px;font-weight:900}
+  .todo li span{color:var(--ink-2)}
+  .todo .bar{margin-bottom:16px}
+  .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .mini div{padding:12px 10px;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface)}
+  .mini b{display:block;font-size:21px;font-weight:900;letter-spacing:-.04em}
+  .mini span{font-size:13px;color:var(--ink-3)}
+  /* 과목 고르기 — 학생 시험의 과목만. 준비 안 된 과목은 흐리게 */
+  .subs{display:flex;gap:6px;overflow-x:auto;padding:16px 0 2px;scrollbar-width:none}
+  .subs::-webkit-scrollbar{display:none}
+  .subs a,.subs span{flex:none;text-decoration:none;font-size:15px;font-weight:800;padding:8px 14px;border-radius:99px;
+    border:1.5px solid var(--line-2);color:var(--ink-2);background:var(--surface);white-space:nowrap}
+  .subs a.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+  .subs span{color:var(--ink-4);border-style:dashed;font-weight:700}
+  .subs span small{font-size:12px;margin-left:4px}
+  .att{margin-top:18px;padding:14px 16px;border-radius:var(--r3);background:var(--surface-2)}
+  .att h3{font-size:15px;color:var(--ink-2)}
+  .att summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--ink-2)}
+  .mini div{background:var(--surface-2);border:0}
+  .alt{margin-top:28px}
+  .alt h3{font-size:15px;color:var(--ink-3);margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="subs" id="subs"></div>
+  <div class="exam">
+    <div class="k" id="ek"></div>
+    <div class="d num" id="ed"></div>
+  </div>
+
+  <div class="todo" id="todo"></div>
+
+  <div class="mini" id="mini"></div>
+  <div class="att" id="att"></div>
+
+  <div class="alt">
+    <h3>다른 걸 연습하고 싶다면</h3>
+    <div class="list" id="alt"></div>
+  </div>
+</div>
+
+<script src="js/catalog.js"></script>
+<script src="data/ready.js"></script>
+<script src="js/boot.js"></script>
+<script src="js/store.js"></script>
+<script>
+(function () {
+  "use strict";
+  GB.mountNav("index.html");
+  var $ = function (id) { return document.getElementById(id); }, esc = GB.esc;
+
+  var tr = GB.track(), dd = GB.dday();
+  $("ek").textContent = tr.name + " · " + GB.subject;
+  $("subs").innerHTML = GB.subs().map(function (k) {
+    if (!CATALOG.ready(k)) return "<span>" + esc(CATALOG.name(k)) + "<small>준비 중</small></span>";
+    return '<a href="index.html?s=' + k + '"' + (k === GB.cur() ? ' class="on"' : "") + ">" + esc(CATALOG.name(k)) + "</a>";
+  }).join("");
+  $("ed").innerHTML = (dd > 0 ? "D-" + dd : dd === 0 ? "D-DAY" : "시험 끝") + "<small>" + GB.goal().replace(/-/g, ".") +
+    ' <span class="chip">' + GB.goalMark() + "</span></small>";
+
+  var t = GB.today(), nm = GB.name();
+  var newN = t.seq.filter(function (s) { return s.k === "ox" && !s.re; }).length;
+  var prN = t.seq.filter(function (s) { return s.k === "pair"; }).length;
+  var foci = t.foci.slice(0, 3).map(function (n) { return n.name; });
+  var h;
+  if (t.finished) {
+    h = '<h2>오늘 몫 끝</h2><p class="t">' + t.total + "개를 다 했어요. 더 하고 싶으면 어려운 O·X 로 가요.</p>" +
+        '<div style="margin-top:18px"><a class="btn block" href="ox.html?mode=hard">어려운 O·X</a></div>';
+  } else {
+    h = '<h2>' + (nm ? esc(nm) + ", " : "") + (t.done ? "이어서 " : "") + t.min + "분만 해볼까요?</h2>" +
+        '<p class="t">약 ' + t.min + "분 · " + t.total + "개</p>" +
+        "<ul>" +
+        (t.re ? "<li><b class=\"num\">" + t.re + "개</b><span>되돌리기 — 틀렸거나 다시 볼 때가 된 것</span></li>" : "") +
+        "<li><b class=\"num\">" + newN + "개</b><span>새 문제 — " + esc(foci.join(" · ")) + "</span></li>" +
+        (prN ? "<li><b class=\"num\">" + prN + "개</b><span>헷갈리는 짝</span></li>" : "") +
+        "</ul>" +
+        (t.done ? '<div class="bar"><i style="width:' + Math.round(t.done / t.total * 100) + '%"></i></div>' : "") +
+        '<a class="btn block" href="ox.html">' + (t.done ? "이어서 · " + t.done + " / " + t.total : "시작") + "</a>";
+  }
+  $("todo").innerHTML = h;
+
+  /* 불꽃(연속) · 방패(등급) · 출석(주간 + 월간) — 선호대장 1차 */
+  var FLAME = '<svg viewBox="0 0 24 24"><path fill="#F97316" d="M12 2c1 3.5 4.5 5.2 4.5 9.5A4.5 4.5 0 0 1 12 16a4.5 4.5 0 0 1-4.5-4.5c0-1.8.8-3.1 1.8-4.1.1 1.5.9 2.6 2 2.9C11 8 11.2 4.6 12 2z"/><path fill="#FDBA74" d="M12 22a6 6 0 0 1-6-6c0-2.3 1.2-4 2.6-5.3-.1 2.5 1.4 4.3 3.4 4.3s3.5-1.6 3.4-4.3C16.8 12 18 13.7 18 16a6 6 0 0 1-6 6z"/></svg>';
+  var SHIELD = ["#B7794B", "#9CA3AF", "#EAB308", "#22D3EE", "#60A5FA"];
+  var tr2 = GB.tier();
+  var shield = '<svg viewBox="0 0 34 38"><path d="M17 1 32 6v12c0 9.5-6.4 16.2-15 19C8.4 34.2 2 27.5 2 18V6z" fill="' + SHIELD[tr2.rank] + '"/><path d="M17 5 28 9v9c0 7.2-4.6 12.4-11 14.8C10.6 30.4 6 25.2 6 18V9z" fill="rgba(255,255,255,.28)"/></svg>';
+  $("mini").innerHTML =
+    '<div><b class="num flame">' + FLAME + GB.streak() + "일</b><span>연속</span></div>" +
+    (GB.tierOn() ? '<div><b class="shield">' + shield + '<span style="font-size:16px">' + tr2.name + "</span></b><span>오래 기억한 문장 " + GB.num(tr2.held) + "개</span></div>"
+                 : '<div><b class="num">' + GB.overall().prog + "%</b><span>푼 문장</span></div>") +
+    '<div><b class="num">' + GB.todayCount() + "</b><span>오늘 푼 문장</span></div>";
+  (function 출석() {
+    var D = GB.days(), now = new Date(), y = now.getFullYear(), m = now.getMonth();
+    function ymd(d) { return GB.ymd(d); }
+    var 주 = "", 월 = "", w0 = new Date(now); w0.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(w0); d.setDate(w0.getDate() + i);
+      주 += '<i class="' + (D[ymd(d)] ? "on" : "") + (ymd(d) === ymd(now) ? " today" : "") + '">' + "월화수목금토일"[i] + "</i>";
+    }
+    var first = new Date(y, m, 1), pad = (first.getDay() + 6) % 7, last = new Date(y, m + 1, 0).getDate();
+    월 = "월화수목금토일".split("").map(function (c) { return "<b>" + c + "</b>"; }).join("");
+    for (var k = 0; k < pad; k++) 월 += '<i class="blank"></i>';
+    for (var dd = 1; dd <= last; dd++) {
+      var dt = new Date(y, m, dd);
+      월 += '<i class="' + (D[ymd(dt)] ? "on" : "") + (ymd(dt) === ymd(now) ? " today" : "") + '">' + dd + "</i>";
+    }
+    $("att").innerHTML = '<h3>이번 주</h3><div class="cal">' + 주 + '</div>' +
+      '<details style="margin-top:10px"><summary>' + (m + 1) + "월 출석</summary>" + '<div class="cal">' + 월 + "</div></details>";
+  })();
+
+  var wrong = GB.wrongList().length;
+  $("alt").innerHTML =
+    '<a class="row" href="ox.html?mode=hard"><span class="t"><b>어려운 O·X</b><span>한두 마디만 바꾼 함정 문장</span></span><span class="go">›</span></a>' +
+    '<a class="row" href="ox.html?mode=pair"><span class="t"><b>헷갈리는 짝</b><span>닮은 두 기출 문장 중 맞는 것 고르기</span></span><span class="go">›</span></a>' +
+    (wrong ? '<a class="row" href="ox.html?mode=wrong"><span class="t"><b>틀린 문장 다시</b><span>' + wrong + "개</span></span><span class=\"go\">›</span></a>" : "");
+})();
+</script>
+</body>
+</html>

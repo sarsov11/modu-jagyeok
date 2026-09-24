@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>시작 — 모두의 자격</title>
+<link rel="icon" href="icons/favicon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<script>try{document.documentElement.dataset.skin=localStorage.getItem("mj.skin")||"white"}catch(e){document.documentElement.dataset.skin="white"}</script>
+<link rel="stylesheet" href="css/app.css">
+<style>
+  /* 첫 설정 — 한 화면에 질문 하나, 큰 단추 하나(모두의 통사 start.html · 헤이링 방식) */
+  .wrap{max-width:520px;margin:0 auto;padding:28px 16px 48px;min-height:100vh;display:flex;flex-direction:column}
+  .dots{display:flex;gap:6px;margin-bottom:28px}
+  .dots i{flex:1;height:4px;border-radius:99px;background:var(--surface-3)}
+  .dots i.on{background:var(--ink)}
+  h1{font-size:27px;letter-spacing:-.05em}
+  .lead{color:var(--ink-3);font-size:16px;margin:8px 0 0}
+  .body{flex:1;margin-top:26px}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opts button{appearance:none;position:relative;text-align:left;border:1.5px solid var(--line-2);background:var(--surface);
+    border-radius:var(--r3);padding:16px 18px;font-size:17px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  .opts button small{font-size:14px;color:var(--ink-3);font-weight:600}
+  .opts button[aria-pressed="true"]{border:2px solid var(--ink);background:var(--surface-3)}
+  .opts.g2{display:grid;grid-template-columns:1fr 1fr}
+  input[type=text],input[type=date]{width:100%;font:inherit;font-size:19px;padding:15px 16px;border:1.5px solid var(--line-2);
+    border-radius:var(--r3);background:var(--surface);color:var(--ink)}
+  input:focus{outline:none;border-color:var(--ink)}
+  .foot{display:flex;flex-direction:column;gap:10px;margin-top:24px}
+  .skip{appearance:none;border:0;background:none;color:var(--ink-4);font-size:15px;cursor:pointer;padding:6px;position:relative}
+  .skip .tip{display:none;position:absolute;bottom:130%;left:50%;transform:translateX(-50%);width:250px;background:var(--ink);color:var(--bg);
+    font-size:13.5px;padding:8px 10px;border-radius:var(--r1);line-height:1.45}
+  .skip:hover .tip,.skip:focus .tip,.skip.on .tip{display:block}
+  .dateline{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:28px;font-weight:900;letter-spacing:-.05em}
+  .qhd{display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--ink-3);font-weight:700}
+  .perpart{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+  .perpart div{display:grid;grid-template-columns:1fr 60px;gap:6px 10px;align-items:center;font-size:15px}
+  .perpart .bar{grid-column:1 / -1}
+  .from{margin-top:20px;padding:16px;border:1px solid var(--line);border-radius:var(--r3);background:var(--surface)}
+  .from b{display:block;font-size:14px;color:var(--ink-3);margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="dots" id="dots"></div>
+  <div id="scr"></div>
+</div>
+
+<script src="js/catalog.js"></script>
+<script src="data/ready.js"></script>
+<script src="js/boot.js"></script>
+<script src="js/judge.js"></script>
+<script src="js/store.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); }, esc = GB.esc;
+  var LIMIT = 15000;     /* 배치 시험 한 문장 제한 — 행정법 선지는 통사 O·X(10초)보다 길어 15초 */
+  var STEPS = ["intro", "exam", "series", "subs", "name", "date", "min", "check", "done"];
+  /* 과목이 정해진 뒤 실력 확인은 그 학생 과목 중 준비된 첫 과목으로 — 지금 실린 자료가 다르면 그 과목으로 다시 연다 */
+  var 시작단계 = new URLSearchParams(location.search).get("step");
+  var at = 0, A = { rec: [] };
+
+  function dots() {
+    $("dots").innerHTML = STEPS.map(function (s, i) { return '<i class="' + (i <= at ? "on" : "") + '"></i>'; }).join("");
+  }
+  function go(i) { at = i; dots(); 화면[STEPS[i]](); window.scrollTo(0, 0); }
+  function nextStep() { go(at + 1); }
+
+  var 화면 = {
+    intro: function () {
+      $("scr").innerHTML = '<h1>자격증, 시험에 나온 문장으로<br>O·X부터 풉니다</h1>' +
+        '<p class="lead">주택관리사 · 물류관리사 · 행정사. 하루 정한 시간만큼, 오늘 할 것은 우리가 골라요.</p>' +
+        '<div class="body"></div><div class="foot"><button class="btn block" id="n">시작하기</button></div>';
+      $("n").onclick = nextStep;
+    },
+    name: function () {
+      $("scr").innerHTML = "<h1>뭐라고 부를까요?</h1><p class=\"lead\">홈에서 이 이름으로 불러요. 비워 둬도 돼요.</p>" +
+        '<div class="body"><input type="text" id="nm" maxlength="12" placeholder="닉네임" value="' + esc(GB.name()) + '"></div>' +
+        '<div class="foot"><button class="btn block" id="n">다음</button></div>';
+      $("nm").focus();
+      $("nm").onkeydown = function (e) { if (e.key === "Enter") $("n").click(); };
+      $("n").onclick = function () { GB.setName($("nm").value); nextStep(); };
+    },
+    exam: function () {
+      var cur = null;
+      try { cur = (JSON.parse(localStorage.getItem("mj.pref.v1") || "{}").exam) || null; } catch (e) {}
+      $("scr").innerHTML = "<h1>어떤 시험을 봐요?</h1><p class=\"lead\">시험에 맞춰 과목과 기출을 골라 드려요.</p>" +
+        '<div class="body"><div class="opts" id="op">' + CATALOG.EXAMS.map(function (e) {
+          return '<button type="button" data-v="' + e.id + '" aria-pressed="' + (e.id === cur) + '">' + e.name + "<small>" + e.sub + "</small></button>";
+        }).join("") + "</div></div>";
+      $("op").querySelectorAll("button").forEach(function (b) {
+        b.onclick = function () {
+          b.setAttribute("aria-pressed", "true");
+          var e = CATALOG.exam(b.dataset.v);
+          GB.setExam(e.id, null);
+          setTimeout(function () { go(STEPS.indexOf(e.series ? "series" : "subs")); }, 120);
+        };
+      });
+    },
+    series: function () {
+      var e = GB.exam();
+      if (!e.series) return go(STEPS.indexOf("subs"));
+      $("scr").innerHTML = "<h1>어느 직렬이에요?</h1><p class=\"lead\">" + esc(e.name) + " — 직렬마다 전문과목이 달라요.</p>" +
+        '<div class="body"><div class="opts" id="op">' + e.series.map(function (x) {
+          return '<button type="button" data-v="' + x.id + '">' + x.name + "<small>" +
+            x.subs.map(function (k) { return CATALOG.name(k); }).join(" · ") + "</small></button>";
+        }).join("") + "</div></div>";
+      $("op").querySelectorAll("button").forEach(function (b) {
+        b.onclick = function () { b.setAttribute("aria-pressed", "true"); GB.setExam(e.id, b.dataset.v); setTimeout(nextStep, 120); };
+      });
+    },
+    subs: function () {
+      var ss = GB.subs();
+      $("scr").innerHTML = "<h1>이 과목들을 봐요</h1><p class=\"lead\">" + esc(GB.track().name) + " 시험 과목이에요. 준비된 과목부터 풀 수 있어요.</p>" +
+        '<div class="body"><div class="opts">' + ss.map(function (k) {
+          var r = CATALOG.ready(k);
+          return '<button type="button" disabled style="cursor:default;opacity:1">' + CATALOG.name(k) + "<small>" +
+            (r ? "기출 " + GB.num(CATALOG.count(k)) + "개" : "준비 중") + "</small></button>";
+        }).join("") + "</div></div>" +
+        '<div class="foot"><button class="btn block" id="n">좋아요</button></div>';
+      $("n").onclick = nextStep;
+    },
+    date: function () {
+      var tr = GB.track();
+      $("scr").innerHTML = "<h1>시험 날짜</h1><p class=\"lead\">2027년 " + esc(GB.exam().name) + " 일정은 아직 공고 전이에요. 예년 기준 예상 날짜를 넣어 뒀어요.</p>" +
+        '<div class="body"><div class="dateline num"><span id="dv">' + GB.goal().replace(/-/g, ".") + '</span><span class="chip" id="dm">' + GB.goalMark() + "</span></div>" +
+        '<input type="date" id="di" value="' + GB.goal() + '"></div>' +
+        '<div class="foot"><button class="btn block" id="n">이 날짜로</button></div>';
+      $("di").onchange = function () {
+        if (!this.value) return;
+        GB.setGoal(this.value, true);
+        $("dv").textContent = this.value.replace(/-/g, "."); $("dm").textContent = "직접";
+      };
+      $("n").onclick = nextStep;
+    },
+    min: function () {
+      var cur = GB.minutes();
+      $("scr").innerHTML = "<h1>하루 몇 분?</h1><p class=\"lead\">정한 시간만큼만 내요. 나중에 설정에서 바꿀 수 있어요.</p>" +
+        '<div class="body"><div class="opts g2" id="op">' + [10, 15, 20, 30].map(function (m) {
+          return '<button type="button" data-v="' + m + '" aria-pressed="' + (m === cur) + '">' + m + "분<small>약 " + Math.round(m * 60 / GB.SEC_PER) + "개</small>" +
+            (m === 15 ? '<span class="bdg">추천</span>' : "") + "</button>";
+        }).join("") + "</div></div>";
+      $("op").querySelectorAll("button").forEach(function (b) {
+        b.onclick = function () { GB.setMinutes(+b.dataset.v); b.setAttribute("aria-pressed", "true"); setTimeout(nextStep, 120); };
+      });
+    },
+    check: function () {
+      var mine = GB.subs().filter(function (k) { return CATALOG.ready(k); });
+      if (mine.length && mine.indexOf(GB.cur()) < 0) { location.replace("start.html?s=" + mine[0] + "&step=check"); return; }
+      if (!mine.length) return go(STEPS.indexOf("done"));
+      var set = GB.placementSet(20), i = 0, timer = null, t0 = 0;
+      if (set.length < 5) return go(STEPS.indexOf("done"));   /* O·X 문장이 없는 과목 — 실력 확인 없이 시작 */
+      function one() {
+        if (i >= set.length) { clearInterval(timer); return fin(); }
+        var q = set[i]; t0 = Date.now();
+        $("scr").innerHTML = '<div class="qhd"><span>실력 확인 ' + (i + 1) + " / " + set.length + '</span><span class="chip">' + esc(GB.node(q.n).name) + "</span></div>" +
+          '<div class="tm" id="tm"><i style="width:100%"></i></div>' +
+          '<div class="qcard" style="margin-top:14px"><p class="sent">' + esc(q.t) + "</p></div>" +
+          '<div class="oxb" id="oxb"><button type="button" data-a="O">O</button><button type="button" data-a="X">X</button></div>' +
+          '<div class="foot"><button class="skip" id="sk">건너뛰기<span class="tip">스무 문장을 다 풀어야 어디서부터 할지 정확히 골라요.</span></button></div>';
+        var locked = false;
+        function pick(a) {
+          if (locked) return; locked = true;
+          var ms = Date.now() - t0, to = a == null, ok = !to && a === q.ox;
+          $("oxb").querySelectorAll("button").forEach(function (x) {
+            x.disabled = true;
+            if (x.dataset.a === q.ox) x.dataset.s = "ok"; else if (x.dataset.a === a) x.dataset.s = "no";
+          });
+          A.rec.push({ id: q.i, ok: ok, ms: ms, to: to });
+          GB.answer(q.i, ok, { ms: ms, kind: to ? "시간초과" : ok ? "정답" : "오답" });
+          i++; setTimeout(one, ok ? 450 : 1100);
+        }
+        $("oxb").querySelectorAll("button").forEach(function (b) { b.onclick = function () { pick(b.dataset.a); }; });
+        var armed = false;
+        $("sk").onclick = function () {
+          if (!armed) { armed = true; this.classList.add("on"); this.firstChild.textContent = "그래도 건너뛰기";
+            var me = this; setTimeout(function () { armed = false; me.classList.remove("on"); me.firstChild.textContent = "건너뛰기"; }, 6000); return; }
+          clearInterval(timer); A.skipped = true; fin();
+        };
+        clearInterval(timer);
+        timer = setInterval(function () {
+          var left = LIMIT - (Date.now() - t0), el = $("tm");
+          if (!el) return;
+          el.firstChild.style.width = Math.max(0, left / LIMIT * 100) + "%";
+          el.classList.toggle("low", left < LIMIT * 0.3);
+          if (left <= 0) { clearInterval(timer); pick(null); }
+        }, 100);
+      }
+      function fin() { A.place = GB.setPlacement(A.rec); nextStep(); }
+      one();
+    },
+    done: function () {
+      var p = A.place || GB.placement() || { n: 0, ok: 0, per: {} };
+      /* ★ 「여기서부터」는 홈의 오늘 할 것이 실제로 고른 쟁점과 같아야 한다 — 다르면 학생이 헷갈린다 */
+      var from = GB.today().foci.slice(0, 3);
+      var fast = A.rec.filter(function (r) { return r.ok && r.ms < 6000; }).length;
+      $("scr").innerHTML = "<h1>" + (p.n ? p.n + "문장 중 " + p.ok + "개" : "좋아요, 바로 시작해요") + "</h1>" +
+        (p.n ? '<p class="lead">바로(6초 안에) 맞힌 것 ' + fast + "개 · 시간 넘긴 것 " + A.rec.filter(function (r) { return r.to; }).length + "개</p>" : "") +
+        '<div class="body">' +
+        (p.n ? '<div class="perpart">' + GB.parts.filter(function (pt) { return p.per[pt.no]; }).map(function (pt) {
+          var x = p.per[pt.no];
+          return "<div><span>" + esc(pt.name) + '</span><span class="num" style="text-align:right">' + x.ok + " / " + x.n + '</span><div class="bar"><i style="width:' + Math.round(x.ok / x.n * 100) + '%"></i></div></div>';
+        }).join("") + "</div>" : "") +
+        (from.length ? '<div class="from"><b>여기서부터</b>' + from.map(function (n) { return esc(n.name); }).join(" · ") + "</div>" : "") +
+        '</div><div class="foot"><button class="btn block" id="n">오늘 할 것 보기</button></div>';
+      $("n").onclick = function () { GB.setOnboarded(); location.href = "index.html"; };
+    }
+  };
+  go(시작단계 && STEPS.indexOf(시작단계) >= 0 ? STEPS.indexOf(시작단계) : 0);
+})();
+</script>
+</body>
+</html>

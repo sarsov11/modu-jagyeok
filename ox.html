@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>O·X — 모두의 자격</title>
+<link rel="icon" href="icons/favicon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<script>try{document.documentElement.dataset.skin=localStorage.getItem("mj.skin")||"white"}catch(e){document.documentElement.dataset.skin="white"}</script>
+<link rel="stylesheet" href="css/app.css">
+<style>
+  .hd{display:flex;align-items:center;gap:10px;padding:18px 0 0}
+  .hd h1{font-size:20px;flex:1;min-width:0}
+  .hd .cnt{font-size:15px;color:var(--ink-3)}
+  .hd a.x{color:var(--ink-4);text-decoration:none;font-size:22px;line-height:1;padding:4px}
+  .lock{opacity:.35;pointer-events:none}
+  .more{margin-top:10px;font-size:14.5px;color:var(--ink-3)}
+  .readhd{display:flex;align-items:center;gap:10px;margin-top:18px}
+  .readhd h2{font-size:18px;flex:1}
+  .empty{padding:48px 8px;text-align:center;color:var(--ink-3)}
+  .spd{font-size:40px;font-weight:900;text-align:center;letter-spacing:-.05em}
+</style>
+</head>
+<body class="focus">
+<div class="page">
+  <div class="hd"><h1 id="ttl">O·X</h1><span class="cnt num" id="cnt"></span><a class="x" href="index.html" title="그만하기">✕</a></div>
+  <div class="stones" id="prog"></div>
+  <div id="stage"></div>
+</div>
+
+<script src="js/catalog.js"></script>
+<script src="data/ready.js"></script>
+<script src="js/boot.js"></script>
+<script src="js/judge.js"></script>
+<script src="js/store.js"></script>
+<script>
+(function () {
+  "use strict";
+  GB.mountNav("ox.html");
+  var qsp = new URLSearchParams(location.search);
+  var mode = qsp.get("mode") || (qsp.get("node") ? "node" : qsp.get("read") ? "read" : "today");
+  var nodeNo = +(qsp.get("node") || qsp.get("read") || 0);
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = GB.esc;
+
+  /* ── 세션 목록 만들기 ──
+     today 는 저장된 오늘 목록의 안 한 것부터. 나머지는 열 개씩. */
+  var seq = [], todayIdx = [];
+  if (mode === "today") {
+    var t = GB.today();
+    t.seq.forEach(function (s, i) { if (!s.done) { seq.push(s); todayIdx.push(i); } });
+    $("ttl").textContent = "오늘 " + t.min + "분";
+  } else if (mode === "node") {
+    var nd = GB.node(nodeNo);
+    var wrong = GB.qs(nodeNo).filter(function (q) { var a = GB.answered(q.i); return a && !a.ok; });
+    seq = wrong.concat(GB.freshOf(nodeNo, 10)).slice(0, 10).map(function (q) { return { k: "ox", id: q.i }; });
+    GB.pairs(nodeNo).slice(0, 2).forEach(function (p, i) { seq.splice(3 + i * 4, 0, { k: "pair", id: p.id }); });
+    $("ttl").textContent = nd ? nd.name : "O·X";
+  } else if (mode === "wrong") {
+    seq = GB.wrongList().slice(0, 15).map(function (id) { return { k: "ox", id: id }; });
+    $("ttl").textContent = "틀린 문장 다시";
+  } else if (mode === "pair") {
+    var pl = (nodeNo ? GB.pairs(nodeNo) : GB.pairs()).filter(function (p) { return !GB.state().pairs[p.id] || !GB.state().pairs[p.id].ok; });
+    shuffle(pl, 17);
+    seq = pl.slice(0, 10).map(function (p) { return { k: "pair", id: p.id }; });
+    $("ttl").textContent = "헷갈리는 짝";
+  } else if (mode === "hard") {
+    /* 어려운 O·X — 헷갈리는 짝에 들어 있는 **틀린 쪽 문장**(맞는 문장과 한두 마디만 다르다)
+       + 내가 확신하고 틀렸던 문장. 새 문장을 짓지 않는다. */
+    var mine = Object.keys(GB.state().ans).filter(function (id) { var a = GB.state().ans[id]; return a.kind === "오개념" && GB.item(id); });
+    var traps = GB.pairs().map(function (p) { return p.x.i; }).filter(function (id) { var a = GB.answered(id); return GB.item(id) && !(a && a.ok && a.conf === "sure"); });
+    shuffle(traps, new Date().getDate());
+    seq = mine.concat(traps).slice(0, 12).map(function (id) { return { k: "ox", id: id }; });
+    $("ttl").textContent = "어려운 O·X";
+  } else if (mode === "speed") {
+    $("ttl").textContent = "60초 스피드";
+  }
+
+  function shuffle(a, seed) {
+    var s = seed || 1;
+    for (var i = a.length - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; var j = Math.floor(s / 233280 * (i + 1)); var x = a[i]; a[i] = a[j]; a[j] = x; }
+    return a;
+  }
+
+  var pos = 0, results = [], streakBy = {};
+
+  function drawProg() {
+    var n = seq.length;
+    $("cnt").textContent = n ? Math.min(pos + 1, n) + " / " + n : "";
+    /* 일자 징검다리(선호대장 1차) — 남은 문항이 반드시 보이게. 많으면 지금 자리 둘레 18칸만 */
+    var from = Math.max(0, Math.min(pos - 6, n - 18)), to = Math.min(n, from + 18);
+    var h = "";
+    for (var i = from; i < to; i++) {
+      var r = results[i];
+      h += "<i class=\"" + (r ? (r.kind === "오개념" ? "warn" : r.ok ? "ok" : "no") : i === pos ? "now" : "") + "\"></i>";
+    }
+    $("prog").innerHTML = h + '<span class="left">남은 ' + Math.max(0, n - pos - (results[pos] ? 1 : 0)) + "개</span>";
+  }
+
+  function nodeChip(no) { var n = GB.node(no); return n ? '<span class="chip">' + esc(n.name) + "</span>" : ""; }
+
+  /* 같은 쟁점에서 가장 닮은 **맞는** 기출 문장 — 틀린 문장을 고쳐 읽게 한다(지어낸 해설 대신) */
+  function grams(t) { var s = t.replace(/\s+/g, ""), g = {}; for (var i = 0; i < s.length - 2; i++) g[s.substr(i, 3)] = 1; return g; }
+  function sim(a, b) { var A = grams(a), B = grams(b), i = 0, u = 0, k; for (k in A) { u++; if (B[k]) i++; } for (k in B) if (!A[k]) u++; return u ? i / u : 0; }
+  function nearestO(q) {
+    var best = null, bs = 0;
+    GB.qs(q.n).forEach(function (o) {
+      if (o.ox !== "O" || o.i === q.i) return;
+      var s = sim(q.t, o.t); if (s > bs) { bs = s; best = o; }
+    });
+    return bs >= 0.28 ? best : null;
+  }
+  function pairOf(id) {
+    var ps = GB.pairs(GB.item(id).n);
+    for (var i = 0; i < ps.length; i++) if (ps[i].o.i === id || ps[i].x.i === id) return ps[i];
+    return null;
+  }
+
+  /* ── 한 문장 O·X ── */
+  function showOX(s) {
+    var q = GB.item(s.id);
+    if (!q) { next(); return; }
+    var conf = null, t0 = Date.now(), done = false;
+    /* 기출 풀기(4지선다) — 국어·영어처럼 한 문장으로 못 자르는 문항. q.mc = {s:발문, d:자료, o:[선지 4], a:정답 1~4} */
+    var mc = q.mc, 정답 = mc ? String(mc.a) : q.ox;
+    var 단추 = mc
+      ? '<div class="mcb lock" id="oxb">' + mc.o.map(function (o, i) {
+          return '<button type="button" data-a="' + (i + 1) + '"><b>' + "①②③④⑤"[i] + "</b><span>" + esc(o) + "</span></button>"; }).join("") + "</div>"
+      : '<div class="oxb lock" id="oxb"><button type="button" data-a="O">O</button><button type="button" data-a="X">X</button></div>';
+    $("stage").innerHTML =
+      '<div class="qcard"><div class="src">' + nodeChip(q.n) + '<span class="chip">' + esc(GB.src(q)) + "</span>" +
+        (s.re ? '<span class="chip cta">다시 보기</span>' : "") + "</div>" +
+        (q.sa ? '<div class="case"><b>사례</b>' + esc(q.sa) + "</div>" : "") +
+        (q.tp ? '<div class="topic">' + esc(q.tp) + "</div>" : "") +
+        '<p class="sent" id="sent">' + esc(mc ? mc.s : q.t) + "</p>" +
+        (mc && mc.d ? '<div class="case mcdata" style="margin:12px 0 0">' + esc(mc.d) + "</div>" : "") + "</div>" +
+      '<div class="step"><h3>얼마나 확실해요?</h3><div class="conf" id="conf">' +
+        [{ v: "sure", name: "확실해요" }, { v: "half", name: "헷갈려요" }].map(function (c, i) { return '<button type="button" data-v="' + c.v + '" aria-pressed="false">' + c.name + "</button>"; }).join("") +
+      "</div></div>" +
+      단추 +
+      '<p class="hint" id="hint">확실한지 먼저 골라요</p>' +
+      '<div id="after"></div>';
+    var cb = $("conf").querySelectorAll("button");
+    cb.forEach(function (b) {
+      b.onclick = function () {
+        if (done) return;
+        conf = b.dataset.v;
+        cb.forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+        $("oxb").classList.remove("lock"); $("hint").textContent = "";
+      };
+    });
+    $("oxb").querySelectorAll("button").forEach(function (b) {
+      b.onclick = function () {
+        if (done || !conf) return;
+        done = true;
+        var pick = b.dataset.a, ok = pick === 정답, ms = Date.now() - t0;
+        $("oxb").querySelectorAll("button").forEach(function (x) {
+          x.disabled = true;
+          if (x.dataset.a === 정답) x.dataset.s = "ok"; else if (x === b) x.dataset.s = "no";
+        });
+        var st = GB.nodeStat(q.n), prev = GB.answered(q.i);
+        var j = JUDGE.판정({ ok: ok, conf: conf, ms: ms, attempt: prev ? prev.n + 1 : 1, mastery: st.mastery,
+                             streak: streakBy[q.n] || 0, qid: q.i, leafName: GB.node(q.n).name });
+        streakBy[q.n] = ok ? 0 : (streakBy[q.n] || 0) + 1;
+        GB.answer(q.i, ok, { conf: conf, ms: ms, kind: j.kind });
+        results[pos] = { ok: ok, kind: j.kind, id: q.i };
+        document.querySelector(".qcard").classList.add(ok ? "glow-ok" : "glow-no");
+        if (mode === "today") GB.markToday(todayIdx[pos]);
+        drawProg();
+
+        /* 판정이 "하나 더" 라고 하면 **실제로 끼운다** — 말만 하고 안 하면 그 말을 안 믿는다 */
+        var extra = null;
+        if (!ok || j.next === "same" || j.next === "similar") {
+          var more = GB.freshOf(q.n, 3).filter(function (x) { return !seq.some(function (y) { return y.id === x.i; }); })[0];
+          if (more) { extra = more; seq.splice(pos + 1, 0, { k: "ox", id: more.i, add: 1 }); if (mode === "today") todayIdx.splice(pos + 1, 0, -1); drawProg(); }
+        }
+
+        var h = '<div class="verdict ' + j.tone + '"><div class="top"><span class="mk">' + (ok ? "O" : "✕") + "</span>" +
+          (ok ? '<span class="reward">+1</span>' : "") + '<span class="chip">' + esc(j.label || { "재시도정답": "다시 풀어 맞힘", "연속오답": "연속 오답" }[j.kind] || j.kind) + "</span></div>" +
+          '<p class="say">' + esc(j.say) + "</p>" +
+          '<p class="ans">정답은 <b>' + (mc ? "①②③④⑤"[+정답 - 1] : q.ox) + "</b>" + (mc ? "" : q.ox === "X" ? " — 이 문장은 틀린 문장이에요." : " — 맞는 문장이에요.") + "</p>";
+        var 해설 = "";
+        var p = pairOf(q.i);
+        if (p) {
+          var d = GB.markDiff(p.o.t, p.x.t);
+          해설 += '<div class="pair"><div class="lab">헷갈리는 짝 — 갈리는 마디에 칠했어요</div>' +
+               '<p><b style="color:var(--ok)">맞음</b> ' + d[0] + "</p>" +
+               '<p><b style="color:var(--no)">틀림</b> ' + d[1] + "</p></div>";
+        } else if (!mc && q.ox === "X") {
+          var o = nearestO(q);
+          if (o) 해설 += '<div class="pair"><div class="lab">같은 쟁점의 맞는 기출 문장 · ' + esc(GB.src(o)) + "</div><p>" + GB.markDiff(o.t, q.t)[0] + "</p></div>";
+        }
+        if (해설) h += '<div class="expl" id="expl"><button type="button">해설 보기</button><div class="body">' + 해설 + "</div></div>";
+        if (extra) h += '<p class="more">' + esc(GB.node(q.n).name) + " 문장 하나를 바로 뒤에 넣었어요.</p>";
+        h += "</div>";
+        var readBtn = (j.next === "concept" || j.next === "lecture")
+          ? '<button class="btn ghost" id="read">' + JUDGE.다음말[j.next].t + "</button>" : "";
+        h += '<div class="acts">' + readBtn + '<button class="btn" id="nx">다음</button></div>';
+        $("after").innerHTML = h;
+        $("nx").onclick = next;
+        if ($("expl")) $("expl").firstChild.onclick = function () { $("expl").classList.toggle("open"); this.textContent = $("expl").classList.contains("open") ? "해설 접기" : "해설 보기"; };
+        if ($("read")) $("read").onclick = function () { showRead(q.n, true); };
+        $("nx").focus({ preventScroll: true });
+        $("after").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      };
+    });
+  }
+
+  /* ── 헷갈리는 짝 — 둘 중 맞는 문장 고르기 ── */
+  function showPair(s) {
+    var p = GB.pair(s.id);
+    if (!p) { next(); return; }
+    var flip = (p.id.charCodeAt(p.id.length - 1) + new Date().getDate()) % 2 === 1;   /* 자리를 외우지 못하게 */
+    var A = flip ? [p.x, p.o] : [p.o, p.x], done = false;
+    $("stage").innerHTML =
+      '<div class="qcard"><div class="src">' + nodeChip(p.n) + '<span class="chip cta">헷갈리는 짝</span></div>' +
+      '<p class="sent" style="font-size:17px">두 기출 문장 중 <b>맞는 문장</b>을 고르세요.</p>' +
+      '<div class="two" id="two">' + A.map(function (x, i) {
+        return '<button type="button" data-i="' + x.i + '"><b>' + "가나"[i] + '</b><span class="tx">' + esc(x.t) + "</span></button>";
+      }).join("") + "</div></div><div id=\"after\"></div>";
+    $("two").querySelectorAll("button").forEach(function (b) {
+      b.onclick = function () {
+        if (done) return; done = true;
+        var ok = b.dataset.i === p.o.i;
+        var d = GB.markDiff(p.o.t, p.x.t);
+        $("two").querySelectorAll("button").forEach(function (x) {
+          x.disabled = true;
+          var isO = x.dataset.i === p.o.i;
+          x.querySelector(".tx").innerHTML = isO ? d[0] : d[1];
+          if (isO) x.dataset.s = "ok"; else if (x === b) x.dataset.s = "no";
+        });
+        GB.pairAnswer(p.id, ok);
+        results[pos] = { ok: ok, kind: ok ? "정답" : "오답", pair: 1 };
+        if (mode === "today") GB.markToday(todayIdx[pos]);
+        drawProg();
+        $("after").innerHTML = '<div class="verdict ' + (ok ? "good" : "bad") + '"><div class="top"><span class="mk">' + (ok ? "O" : "✕") + "</span></div>" +
+          '<p class="say">' + (ok ? "맞았어요. 칠한 마디가 두 문장을 가릅니다." : "칠한 마디를 보세요. 여기서 맞고 틀림이 갈려요.") + "</p>" +
+          '<p class="ans">출처 — 맞음 ' + esc((p.o.y || "") + " " + (p.o.e || "")) + " · 틀림 " + esc((p.x.y || "") + " " + (p.x.e || "")) + "</p></div>" +
+          '<div class="acts"><button class="btn" id="nx">다음</button></div>';
+        $("nx").onclick = next; $("nx").focus({ preventScroll: true });
+      };
+    });
+  }
+
+  /* ── 맞는 문장 읽기 — 그 쟁점의 O 기출 선지를 모아 보여 준다 ── */
+  function showRead(no, back) {
+    var nd = GB.node(no);
+    var os = GB.qs(no).filter(function (q) { return q.ox === "O"; })
+      .sort(function (a, b) { return (b.y || 0) - (a.y || 0); }).slice(0, 12);
+    var h = '<div class="readhd"><h2>' + esc(nd.name) + " — 맞는 기출 문장</h2></div>" +
+      '<p class="muted" style="margin:4px 0 0;font-size:14.5px">시험에 맞는 문장으로 나온 것만 모았어요. 최근 것부터.</p>' +
+      '<div class="readlist">' + os.map(function (q) { return "<p>" + esc(q.t) + "<small>" + esc(GB.src(q)) + "</small></p>"; }).join("") + "</div>" +
+      '<div class="acts">' + (back ? '<button class="btn" id="nx">이어서 풀기</button>'
+                                   : '<a class="btn" href="ox.html?node=' + no + '">이 쟁점 O·X 풀기</a>') + "</div>";
+    $("stage").innerHTML = h;
+    if (back) $("nx").onclick = next;
+    window.scrollTo(0, 0);
+  }
+
+  /* ── 60초 스피드 — 확신도 없이, 반응만 ── */
+  function runSpeed() {
+    var pool = [];
+    GB.focusNodes(6).forEach(function (n) { pool = pool.concat(GB.qs(n.no).filter(function (q) { return q.t.length <= 80 && !q.sa && !q.mc; })); });
+    shuffle(pool, Date.now() % 997);
+    var end = Date.now() + 60000, i = 0, ok = 0, n = 0;
+    function one() {
+      if (Date.now() >= end || i >= pool.length) return fin();
+      var q = pool[i++], t0 = Date.now();
+      $("stage").innerHTML = '<div class="spd num" id="left"></div><div class="qcard"><div class="src">' + nodeChip(q.n) +
+        '</div><p class="sent">' + esc(q.t) + '</p></div><div class="oxb" id="oxb"><button data-a="O">O</button><button data-a="X">X</button></div>';
+      $("oxb").querySelectorAll("button").forEach(function (b) {
+        b.onclick = function () {
+          var good = b.dataset.a === q.ox; n++; if (good) ok++;
+          b.dataset.s = good ? "ok" : "no";
+          GB.answer(q.i, good, { ms: Date.now() - t0 });
+          setTimeout(one, good ? 250 : 900);
+        };
+      });
+    }
+    var tick = setInterval(function () {
+      var l = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+      if ($("left")) $("left").textContent = l + "초";
+      if (l <= 0) { clearInterval(tick); fin(); }
+    }, 200);
+    var fined = false;
+    function fin() {
+      if (fined) return; fined = true; clearInterval(tick);
+      $("stage").innerHTML = '<div class="done"><div class="big num">' + ok + " / " + n + '</div><p class="muted">60초 동안 ' + n + "문장, " + ok + '개 맞힘</p>' +
+        '<div class="acts"><a class="btn ghost" href="drill.html">훈련으로</a><a class="btn" href="ox.html?mode=speed">한 번 더</a></div></div>';
+    }
+    one();
+  }
+
+  function next() {
+    pos++;
+    drawProg();
+    if (pos >= seq.length) return finish();
+    var s = seq[pos];
+    if (s.k === "pair") showPair(s); else showOX(s);
+    window.scrollTo(0, 0);
+  }
+
+  function finish() {
+    var n = results.filter(Boolean).length, ok = results.filter(function (r) { return r && r.ok; }).length;
+    var mis = results.filter(function (r) { return r && r.kind === "오개념"; }).length;
+    var tomorrow = GB.dueList().length;
+    $("prog").innerHTML = ""; $("cnt").textContent = "";
+    var todayDone = mode === "today";
+    $("stage").innerHTML = '<div class="done">' +
+      (n ? '<div class="big num">' + ok + " / " + n + "</div>" : '<div class="big">끝</div>') +
+      '<p class="muted">' + (todayDone ? "오늘 몫을 다 했어요." : "이번 묶음을 다 풀었어요.") + "</p>" +
+      '<div class="grid3"><div><b class="num">' + ok + "</b><span>맞힘</span></div><div><b class=\"num\" style=\"color:var(--warn)\">" + mis +
+      '</b><span>확신했는데 틀림</span></div><div><b class="num">' + GB.streak() + "</b><span>연속 일</span></div></div>" +
+      '<div class="acts" style="margin-top:22px"><a class="btn ghost" href="index.html">홈</a>' +
+      (mis ? '<a class="btn" href="ox.html?mode=hard">어려운 O·X</a>' : '<a class="btn" href="ox.html?mode=wrong">틀린 것 다시</a>') + "</div></div>";
+  }
+
+  /* 키보드 — 1·2·3 확신도, O·X, Enter 다음 */
+  document.addEventListener("keydown", function (e) {
+    if (e.target.tagName === "INPUT") return;
+    var k = e.key.toLowerCase();
+    if (k === "1" || k === "2") { var b = document.querySelectorAll("#conf button")[+k - 1]; if (b) b.click(); }
+    else if (k === "o") { var o = document.querySelector('#oxb [data-a="O"]'); if (o) o.click(); }
+    else if (k === "x") { var x = document.querySelector('#oxb [data-a="X"]'); if (x) x.click(); }
+    else if (k === "enter") { var n = $("nx"); if (n) { e.preventDefault(); n.click(); } }
+  });
+
+  if (mode === "read") { showRead(nodeNo, false); $("ttl").textContent = "맞는 문장 읽기"; return; }
+  if (mode === "speed") { runSpeed(); return; }
+  if (!seq.length) {
+    $("stage").innerHTML = '<div class="empty">' + (mode === "today" ? "오늘 몫을 다 했어요. 내일 다시 올게요." :
+      mode === "wrong" ? "틀린 문장이 없어요." : "풀 문장이 없어요.") +
+      '<div class="acts" style="justify-content:center;margin-top:18px"><a class="btn" href="index.html">홈</a></div></div>';
+    return;
+  }
+  pos = -1; next();
+})();
+</script>
+</body>
+</html>

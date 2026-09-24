@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>훈련 — 모두의 자격</title>
+<link rel="icon" href="icons/favicon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<script>try{document.documentElement.dataset.skin=localStorage.getItem("mj.skin")||"white"}catch(e){document.documentElement.dataset.skin="white"}</script>
+<link rel="stylesheet" href="css/app.css">
+<style>
+  .hd{padding:26px 0 4px}
+  .hd h1{font-size:26px}
+  .hd p{color:var(--ink-3);margin:4px 0 0}
+  .row .n{font-weight:900;font-size:15px;color:var(--ink-3);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hd"><h1>훈련</h1><p>오늘 몫과 따로, 하고 싶은 것만 골라서.</p></div>
+  <div class="list sec" id="ls"></div>
+</div>
+<script src="js/catalog.js"></script>
+<script src="data/ready.js"></script>
+<script src="js/boot.js"></script>
+<script src="js/store.js"></script>
+<script>
+(function () {
+  "use strict";
+  GB.mountNav("drill.html");
+  var S = GB.state(), done = Object.keys(S.pairs).filter(function (k) { return S.pairs[k].ok; }).length;
+  var wrong = GB.wrongList().length, mis = Object.keys(S.ans).filter(function (id) { return S.ans[id].kind === "오개념"; }).length;
+  var rows = [
+    ["ox.html?mode=hard", "어려운 O·X", "맞는 문장과 한두 마디만 다른 함정 문장" + (mis ? " · 확신했는데 틀린 " + mis + "개 먼저" : ""), GB.pairs().length + "개"],
+    ["ox.html?mode=pair", "헷갈리는 짝", "닮은 두 기출 문장 중 맞는 것 고르기", done + " / " + GB.pairs().length],
+    ["ox.html?mode=speed", "60초 스피드", "확신도 없이 반응만. 짧은 문장으로", "60초"],
+    ["ox.html?mode=wrong", "틀린 문장 다시", wrong ? "최근에 틀린 것부터" : "아직 틀린 문장이 없어요", wrong + "개"],
+    ["skilltree.html", "쟁점 골라 풀기", "스킬트리에서 쟁점을 누르면 그 쟁점만 풀어요", GB.nodes.length + "쟁점"]
+  ];
+  document.getElementById("ls").innerHTML = rows.map(function (r) {
+    return '<a class="row" href="' + r[0] + '"><span class="t"><b>' + r[1] + "</b><span>" + GB.esc(r[2]) + '</span></span><span class="n num">' + r[3] + "</span></a>";
+  }).join("");
+})();
+</script>
+</body>
+</html>

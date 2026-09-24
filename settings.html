@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>설정 — 모두의 자격</title>
+<link rel="icon" href="icons/favicon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<script>try{document.documentElement.dataset.skin=localStorage.getItem("mj.skin")||"white"}catch(e){document.documentElement.dataset.skin="white"}</script>
+<link rel="stylesheet" href="css/app.css">
+<style>
+  /* 설정은 묶음별로 접는다 — 주르륵 스크롤 금지(모두의 통사 0919) */
+  .hd{padding:26px 0 8px}
+  .hd h1{font-size:26px}
+  details{background:var(--surface);border:1px solid var(--line);border-radius:var(--r3);margin-top:10px}
+  summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:800;font-size:17px;display:flex;justify-content:space-between}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"＋";color:var(--ink-4)}
+  details[open] summary::after{content:"－"}
+  .in{padding:0 18px 18px;display:flex;flex-direction:column;gap:16px}
+  .f label{display:block;font-size:14px;color:var(--ink-3);font-weight:700;margin-bottom:6px}
+  .seg{display:flex;flex-wrap:wrap;gap:6px}
+  .seg button{appearance:none;border:1.5px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:var(--r2);
+    padding:9px 13px;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .seg button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);background:var(--surface-3)}
+  .seg i{width:14px;height:14px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(128,128,128,.5)}
+  input[type=text],input[type=date]{font:inherit;font-size:16px;padding:10px 12px;border:1.5px solid var(--line-2);border-radius:var(--r2);background:var(--surface);color:var(--ink)}
+  textarea{width:100%;min-height:80px;font:12px/1.4 monospace;border:1px solid var(--line-2);border-radius:var(--r2);background:var(--surface-2);color:var(--ink-2)}
+  .msg{font-size:14px;color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hd"><h1>설정</h1></div>
+
+  <details open><summary>공부</summary><div class="in">
+    <div class="f"><label>시험 · 과목</label><div class="seg"><button type="button" id="trk"></button></div></div>
+    <div class="f"><label>시험 날짜 <span class="chip" id="gm"></span></label><input type="date" id="goal"></div>
+    <div class="f"><label>하루 시간</label><div class="seg" id="min"></div></div>
+    <div class="f"><label>부를 이름</label><input type="text" id="nm" maxlength="12" placeholder="닉네임"></div>
+  </div></details>
+
+  <details><summary>화면</summary><div class="in">
+    <div class="f"><label>스킨</label><div class="seg" id="skin"></div></div>
+    <div class="f"><label>등급 배지</label><div class="seg" id="tier"></div></div>
+  </div></details>
+
+  <details><summary>기록</summary><div class="in">
+    <div class="f"><label>기록 옮기기 — 이 글을 복사해 다른 기기의 같은 칸에 붙여 넣어요</label>
+      <textarea id="ex" readonly></textarea>
+      <div class="seg" style="margin-top:8px"><button type="button" id="cp">복사</button><button type="button" id="im">붙여 넣은 기록 되살리기</button></div>
+      <p class="msg" id="msg"></p></div>
+    <div class="f"><label>처음부터</label><div class="seg"><button type="button" id="again">첫 설정 다시 하기</button><button type="button" id="rs">기록 전부 지우기</button></div></div>
+  </div></details>
+</div>
+<script src="js/catalog.js"></script>
+<script src="data/ready.js"></script>
+<script src="js/boot.js"></script>
+<script src="js/store.js"></script>
+<script>
+(function () {
+  "use strict";
+  GB.mountNav("settings.html");
+  var $ = function (id) { return document.getElementById(id); };
+  function seg(host, items, cur, on) {
+    host.innerHTML = items.map(function (x) {
+      return '<button type="button" data-v="' + x.v + '" aria-pressed="' + (String(x.v) === String(cur)) + '">' + (x.c ? '<i style="background:' + x.c + '"></i>' : "") + x.n + "</button>";
+    }).join("");
+    host.querySelectorAll("button").forEach(function (b) {
+      b.onclick = function () {
+        host.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+        on(b.dataset.v);
+      };
+    });
+  }
+  function drawGoal() { $("goal").value = GB.goal(); $("gm").textContent = GB.goalMark(); }
+  $("trk").textContent = GB.track().name + " · 바꾸기";
+  $("trk").onclick = function () { location.href = "start.html?step=exam"; };
+  drawGoal();
+  $("goal").onchange = function () { if (this.value) { GB.setGoal(this.value, true); drawGoal(); } };
+  seg($("min"), [10, 15, 20, 30].map(function (m) { return { v: m, n: m + "분" }; }), GB.minutes(), function (v) { GB.setMinutes(+v); });
+  $("nm").value = GB.name();
+  $("nm").onchange = function () { GB.setName(this.value); };
+  seg($("tier"), [{ v: "1", n: "보기" }, { v: "0", n: "숨기기" }], GB.tierOn() ? "1" : "0", function (v) { GB.setTierOn(v === "1"); });
+  seg($("skin"), GB.SKINS.map(function (s) { return { v: s.v, n: s.n, c: s.c }; }), GB.skin(), function (v) { GB.setSkin(v); });
+
+  $("ex").value = GB.exportData();
+  $("cp").onclick = function () { $("ex").select(); try { navigator.clipboard.writeText($("ex").value); } catch (e) { document.execCommand("copy"); } $("msg").textContent = "복사했어요."; };
+  $("im").onclick = function () {
+    var t = prompt("다른 기기에서 복사한 기록을 붙여 넣어요");
+    if (!t) return;
+    try { GB.importData(t); $("msg").textContent = "되살렸어요."; setTimeout(function () { location.reload(); }, 600); }
+    catch (e) { $("msg").textContent = "형식이 달라요. 복사한 글 전체를 붙여 넣어요."; }
+  };
+  $("again").onclick = function () {
+    try { var p = JSON.parse(localStorage.getItem("mj.pref.v1") || "{}"); delete p.onboarded; localStorage.setItem("mj.pref.v1", JSON.stringify(p)); } catch (e) {}
+    location.href = "start.html";
+  };
+  $("rs").onclick = function () { if (confirm("푼 기록을 전부 지울까요? 되돌릴 수 없어요.")) { GB.reset(); location.reload(); } };
+})();
+</script>
+</body>
+</html>
