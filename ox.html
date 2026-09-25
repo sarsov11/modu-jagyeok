@@ -234,7 +234,7 @@
         if (mode === "today") GB.markToday(todayIdx[pos]);
         drawProg();
         $("after").innerHTML = '<div class="verdict ' + (ok ? "good" : "bad") + '"><div class="top"><span class="mk">' + (ok ? "O" : "✕") + "</span></div>" +
-          '<p class="say">' + (ok ? "맞았어요. 칠한 마디가 두 문장을 가릅니다." : "칠한 마디에서 맞고 틀림이 갈립니다.") + "</p>" +
+          '<p class="say">' + (ok ? "정답" : "오답. 칠한 부분 비교") + "</p>" +
           '<p class="ans">출처 — 맞음 ' + esc((p.o.y || "") + " " + (p.o.e || "")) + " · 틀림 " + esc((p.x.y || "") + " " + (p.x.e || "")) + "</p></div>" +
           '<div class="acts"><button class="btn" id="nx">다음</button></div>';
         $("nx").onclick = next; $("nx").focus({ preventScroll: true });
