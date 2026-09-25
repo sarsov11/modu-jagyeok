@@ -123,7 +123,7 @@
     },
     date: function () {
       var tr = GB.track();
-      $("scr").innerHTML = "<h1>시험 날짜</h1><p class=\"lead\">" + String(GB.exam().date || "2027").slice(0, 4) + "년 " + esc(GB.exam().name) + " 일정은 아직 공고 전이에요. 예년 기준 예상 날짜를 넣어 뒀어요.</p>" +
+      $("scr").innerHTML = "<h1>시험 날짜</h1><p class=\"lead\">2027년 " + esc(GB.exam().name) + " 일정은 아직 공고 전이에요. 예년 기준 예상 날짜를 넣어 뒀어요.</p>" +
         '<div class="body"><div class="dateline num"><span id="dv">' + GB.goal().replace(/-/g, ".") + '</span><span class="chip" id="dm">' + GB.goalMark() + "</span></div>" +
         '<input type="date" id="di" value="' + GB.goal() + '"></div>' +
         '<div class="foot"><button class="btn block" id="n">이 날짜로</button></div>';

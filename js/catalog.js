@@ -9,6 +9,9 @@
   "use strict";
   var SUBJECTS = {
     hm_acct:      { name: "회계원리" },
+    jk_fa:        { name: "재무회계" },
+    jk_ca:        { name: "원가관리회계" },
+    jk_tax:       { name: "세무회계" },
     hm_build:     { name: "공동주택시설개론" },
     hm_law:       { name: "민법" },
     lg_logi:      { name: "물류관리론" },
@@ -98,7 +101,9 @@
     { id: "franchise", name: "가맹거래사", sub: "1차", date: "2027-04-17", subs: ["fr_econ", "fr_civil", "fr_biz"] },
     { id: "mgmtc",     name: "경영지도사", sub: "1차", date: "2027-05-15", subs: ["mg_law", "mg_acct", "mg_mgmt", "mg_diag", "mg_survey"] },
     { id: "patent",  name: "변리사",     sub: "1차", date: "2027-02-27", subs: ["pt_iplaw", "pt_civil", "pt_natsci"] },
-    { id: "actuary", name: "보험계리사", sub: "1차", date: "2027-05-22", subs: ["ac_econ", "ac_law", "ac_math", "ac_acct"] }
+    { id: "actuary", name: "보험계리사", sub: "1차", date: "2027-05-22", subs: ["ac_econ", "ac_law", "ac_math", "ac_acct"] },
+    /* 재경관리사 — 삼일회계법인 공개 기출 2023~25(공식 확정답안). 시험은 연 8회 안팎, 날짜는 예상 */
+    { id: "jaegyeong", name: "재경관리사", sub: "", date: "2026-11-21", subs: ["jk_fa", "jk_ca", "jk_tax"] }
   ];
 
   function exam(id) { return EXAMS.filter(function (e) { return e.id === id; })[0] || null; }
