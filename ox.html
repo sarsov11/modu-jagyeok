@@ -234,7 +234,7 @@
         if (mode === "today") GB.markToday(todayIdx[pos]);
         drawProg();
         $("after").innerHTML = '<div class="verdict ' + (ok ? "good" : "bad") + '"><div class="top"><span class="mk">' + (ok ? "O" : "✕") + "</span></div>" +
-          '<p class="say">' + (ok ? "맞았어요. 칠한 마디가 두 문장을 가릅니다." : "칠한 마디를 보세요. 여기서 맞고 틀림이 갈려요.") + "</p>" +
+          '<p class="say">' + (ok ? "맞았어요. 칠한 마디가 두 문장을 가릅니다." : "칠한 마디에서 맞고 틀림이 갈립니다.") + "</p>" +
           '<p class="ans">출처 — 맞음 ' + esc((p.o.y || "") + " " + (p.o.e || "")) + " · 틀림 " + esc((p.x.y || "") + " " + (p.x.e || "")) + "</p></div>" +
           '<div class="acts"><button class="btn" id="nx">다음</button></div>';
         $("nx").onclick = next; $("nx").focus({ preventScroll: true });
@@ -308,7 +308,7 @@
     var todayDone = mode === "today";
     $("stage").innerHTML = '<div class="done">' +
       (n ? '<div class="big num">' + ok + " / " + n + "</div>" : '<div class="big">끝</div>') +
-      '<p class="muted">' + (todayDone ? "오늘 몫을 다 했어요." : "이번 묶음을 다 풀었어요.") + "</p>" +
+      '<p class="muted">' + (todayDone ? "오늘 분량 완료." : "이번 묶음을 다 풀었어요.") + "</p>" +
       '<div class="grid3"><div><b class="num">' + ok + "</b><span>맞힘</span></div><div><b class=\"num\" style=\"color:var(--warn)\">" + mis +
       '</b><span>확신했는데 틀림</span></div><div><b class="num">' + GB.streak() + "</b><span>연속 일</span></div></div>" +
       '<div class="acts" style="margin-top:22px"><a class="btn ghost" href="index.html">홈</a>' +
@@ -328,7 +328,7 @@
   if (mode === "read") { showRead(nodeNo, false); $("ttl").textContent = "맞는 문장 읽기"; return; }
   if (mode === "speed") { runSpeed(); return; }
   if (!seq.length) {
-    $("stage").innerHTML = '<div class="empty">' + (mode === "today" ? "오늘 몫을 다 했어요. 내일 다시 올게요." :
+    $("stage").innerHTML = '<div class="empty">' + (mode === "today" ? "오늘 분량 완료. 내일 새 분량." :
       mode === "wrong" ? "틀린 문장이 없어요." : "풀 문장이 없어요.") +
       '<div class="acts" style="justify-content:center;margin-top:18px"><a class="btn" href="index.html">홈</a></div></div>';
     return;

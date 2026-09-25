@@ -651,7 +651,7 @@
       c.innerHTML='<span class="swapin">'+esc(T.subject)+'</span>';
       document.getElementById("lede").textContent=
         "시험 범위를 편·장·쟁점으로 갈라 놓았습니다 — 편 "+T.stat.parts+" · 장 "+T.stat.chs+
-        " · 쟁점 "+T.stat.nodes+"개. 눌러서 들어가 보세요. 붙은 기출 선지 "+GB.num(ALL.n)+"개";
+        " · 쟁점 "+T.stat.nodes+"개. 붙은 기출 선지 "+GB.num(ALL.n)+"개";
       document.getElementById("plateTitle").textContent=T.subject;
       document.getElementById("plateSub").textContent=GB.track().name;
     }else if(level===2&&chk){
@@ -662,7 +662,7 @@
       document.getElementById("upbtn").onclick=function(){ if(!busy) goAll(); };
       document.getElementById("uppart").onclick=function(){ if(!busy) goPart(ch.part,LAY.CX,LAY.CY); };
       document.getElementById("lede").textContent=
-        "쟁점 "+ch.nodes.length+"개 · 학습 분량 "+st.vol+"쪽 · 붙은 기출 선지 "+st.n+"개. 하나 눌러 보세요.";
+        "쟁점 "+ch.nodes.length+"개 · 학습 분량 "+st.vol+"쪽 · 붙은 기출 선지 "+st.n+"개.";
       document.getElementById("plateTitle").textContent=ch.name;
       document.getElementById("plateSub").textContent="쟁점 "+ch.nodes.length;
     }else{
@@ -675,8 +675,8 @@
       document.getElementById("plateTitle").textContent=p.name;
       var weak=GB.nodes.filter(function(n){ return n.part===part&&GB.nodeStat(n.no).solved>0; })
         .sort(function(a,b){ return GB.nodeStat(a.no).achieve-GB.nodeStat(b.no).achieve; })[0];
-      document.getElementById("plateSub").textContent=
-        weak ? (weak.title+" 를 한 번 더 다져 볼까요?") : (ps.n+"개 선지가 기다리고 있어요");
+      document.getElementById("plateSub").innerHTML=   /* 0925 권유 말투 → 이름표 + 강추 배지 */
+        weak ? (esc(weak.title)+' <i class="gc">강추</i>') : ("선지 "+ps.n+"개");
     }
     var b=document.getElementById("backbtn");
     b.hidden=(level===0);

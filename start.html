@@ -75,7 +75,7 @@
       $("n").onclick = nextStep;
     },
     name: function () {
-      $("scr").innerHTML = "<h1>뭐라고 부를까요?</h1><p class=\"lead\">홈에서 이 이름으로 불러요. 비워 둬도 돼요.</p>" +
+      $("scr").innerHTML = "<h1>이름</h1>" +
         '<div class="body"><input type="text" id="nm" maxlength="12" placeholder="닉네임" value="' + esc(GB.name()) + '"></div>' +
         '<div class="foot"><button class="btn block" id="n">다음</button></div>';
       $("nm").focus();

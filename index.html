@@ -86,10 +86,10 @@
   var foci = t.foci.slice(0, 3).map(function (n) { return n.name; });
   var h;
   if (t.finished) {
-    h = '<h2>오늘 몫 끝</h2><p class="t">' + t.total + "개를 다 했어요. 더 하고 싶으면 어려운 O·X 로 가요.</p>" +
+    h = '<h2>오늘 분량 완료</h2><p class="t">' + t.total + "개 완료. 더 풀려면 어려운 O·X.</p>" +
         '<div style="margin-top:18px"><a class="btn block" href="ox.html?mode=hard">어려운 O·X</a></div>';
   } else {
-    h = '<h2>' + (nm ? esc(nm) + ", " : "") + (t.done ? "이어서 " : "") + t.min + "분만 해볼까요?</h2>" +
+    h = '<h2>' + (nm ? esc(nm) + ", " : "") + (t.done ? "이어서 " : "오늘 ") + t.min + "분</h2>" +
         '<p class="t">약 ' + t.min + "분 · " + t.total + "개</p>" +
         "<ul>" +
         (t.re ? "<li><b class=\"num\">" + t.re + "개</b><span>되돌리기 — 틀렸거나 다시 볼 때가 된 것</span></li>" : "") +
