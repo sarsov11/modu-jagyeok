@@ -12,6 +12,10 @@
     jk_fa:        { name: "재무회계" },
     jk_ca:        { name: "원가관리회계" },
     jk_tax:       { name: "세무회계" },
+    ip_1:         { name: "지식재산 제도 이해" },
+    ip_2:         { name: "지식재산 창출" },
+    ip_3:         { name: "지식재산 보호" },
+    ip_4:         { name: "지식재산 활용" },
     hm_build:     { name: "공동주택시설개론" },
     hm_law:       { name: "민법" },
     lg_logi:      { name: "물류관리론" },
@@ -103,7 +107,9 @@
     { id: "patent",  name: "변리사",     sub: "1차", date: "2027-02-27", subs: ["pt_iplaw", "pt_civil", "pt_natsci"] },
     { id: "actuary", name: "보험계리사", sub: "1차", date: "2027-05-22", subs: ["ac_econ", "ac_law", "ac_math", "ac_acct"] },
     /* 재경관리사 — 삼일회계법인 공개 기출 2023~25(공식 확정답안). 시험은 연 8회 안팎, 날짜는 예상 */
-    { id: "jaegyeong", name: "재경관리사", sub: "", date: "2026-11-21", subs: ["jk_fa", "jk_ca", "jk_tax"] }
+    { id: "jaegyeong", name: "재경관리사", sub: "", date: "2026-11-21", subs: ["jk_fa", "jk_ca", "jk_tax"] },
+    /* IPAT 지식재산능력시험(국가공인, 한국발명진흥회) — 공개 기출 없음. 교재 핵심을 새로 지은 O·X(TREE.srcw="핵심"). 시험일 예상 */
+    { id: "ipat", name: "지식재산능력시험", sub: "IPAT", date: "2026-11-15", subs: ["ip_1", "ip_2", "ip_3", "ip_4"] }
   ];
 
   function exam(id) { return EXAMS.filter(function (e) { return e.id === id; })[0] || null; }

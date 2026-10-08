@@ -406,3 +406,36 @@
     state: function () { return S; }
   };
 })();
+
+/* 1007 IPAT 처럼 기출이 아니라 교재 핵심을 새로 지은 과목(TREE.srcw="핵심")은 화면의 「기출」 표기를 바꾼다 — 거짓 출처 표기 방지 */
+(function () {
+  var T = window.TREE; if (!T || !T.srcw) return;
+  var 바꿈 = [
+    [/문장은 모두 <b>기출 원본<\/b>이고 O·X 는 그 시험의 정답표를 따릅니다\./g, "문장은 교재 핵심 내용을 새로 지은 것이고, 틀린 문장은 맞는 문장과 짝지어 두었습니다."],
+    [/문장은 모두 기출 원본이고 O·X 는 그 시험의 정답표를 따릅니다\./g, "문장은 교재 핵심 내용을 새로 지은 것이고, 틀린 문장은 맞는 문장과 짝지어 두었습니다."],
+    [/는 공개된 기출에서 뽑아 쟁점에 붙였습니다\. O·X 판정은 그 시험의 정답표 그대로입니다\./g, "는 핵심 내용으로 지어 쟁점에 붙였습니다."],
+    [/시험에 맞는 문장으로 나온 것만 모았어요\. 최근 것부터\./g, "맞는 문장만 모았어요."],
+    [/기출 선지/g, "핵심 문장"], [/기출 문장/g, "핵심 문장"], [/기출 수/g, "문장 수"], [/기출/g, T.srcw],
+    /* 문장이 여러 조각(<b> 등)으로 나뉜 설명문 — 조각별로 */
+    [/는 공개된 (기출|핵심)에서 뽑아 쟁점에 붙였습니다\./g, "는 교재 핵심 내용으로 새로 지어 쟁점에 붙였습니다."],
+    [/O·X 판정은 그 시험의 정답표 그대로입니다\./g, "틀린 문장은 맞는 문장과 짝지어 두었습니다."],
+    [/O·X 판정은\s*$/g, ""], [/^\s*그 시험의 정답표 그대로입니다\./g, "틀린 문장은 맞는 문장과 짝지어 두었습니다."],
+    [/최근 몇 해에 몰린 쟁점이 실제보다 커지고, /g, ""]
+  ];
+  function 고침(n) {
+    if (n.nodeType === 3) {
+      var pa = n.parentNode && n.parentNode.nodeName;
+      if (pa === "SCRIPT" || pa === "STYLE") return;   // 코드 글자는 절대 건드리지 않는다
+      var v = n.nodeValue, w = v; 바꿈.forEach(function (r) { w = w.replace(r[0], r[1]); }); if (w !== v) n.nodeValue = w; return; }
+    if (n.nodeType === 1 && n.tagName !== "SCRIPT" && n.tagName !== "STYLE") {
+      if (n.innerHTML && n.innerHTML.indexOf("기출 원본</b>") >= 0) n.innerHTML = n.innerHTML.replace(바꿈[0][0], 바꿈[0][1]);
+      for (var c = n.firstChild; c; c = c.nextSibling) 고침(c);
+    }
+  }
+  function 시작() {
+    고침(document.body);
+    new MutationObserver(function (ms) { ms.forEach(function (m) { m.addedNodes.forEach(고침); if (m.type === "characterData") 고침(m.target); }); })
+      .observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+  if (document.body) 시작(); else document.addEventListener("DOMContentLoaded", 시작);
+})();
