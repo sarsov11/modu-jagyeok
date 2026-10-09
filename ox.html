@@ -17,6 +17,15 @@
   .more{margin-top:10px;font-size:14.5px;color:var(--ink-3)}
   .readhd{display:flex;align-items:center;gap:10px;margin-top:18px}
   .readhd h2{font-size:18px;flex:1}
+  .cardv section{margin-top:16px;border:1px solid var(--line-2);border-radius:14px;padding:12px 14px;background:var(--surface)}
+  .cardv h3{font-size:15.5px;font-weight:900;margin:0 0 8px;color:var(--ink)}
+  .cardv ul{margin:0;padding-left:18px} .cardv li{font-size:15px;line-height:1.65;margin:4px 0}
+  .cardv li small{display:block;font-size:13px;color:var(--ink-3);font-weight:600}
+  .cardv .trap li{list-style:none;margin-left:-18px;padding:8px 0;border-top:1px dashed var(--line-2)}
+  .cardv .trap li:first-child{border-top:0}
+  .cardv .trap s{display:block;color:var(--ink-3);font-size:14px}
+  .cardv .trap b{display:block;font-size:15px;color:var(--ink)}
+  .cardv-src{margin-top:16px} .cardv-src summary{cursor:pointer;font-weight:800;font-size:14.5px;color:var(--ink-3)}
   .empty{padding:48px 8px;text-align:center;color:var(--ink-3)}
   .spd{font-size:40px;font-weight:900;text-align:center;letter-spacing:-.05em}
 </style>
@@ -243,8 +252,26 @@
   }
 
   /* ── 맞는 문장 읽기 — 그 쟁점의 O 기출 선지를 모아 보여 준다 ── */
+  /* 개념카드(2026-10-09) — 쟁점 이름으로 짝을 찾는다. 묶음(소제목+줄, 출처) → 함정(틀린 문장 → 바른 문장) */
+  function cardHTML(nd) {
+    var c = window.CARD && CARD[nd.name]; if (!c) return "";
+    return '<div class="cardv">' + c.묶음.map(function (b) {
+      return '<section><h3>' + esc(b.머리) + '</h3><ul>' + b.줄.map(function (l) {
+        return '<li>' + esc(l.t) + (l.src ? '<small>' + esc(l.src) + '</small>' : '') + '</li>'; }).join("") + '</ul></section>';
+    }).join("") + (c.함정 && c.함정.length ? '<section class="trap"><h3>함정</h3><ul>' + c.함정.map(function (h) {
+      return '<li><s>' + esc(h.x) + '</s><b>' + esc(h.o) + '</b></li>'; }).join("") + '</ul></section>' : "") + '</div>';
+  }
   function showRead(no, back) {
-    var nd = GB.node(no);
+    var nd = GB.node(no), 카드 = cardHTML(nd);
+    if (카드) {
+      var os0 = GB.qs(no).filter(function (q) { return q.ox === "O"; });
+      $("stage").innerHTML = '<div class="readhd"><h2>' + esc(nd.name) + '</h2></div>' + 카드 +
+        (os0.length ? '<details class="cardv-src"><summary>맞는 기출 문장 ' + os0.length + '개</summary><div class="readlist">' +
+          os0.map(function (q) { return "<p>" + esc(q.t) + "<small>" + esc(GB.src(q)) + "</small></p>"; }).join("") + '</div></details>' : '') +
+        '<div class="acts">' + (back ? '<button class="btn" id="nx">이어서 풀기</button>' : '<a class="btn" href="ox.html?node=' + no + '">이 쟁점 O·X 풀기</a>') + '</div>';
+      if (back) $("nx").onclick = next;
+      window.scrollTo(0, 0); return;
+    }
     var os = GB.qs(no).filter(function (q) { return q.ox === "O"; })
       .sort(function (a, b) { return (b.y || 0) - (a.y || 0); }).slice(0, 12);
     var h = '<div class="readhd"><h2>' + esc(nd.name) + " — 맞는 기출 문장</h2></div>" +
@@ -325,7 +352,7 @@
     else if (k === "enter") { var n = $("nx"); if (n) { e.preventDefault(); n.click(); } }
   });
 
-  if (mode === "read") { showRead(nodeNo, false); $("ttl").textContent = "맞는 문장 읽기"; return; }
+  if (mode === "read") { showRead(nodeNo, false); $("ttl").textContent = (window.CARD && CARD[(GB.node(nodeNo) || {}).name]) ? "개념 카드" : "맞는 문장 읽기"; return; }
   if (mode === "speed") { runSpeed(); return; }
   if (!seq.length) {
     $("stage").innerHTML = '<div class="empty">' + (mode === "today" ? "오늘 분량 완료. 내일 새 분량." :

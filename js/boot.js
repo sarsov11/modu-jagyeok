@@ -15,4 +15,7 @@
   }
   window.JG_CUR = cur;
   if (cur) document.write('<script src="data/' + cur + '.js?v=' + (R[cur].v || "") + '"><\/script>');
+  /* 개념카드(2026-10-09) — card_ready.js 에 있는 과목이면 card_<키>.js 를 싣는다. 없으면 「맞는 문장 읽기」로 남는다 */
+  if (cur) document.write('<script src="data/card_ready.js?t=' + Math.floor(Date.now() / 3600000) + '"><\/script>' +
+    '<script src="js/cardload.js"><\/script>');
 })();
