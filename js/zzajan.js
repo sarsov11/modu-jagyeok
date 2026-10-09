@@ -275,6 +275,7 @@
   var GRADE = { C: ["#6B7280", "#D1D5DB"], B: ["#1D4ED8", "#7CB4FF"], A: ["#C81E1E", "#FF8A8A"], S: ["#B88A00", "#FFE066"] };
   function promote(from, to) { var g = GRADE[to] || GRADE.S; bigScene(g[0], g[1], to, TXT.prT(to), from ? from + " → " + to : "", to === "S" ? "fanfare" : "levelup"); }
   function stars(n) {
+    if (!(n >= 1)) return;   /* 별 0개는 부르지 않는다(40% 미만) */
     var wait = Math.max(bannerUntil, bigUntil) - Date.now();
     if (wait > 0) { setTimeout(function () { stars(n); }, wait + 60); return; }
     bigUntil = Date.now() + 2500;
@@ -319,7 +320,7 @@
   var OKS = '[data-s="ok"],.verdict.good,.verdict.ok,.msg.ok', NOS = '[data-s="no"],.verdict.warn,.verdict.bad,.verdict.no,.msg.no';
   function pickScene(el) {
     var r = rect(el); if (!r || r.width > innerWidth * .9 || el.closest("nav,header,.tabbar,.nav,.bottom")) return;
-    if (el.matches(OKS + "," + NOS)) return;
+    if (el.matches(OKS + "," + NOS) || el.hasAttribute("data-s")) return;   /* 답을 낸 뒤 정답 칸에 다는 data-s="ans" 도 「고름」 으로 세지 않는다(중개사 2026-10-09) */
     play("pick", { vol: .7 });
     if (el.animate) el.animate([{ boxShadow: "inset 0 0 0 0 " + ACC + "00" }, { boxShadow: "inset 0 0 0 3px " + ACC + ", 0 0 0 4px " + ACC + "33", offset: .3 }, { boxShadow: "inset 0 0 0 0 " + ACC + "00" }],
       { duration: 520, easing: "ease-out" });
