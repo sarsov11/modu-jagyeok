@@ -254,7 +254,7 @@
   /* ── 맞는 문장 읽기 — 그 쟁점의 O 기출 선지를 모아 보여 준다 ── */
   /* 개념카드(2026-10-09) — 쟁점 이름으로 짝을 찾는다. 묶음(소제목+줄, 출처) → 함정(틀린 문장 → 바른 문장) */
   function cardHTML(nd) {
-    var c = window.CARD && CARD[nd.name]; if (!c) return "";
+    var c = window.CARD && (CARD["#" + nd.no] || CARD[nd.name]); if (!c) return "";
     return '<div class="cardv">' + c.묶음.map(function (b) {
       return '<section><h3>' + esc(b.머리) + '</h3><ul>' + b.줄.map(function (l) {
         return '<li>' + esc(l.t) + (l.src ? '<small>' + esc(l.src) + '</small>' : '') + '</li>'; }).join("") + '</ul></section>';
@@ -352,7 +352,7 @@
     else if (k === "enter") { var n = $("nx"); if (n) { e.preventDefault(); n.click(); } }
   });
 
-  if (mode === "read") { showRead(nodeNo, false); $("ttl").textContent = (window.CARD && CARD[(GB.node(nodeNo) || {}).name]) ? "개념 카드" : "맞는 문장 읽기"; return; }
+  if (mode === "read") { showRead(nodeNo, false); $("ttl").textContent = (window.CARD && (CARD["#" + nodeNo] || CARD[(GB.node(nodeNo) || {}).name])) ? "개념 카드" : "맞는 문장 읽기"; return; }
   if (mode === "speed") { runSpeed(); return; }
   if (!seq.length) {
     $("stage").innerHTML = '<div class="empty">' + (mode === "today" ? "오늘 분량 완료. 내일 새 분량." :

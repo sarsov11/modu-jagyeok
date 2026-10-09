@@ -809,7 +809,7 @@
       : '<p style="font-size:14px;color:var(--ink-3)">이 쟁점에 붙은 기출 문장이 아직 없어요.</p>';
     document.getElementById("shGo").innerHTML= qs.length
       ? '<a class="btn" href="ox.html?node='+n.no+'">이 쟁점 O·X 풀기</a>'+
-        '<a class="btn ghost" href="ox.html?read='+n.no+'">'+(window.CARD&&CARD[n.name]?"개념 카드":"맞는 문장 읽기")+'</a>'
+        '<a class="btn ghost" href="ox.html?read='+n.no+'">'+(window.CARD&&(CARD["#"+n.no]||CARD[n.name])?"개념 카드":"맞는 문장 읽기")+'</a>'
       : '<span class="muted">이 쟁점은 아직 기출 문장이 없어요.</span>';
     sheet.hidden=false;
     requestAnimationFrame(function(){ sheet.classList.add("on"); });
