@@ -928,5 +928,14 @@
   GB.mountNext();
 })();
 </script>
+<script src="js/zzsfx.js?v=1009a" defer></script><script src="js/zzajan.js?v=1009a" defer></script><script src="js/zzcoach.js?v=1009a" defer></script>
+<script>
+/* 첫 진입 안내(zzcoach.js, defer 라 load 뒤에 부른다). 한 번 보면 다시 안 뜬다 */
+window.addEventListener("load", function () { if (!window.ZZCOACH) return; ZZCOACH.run("modu-jagyeok.skilltree", [
+  { el: function () { var t = document.querySelector(".tabbar a"); if (t && t.offsetParent) return t; return document.querySelector(".navlinks a"); }, text: "홈에서 오늘 풀 문장을 바로 시작함" },
+  { el: function () { var l = document.querySelector("#treelist .mrow"); return (l && l.offsetParent) ? l : document.querySelector(".board"); }, text: "편, 장, 쟁점 순으로 들어가는 시험 범위 지도. 쟁점에서 기출 풀이를 시작함" },
+  { el: "#legend", text: "원 색은 성취도. S 80 이상, A 60 이상, B 30 이상, C 30 미만, 안 푼 곳은 –. 원 크기는 학습 분량" }
+], { delay: 900 }); });
+</script>
 </body>
 </html>

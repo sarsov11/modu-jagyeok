@@ -168,6 +168,7 @@
             if (x.dataset.a === q.ox) x.dataset.s = "ok"; else if (x.dataset.a === a) x.dataset.s = "no";
           });
           A.rec.push({ id: q.i, ok: ok, ms: ms, to: to });
+          if (window.ZZ) { if (ok) ZZ.ok(document.querySelector('#oxb [data-s="ok"]')); else ZZ.no(document.querySelector('#oxb [data-s="no"]')); }
           GB.answer(q.i, ok, { ms: ms, kind: to ? "시간초과" : ok ? "정답" : "오답" });
           i++; setTimeout(one, ok ? 450 : 1100);
         }
@@ -195,6 +196,7 @@
       /* ★ 「여기서부터」는 홈의 오늘 할 것이 실제로 고른 쟁점과 같아야 한다 — 다르면 학생이 헷갈린다 */
       var from = GB.today().foci.slice(0, 3);
       var fast = A.rec.filter(function (r) { return r.ok && r.ms < 6000; }).length;
+      if (window.ZZ && p.n && !A.starred) { A.starred = 1; var rr = p.ok / p.n; var kk = rr >= 1 ? 3 : rr >= 0.7 ? 2 : rr >= 0.4 ? 1 : 0; if (kk) ZZ.stars(kk); }
       $("scr").innerHTML = "<h1>" + (p.n ? p.n + "문장 중 " + p.ok + "개" : "좋아요, 바로 시작해요") + "</h1>" +
         (p.n ? '<p class="lead">바로(6초 안에) 맞힌 것 ' + fast + "개 · 시간 넘긴 것 " + A.rec.filter(function (r) { return r.to; }).length + "개</p>" : "") +
         '<div class="body">' +
@@ -210,5 +212,6 @@
   go(시작단계 && STEPS.indexOf(시작단계) >= 0 ? STEPS.indexOf(시작단계) : 0);
 })();
 </script>
+<script src="js/zzsfx.js?v=1009a" defer></script><script src="js/zzajan.js?v=1009a" defer></script>
 </body>
 </html>

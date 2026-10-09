@@ -92,6 +92,21 @@
   }
 
   var pos = 0, results = [], streakBy = {};
+  /* 짜잔 3판 — 세트 안에서 쟁점 등급(S·A·B·C)이 오르면 끝에 승급 연출 */
+  var tierBefore = {}, TORD = { L: 0, C: 1, B: 2, A: 3, S: 4 };
+  function curTier(no) { var s = GB.nodeStat(no), a = s.achieve; return !s.solved ? "L" : a >= 80 ? "S" : a >= 60 ? "A" : a >= 30 ? "B" : "C"; }
+  function noteTier(no) { if (!(no in tierBefore)) tierBefore[no] = curTier(no); }
+  function cheerEnd(ok, n) {
+    if (!window.ZZ || !n) return;
+    var r = ok / n, k = r >= 1 ? 3 : r >= 0.7 ? 2 : r >= 0.4 ? 1 : 0;
+    if (k) ZZ.stars(k);
+    var best = null;
+    Object.keys(tierBefore).forEach(function (no) {
+      var a = tierBefore[no], b = curTier(no);
+      if (a !== "L" && TORD[b] > TORD[a] && (!best || TORD[b] > TORD[best[1]])) best = [a, b];
+    });
+    if (best) ZZ.promote(best[0], best[1]);
+  }
 
   function drawProg() {
     var n = seq.length;
@@ -167,13 +182,14 @@
           x.disabled = true;
           if (x.dataset.a === 정답) x.dataset.s = "ok"; else if (x === b) x.dataset.s = "no";
         });
-        var st = GB.nodeStat(q.n), prev = GB.answered(q.i);
+        var st = GB.nodeStat(q.n), prev = GB.answered(q.i); noteTier(q.n);
         var j = JUDGE.판정({ ok: ok, conf: conf, ms: ms, attempt: prev ? prev.n + 1 : 1, mastery: st.mastery,
                              streak: streakBy[q.n] || 0, qid: q.i, leafName: GB.node(q.n).name });
         streakBy[q.n] = ok ? 0 : (streakBy[q.n] || 0) + 1;
         GB.answer(q.i, ok, { conf: conf, ms: ms, kind: j.kind });
         results[pos] = { ok: ok, kind: j.kind, id: q.i };
         document.querySelector(".qcard").classList.add(ok ? "glow-ok" : "glow-no");
+        if (window.ZZ) { if (ok) ZZ.ok(b); else ZZ.no(b); }
         if (mode === "today") GB.markToday(todayIdx[pos]);
         drawProg();
 
@@ -239,6 +255,7 @@
           if (isO) x.dataset.s = "ok"; else if (x === b) x.dataset.s = "no";
         });
         GB.pairAnswer(p.id, ok);
+        if (window.ZZ) { if (ok) ZZ.ok(b); else ZZ.no(b); }
         results[pos] = { ok: ok, kind: ok ? "정답" : "오답", pair: 1 };
         if (mode === "today") GB.markToday(todayIdx[pos]);
         drawProg();
@@ -299,6 +316,7 @@
         b.onclick = function () {
           var good = b.dataset.a === q.ox; n++; if (good) ok++;
           b.dataset.s = good ? "ok" : "no";
+          if (window.ZZ) { if (good) ZZ.ok(b); else ZZ.no(b); }
           GB.answer(q.i, good, { ms: Date.now() - t0 });
           setTimeout(one, good ? 250 : 900);
         };
@@ -311,7 +329,7 @@
     }, 200);
     var fined = false;
     function fin() {
-      if (fined) return; fined = true; clearInterval(tick);
+      if (fined) return; fined = true; clearInterval(tick); cheerEnd(ok, n);
       $("stage").innerHTML = '<div class="done"><div class="big num">' + ok + " / " + n + '</div><p class="muted">60초 동안 ' + n + "문장, " + ok + '개 맞힘</p>' +
         '<div class="acts"><a class="btn ghost" href="drill.html">훈련으로</a><a class="btn" href="ox.html?mode=speed">한 번 더</a></div></div>';
     }
@@ -332,7 +350,7 @@
     var mis = results.filter(function (r) { return r && r.kind === "오개념"; }).length;
     var tomorrow = GB.dueList().length;
     $("prog").innerHTML = ""; $("cnt").textContent = "";
-    var todayDone = mode === "today";
+    var todayDone = mode === "today"; cheerEnd(ok, n);
     $("stage").innerHTML = '<div class="done">' +
       (n ? '<div class="big num">' + ok + " / " + n + "</div>" : '<div class="big">끝</div>') +
       '<p class="muted">' + (todayDone ? "오늘 분량 완료." : "이번 묶음을 다 풀었어요.") + "</p>" +
@@ -363,5 +381,6 @@
   pos = -1; next();
 })();
 </script>
+<script src="js/zzsfx.js?v=1009a" defer></script><script src="js/zzajan.js?v=1009a" defer></script>
 </body>
 </html>
