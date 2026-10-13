@@ -209,6 +209,10 @@
       $("n").onclick = function () { GB.setOnboarded(); location.href = "index.html"; };
     }
   };
+  /* ?exam=<시험id> — 모두의 시험 허브 카드에서 바로 그 시험으로(2026-10-13). 이미 그 시험으로 설정한 학생은 오늘 화면으로 */
+  var 시험지정 = new URLSearchParams(location.search).get("exam"), 지정 = 시험지정 && CATALOG.exam(시험지정);
+  if (지정 && GB.onboarded() && GB.exam().id === 지정.id) { location.replace("index.html"); return; }
+  if (지정) { GB.setExam(지정.id, null); go(STEPS.indexOf(지정.series ? "series" : "subs")); return; }
   go(시작단계 && STEPS.indexOf(시작단계) >= 0 ? STEPS.indexOf(시작단계) : 0);
 })();
 </script>

@@ -31,8 +31,8 @@
   var S = GB.state(), done = Object.keys(S.pairs).filter(function (k) { return S.pairs[k].ok; }).length;
   var wrong = GB.wrongList().length, mis = Object.keys(S.ans).filter(function (id) { return S.ans[id].kind === "오개념"; }).length;
   var rows = [
-    ["ox.html?mode=hard", "어려운 O·X", "맞는 문장과 한두 마디만 다른 함정 문장" + (mis ? " · 확신했는데 틀린 " + mis + "개 먼저" : ""), GB.pairs().length + "개"],
-    ["ox.html?mode=pair", "헷갈리는 짝", "닮은 두 기출 문장 중 맞는 것 고르기", done + " / " + GB.pairs().length],
+    ["ox.html?mode=hard", "어려운 O·X", "맞는 문장과 한두 마디만 다른 함정 문장" + (mis ? " · 확신했는데 틀린 " + mis + "개 먼저" : ""), (GB.pairs().length ? GB.pairs().length + "개" : "없음")],
+    ["ox.html?mode=pair", "둘 중 맞는 문장", "한두 마디만 다른 기출 두 문장", (GB.pairs().length ? done + " / " + GB.pairs().length : "없음")],
     ["ox.html?mode=speed", "60초 스피드", "확신도 없이 반응만. 짧은 문장으로", "60초"],
     ["ox.html?mode=wrong", "틀린 문장 다시", wrong ? "최근에 틀린 것부터" : "아직 틀린 문장이 없어요", wrong + "개"],
     ["skilltree.html", "쟁점 골라 풀기", "스킬트리에서 쟁점을 누르면 그 쟁점만 풀어요", GB.nodes.length + "쟁점"]

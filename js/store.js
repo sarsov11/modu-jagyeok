@@ -116,7 +116,7 @@
   function nodeStat(no) {
     var list = qs(no), solved = 0, correct = 0, last = null;
     for (var i = 0; i < list.length; i++) {
-      var a = S.ans[list[i].i];
+      var a = S.ans[list[i].i] || twin(list[i]);
       if (a) { solved++; if (a.ok) correct++; if (!last || a.at > last) last = a.at; }
     }
     var n = list.length;
@@ -163,9 +163,26 @@
     if (q.c === "A") s += 1;
     return s;
   }
+  /* 같은 문장·같은 선지가 여러 해에 되풀이 나온다 — 한 세트에 두 번 나오지 않게, 이미 푼 문장은 새 문제로 안 낸다 */
+  function qkey(q) {
+    if (q._k) return q._k;
+    var m = q.mc;
+    return (q._k = (m ? m.s + "|" + (m.o || []).join("/") + "|" + (m.d || "") + "|" + m.a : q.t + "|" + q.ox).replace(/\s+/g, ""));
+  }
+  /* 같은 문장의 다른 해 문항을 풀었으면 이 문항도 푼 것으로 센다(진행률이 100%에 닿게) */
+  var KEYIDS = null;
+  function twin(q) {
+    if (!KEYIDS) { KEYIDS = {}; Object.keys(ITEM).forEach(function (id) { var k = qkey(ITEM[id]); (KEYIDS[k] = KEYIDS[k] || []).push(id); }); }
+    var l = KEYIDS[qkey(q)];
+    if (l.length > 1) for (var i = 0; i < l.length; i++) if (l[i] !== q.i && S.ans[l[i]]) return S.ans[l[i]];
+    return null;
+  }
   function freshOf(no, k) {
+    var seen = {};
+    Object.keys(S.ans).forEach(function (id) { if (ITEM[id]) seen[qkey(ITEM[id])] = 1; });
     return qs(no).filter(function (q) { return !S.ans[q.i]; })
-      .sort(function (a, b) { return rank(b) - rank(a); }).slice(0, k);
+      .sort(function (a, b) { return rank(b) - rank(a); })
+      .filter(function (q) { var key = qkey(q); if (seen[key]) return false; seen[key] = 1; return true; }).slice(0, k);
   }
   /* 오늘 볼 복습 — 기한이 된 것. 틀린 것(0칸)이 먼저 */
   function dueList() {
@@ -207,8 +224,8 @@
     var foci = focusNodes(3), fresh = [], 본 = {};
     function 담기(no, 한도) {
       freshOf(no, 60).some(function (q) {
-        if (쓴 + 초(q.i) > 한도 || 본[q.i]) return 쓴 + SEC_PER > 한도;
-        fresh.push(q.i); 본[q.i] = 1; 쓴 += 초(q.i); return false;
+        if (쓴 + 초(q.i) > 한도 || 본[q.i] || 본[qkey(q)]) return 쓴 + SEC_PER > 한도;
+        fresh.push(q.i); 본[q.i] = 1; 본[qkey(q)] = 1; 쓴 += 초(q.i); return false;
       });
     }
     var 몫 = (예산 - 40 - 쓴) / Math.max(1, foci.length);   /* 짝 둘 몫 40초는 남긴다 */
@@ -217,7 +234,7 @@
     /* 헷갈리는 짝 둘 — 오늘 쟁점에서, 안 푼 것 */
     var ps = [];
     foci.forEach(function (n) { pairs(n.no).forEach(function (p) { if (!S.pairs[p.id] && ps.length < 2) ps.push(p.id); }); });
-    if (ps.length < 2) PR.forEach(function (p) { if (!S.pairs[p.id] && ps.length < 2) ps.push(p.id); });
+    if (ps.length < 2) PR.forEach(function (p) { if (!S.pairs[p.id] && ps.length < 2 && ps.indexOf(p.id) < 0) ps.push(p.id); });
     /* 순서 — 복습 먼저, 새 문장 중간중간에 짝 */
     var seq = due.map(function (id) { return { k: "ox", id: id, re: 1 }; });
     fresh.forEach(function (id, i) {
@@ -349,7 +366,7 @@
     var nav = document.createElement("div");
     nav.className = "nav";
     nav.innerHTML = '<div class="in"><a class="logo" href="index.html"><i></i>' + esc(T.brand) +
-      '<span class="sub">' + esc(T.subject) + "</span></a>" +
+      '<span class="sub"><span class="vh"> · </span>' + esc(T.subject) + "</span></a>" +
       '<nav class="navlinks">' + PAGES.map(function (p) {
         return '<a href="' + p[0] + '"' + (p[0] === here ? ' class="on"' : "") + ">" + p[1] + "</a>";
       }).join("") + "</nav></div>";

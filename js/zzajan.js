@@ -89,6 +89,7 @@
     " box-shadow:0 0 0 2px #fff,0 4px 10px rgba(0,0,0,.25);white-space:nowrap;will-change:transform}",
     "#zz-hud{position:absolute;right:14px;top:12px;display:flex;align-items:center;gap:8px;padding:7px 12px 7px 8px;border-radius:999px;background:#fff;",
     " box-shadow:0 6px 18px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.06);font:800 13px/1 " + FONT + ";color:#111;transform:translateY(-70px);transition:transform .35s cubic-bezier(.2,1.4,.4,1)}",
+    "@media (min-width:700px){#zz-hud{top:64px}}",
     "#zz-hud.on{transform:none}#zz-hud .lv{background:#111;color:#FFD54A;border-radius:999px;padding:5px 8px;font-weight:900}",
     "#zz-hud .bar{width:96px;height:9px;border-radius:9px;background:#EEF0F3;overflow:hidden}#zz-hud .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#FFCB3D,#F59E0B);transition:width .45s cubic-bezier(.2,1,.3,1)}",
     "#zz-hud.hit{animation:zzHit .35s cubic-bezier(.2,1.8,.4,1)}@keyframes zzHit{40%{transform:scale(1.14)}}",

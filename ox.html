@@ -72,7 +72,7 @@
     var pl = (nodeNo ? GB.pairs(nodeNo) : GB.pairs()).filter(function (p) { return !GB.state().pairs[p.id] || !GB.state().pairs[p.id].ok; });
     shuffle(pl, 17);
     seq = pl.slice(0, 10).map(function (p) { return { k: "pair", id: p.id }; });
-    $("ttl").textContent = "헷갈리는 짝";
+    $("ttl").textContent = "둘 중 맞는 문장";
   } else if (mode === "hard") {
     /* 어려운 O·X — 헷갈리는 짝에 들어 있는 **틀린 쪽 문장**(맞는 문장과 한두 마디만 다르다)
        + 내가 확신하고 틀렸던 문장. 새 문장을 짓지 않는다. */
@@ -92,6 +92,7 @@
   }
 
   var pos = 0, results = [], streakBy = {};
+  var planned = seq.length, extraCnt = 0;   /* 틀릴 때마다 한 문장씩 끼우되, 한 세트가 계획의 1.3배 안팎에서 끝나게 상한을 둔다 */
   /* 짜잔 3판 — 세트 안에서 쟁점 등급(S·A·B·C)이 오르면 끝에 승급 연출 */
   var tierBefore = {}, TORD = { L: 0, C: 1, B: 2, A: 3, S: 4 };
   function curTier(no) { var s = GB.nodeStat(no), a = s.achieve; return !s.solved ? "L" : a >= 80 ? "S" : a >= 60 ? "A" : a >= 30 ? "B" : "C"; }
@@ -197,7 +198,7 @@
         var extra = null;
         if (!ok || j.next === "same" || j.next === "similar") {
           var more = GB.freshOf(q.n, 3).filter(function (x) { return !seq.some(function (y) { return y.id === x.i; }); })[0];
-          if (more) { extra = more; seq.splice(pos + 1, 0, { k: "ox", id: more.i, add: 1 }); if (mode === "today") todayIdx.splice(pos + 1, 0, -1); drawProg(); }
+          if (more && extraCnt < Math.max(4, Math.ceil(planned / 3))) { extraCnt++; extra = more; seq.splice(pos + 1, 0, { k: "ox", id: more.i, add: 1 }); if (mode === "today") todayIdx.splice(pos + 1, 0, -1); drawProg(); }
         }
 
         var h = '<div class="verdict ' + j.tone + '"><div class="top"><span class="mk">' + (ok ? "O" : "✕") + "</span>" +
@@ -208,7 +209,7 @@
         var p = pairOf(q.i);
         if (p) {
           var d = GB.markDiff(p.o.t, p.x.t);
-          해설 += '<div class="pair"><div class="lab">헷갈리는 짝 — 갈리는 마디에 칠했어요</div>' +
+          해설 += '<div class="pair"><div class="lab">둘 중 맞는 문장 — 갈리는 마디에 칠했어요</div>' +
                '<p><b style="color:var(--ok)">맞음</b> ' + d[0] + "</p>" +
                '<p><b style="color:var(--no)">틀림</b> ' + d[1] + "</p></div>";
         } else if (!mc && q.ox === "X") {
@@ -231,14 +232,14 @@
     });
   }
 
-  /* ── 헷갈리는 짝 — 둘 중 맞는 문장 고르기 ── */
+  /* ── 둘 중 맞는 문장 — 둘 중 맞는 문장 고르기 ── */
   function showPair(s) {
     var p = GB.pair(s.id);
     if (!p) { next(); return; }
     var flip = (p.id.charCodeAt(p.id.length - 1) + new Date().getDate()) % 2 === 1;   /* 자리를 외우지 못하게 */
     var A = flip ? [p.x, p.o] : [p.o, p.x], done = false;
     $("stage").innerHTML =
-      '<div class="qcard"><div class="src">' + nodeChip(p.n) + '<span class="chip cta">헷갈리는 짝</span></div>' +
+      '<div class="qcard"><div class="src">' + nodeChip(p.n) + '<span class="chip cta">둘 중 맞는 문장</span></div>' +
       '<p class="sent" style="font-size:17px">두 기출 문장 중 <b>맞는 문장</b>을 고르세요.</p>' +
       '<div class="two" id="two">' + A.map(function (x, i) {
         return '<button type="button" data-i="' + x.i + '"><b>' + "가나"[i] + '</b><span class="tx">' + esc(x.t) + "</span></button>";
@@ -305,7 +306,13 @@
   function runSpeed() {
     var pool = [];
     GB.focusNodes(6).forEach(function (n) { pool = pool.concat(GB.qs(n.no).filter(function (q) { return q.t.length <= 80 && !q.sa && !q.mc; })); });
+    /* 짧은 문장이 12개 미만이면(문장이 긴 과목) 전체에서 가장 짧은 문장 40개로 */
+    if (pool.length < 12) {
+      var all = []; GB.nodes.forEach(function (n) { all = all.concat(GB.qs(n.no).filter(function (q) { return !q.sa && !q.mc; })); });
+      all.sort(function (x, y) { return x.t.length - y.t.length; }); pool = all.slice(0, 40);
+    }
     shuffle(pool, Date.now() % 997);
+    if (!pool.length) { $("stage").innerHTML = '<div class="empty">이 과목에는 60초 스피드로 풀 짧은 문장이 아직 없습니다.<div class="acts" style="justify-content:center;margin-top:18px"><a class="btn ghost" href="drill.html">훈련으로</a><a class="btn" href="skilltree.html">쟁점 골라 풀기</a></div></div>'; return; }
     var end = Date.now() + 60000, i = 0, ok = 0, n = 0;
     function one() {
       if (Date.now() >= end || i >= pool.length) return fin();
@@ -373,9 +380,13 @@
   if (mode === "read") { showRead(nodeNo, false); $("ttl").textContent = (window.CARD && (CARD["#" + nodeNo] || CARD[(GB.node(nodeNo) || {}).name])) ? "개념 카드" : "맞는 문장 읽기"; return; }
   if (mode === "speed") { runSpeed(); return; }
   if (!seq.length) {
+    var noPair = !GB.pairs().length;
     $("stage").innerHTML = '<div class="empty">' + (mode === "today" ? "오늘 분량 완료. 내일 새 분량." :
-      mode === "wrong" ? "틀린 문장이 없어요." : "풀 문장이 없어요.") +
-      '<div class="acts" style="justify-content:center;margin-top:18px"><a class="btn" href="index.html">홈</a></div></div>';
+      mode === "wrong" ? "틀린 문장이 없어요." :
+      mode === "pair" ? (noPair ? "이 과목에는 한두 마디만 다른 기출 문장 쌍이 아직 없습니다." : "둘 중 맞는 문장을 모두 맞혔습니다.") :
+      mode === "hard" ? (noPair ? "이 과목에는 어려운 O·X로 쓸 문장이 아직 없습니다." : "풀 문장이 없어요.") : "풀 문장이 없어요.") +
+      '<div class="acts" style="justify-content:center;margin-top:18px"><a class="btn ghost" href="index.html">홈</a>' +
+      (mode === "today" ? "" : '<a class="btn" href="skilltree.html">쟁점 골라 풀기</a>') + '</div></div>';
     return;
   }
   pos = -1; next();

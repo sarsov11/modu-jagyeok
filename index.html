@@ -92,9 +92,9 @@
     h = '<h2>' + (nm ? esc(nm) + ", " : "") + (t.done ? "이어서 " : "오늘 ") + t.min + "분</h2>" +
         '<p class="t">약 ' + t.min + "분 · " + t.total + "개</p>" +
         "<ul>" +
-        (t.re ? "<li><b class=\"num\">" + t.re + "개</b><span>되돌리기 — 틀렸거나 다시 볼 때가 된 것</span></li>" : "") +
+        (t.re ? "<li><b class=\"num\">" + t.re + "개</b><span>복습 — 전에 틀렸거나 다시 볼 날이 된 문장</span></li>" : "") +
         "<li><b class=\"num\">" + newN + "개</b><span>새 문제 — " + esc(foci.join(" · ")) + "</span></li>" +
-        (prN ? "<li><b class=\"num\">" + prN + "개</b><span>헷갈리는 짝</span></li>" : "") +
+        (prN ? "<li><b class=\"num\">" + prN + "개</b><span>둘 중 맞는 문장</span></li>" : "") +
         "</ul>" +
         (t.done ? '<div class="bar"><i style="width:' + Math.round(t.done / t.total * 100) + '%"></i></div>' : "") +
         '<a class="btn block" href="ox.html">' + (t.done ? "이어서 · " + t.done + " / " + t.total : "시작") + "</a>";
@@ -133,7 +133,7 @@
   var wrong = GB.wrongList().length;
   $("alt").innerHTML =
     '<a class="row" href="ox.html?mode=hard"><span class="t"><b>어려운 O·X</b><span>한두 마디만 바꾼 함정 문장</span></span><span class="go">›</span></a>' +
-    '<a class="row" href="ox.html?mode=pair"><span class="t"><b>헷갈리는 짝</b><span>닮은 두 기출 문장 중 맞는 것 고르기</span></span><span class="go">›</span></a>' +
+    '<a class="row" href="ox.html?mode=pair"><span class="t"><b>둘 중 맞는 문장</b><span>한두 마디만 다른 기출 두 문장</span></span><span class="go">›</span></a>' +
     (wrong ? '<a class="row" href="ox.html?mode=wrong"><span class="t"><b>틀린 문장 다시</b><span>' + wrong + "개</span></span><span class=\"go\">›</span></a>" : "");
 })();
 </script>
