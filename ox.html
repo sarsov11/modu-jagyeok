@@ -74,7 +74,7 @@
     seq = pl.slice(0, 10).map(function (p) { return { k: "pair", id: p.id }; });
     $("ttl").textContent = "둘 중 맞는 문장";
   } else if (mode === "hard") {
-    /* 어려운 O·X — 헷갈리는 짝에 들어 있는 **틀린 쪽 문장**(맞는 문장과 한두 마디만 다르다)
+    /* 어려운 O·X — 둘 중 맞는 문장(PAIRS)에 들어 있는 **틀린 쪽 문장**(맞는 문장과 한두 마디만 다르다)
        + 내가 확신하고 틀렸던 문장. 새 문장을 짓지 않는다. */
     var mine = Object.keys(GB.state().ans).filter(function (id) { var a = GB.state().ans[id]; return a.kind === "오개념" && GB.item(id); });
     var traps = GB.pairs().map(function (p) { return p.x.i; }).filter(function (id) { var a = GB.answered(id); return GB.item(id) && !(a && a.ok && a.conf === "sure"); });
@@ -203,28 +203,27 @@
 
         var h = '<div class="verdict ' + j.tone + '"><div class="top"><span class="mk">' + (ok ? "O" : "✕") + "</span>" +
           (ok ? '<span class="reward">+1</span>' : "") + '<span class="chip">' + esc(j.label || { "재시도정답": "다시 풀어 맞힘", "연속오답": "연속 오답" }[j.kind] || j.kind) + "</span></div>" +
-          '<p class="say">' + esc(j.say) + "</p>" +
-          '<p class="ans">정답은 <b>' + (mc ? "①②③④⑤"[+정답 - 1] : q.ox) + "</b>" + (mc ? "" : q.ox === "X" ? " — 이 문장은 틀린 문장이에요." : " — 맞는 문장이에요.") + "</p>";
+          '<p class="ans">정답 <b>' + (mc ? "①②③④⑤"[+정답 - 1] : q.ox) + "</b></p>";
         var 해설 = "";
         var p = pairOf(q.i);
         if (p) {
           var d = GB.markDiff(p.o.t, p.x.t);
-          해설 += '<div class="pair"><div class="lab">둘 중 맞는 문장 — 갈리는 마디에 칠했어요</div>' +
+          해설 += '<div class="pair"><div class="lab">같은 내용을 맞게 낸 기출 · ' + esc((p.o.y || "") + " " + (p.o.e || "")) + "</div>" +
                '<p><b style="color:var(--ok)">맞음</b> ' + d[0] + "</p>" +
                '<p><b style="color:var(--no)">틀림</b> ' + d[1] + "</p></div>";
         } else if (!mc && q.ox === "X") {
           var o = nearestO(q);
           if (o) 해설 += '<div class="pair"><div class="lab">같은 쟁점의 맞는 기출 문장 · ' + esc(GB.src(o)) + "</div><p>" + GB.markDiff(o.t, q.t)[0] + "</p></div>";
         }
-        if (해설) h += '<div class="expl" id="expl"><button type="button">해설 보기</button><div class="body">' + 해설 + "</div></div>";
-        if (extra) h += '<p class="more">' + esc(GB.node(q.n).name) + " 문장 하나를 바로 뒤에 넣었어요.</p>";
+        /* 판정 코칭 문장(j.say)은 내지 않고 그 자리에 해설을 펼쳐 둔다(1014 — 전문직과 같게) */
+        if (해설) h += '<div class="expl open" id="expl"><div class="body">' + 해설 + "</div></div>";
+        if (extra) h += '<p class="more">다음에 ' + esc(GB.node(q.n).name) + " 문제 1개 더</p>";
         h += "</div>";
         var readBtn = (j.next === "concept" || j.next === "lecture")
           ? '<button class="btn ghost" id="read">' + JUDGE.다음말[j.next].t + "</button>" : "";
         h += '<div class="acts">' + readBtn + '<button class="btn" id="nx">다음</button></div>';
         $("after").innerHTML = h;
         $("nx").onclick = next;
-        if ($("expl")) $("expl").firstChild.onclick = function () { $("expl").classList.toggle("open"); this.textContent = $("expl").classList.contains("open") ? "해설 접기" : "해설 보기"; };
         if ($("read")) $("read").onclick = function () { showRead(q.n, true); };
         $("nx").focus({ preventScroll: true });
         $("after").scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -232,7 +231,7 @@
     });
   }
 
-  /* ── 둘 중 맞는 문장 — 둘 중 맞는 문장 고르기 ── */
+  /* ── 둘 중 맞는 문장 고르기 ── */
   function showPair(s) {
     var p = GB.pair(s.id);
     if (!p) { next(); return; }
@@ -261,7 +260,7 @@
         if (mode === "today") GB.markToday(todayIdx[pos]);
         drawProg();
         $("after").innerHTML = '<div class="verdict ' + (ok ? "good" : "bad") + '"><div class="top"><span class="mk">' + (ok ? "O" : "✕") + "</span></div>" +
-          '<p class="say">' + (ok ? "정답" : "오답. 칠한 부분 비교") + "</p>" +
+          '<p class="say">' + (ok ? "정답" : "오답") + "</p>" +
           '<p class="ans">출처 — 맞음 ' + esc((p.o.y || "") + " " + (p.o.e || "")) + " · 틀림 " + esc((p.x.y || "") + " " + (p.x.e || "")) + "</p></div>" +
           '<div class="acts"><button class="btn" id="nx">다음</button></div>';
         $("nx").onclick = next; $("nx").focus({ preventScroll: true });
@@ -269,7 +268,7 @@
     });
   }
 
-  /* ── 맞는 문장 읽기 — 그 쟁점의 O 기출 선지를 모아 보여 준다 ── */
+  /* ── 쟁점 요점 — 그 쟁점의 O 기출 선지를 모아 보여 준다 ── */
   /* 개념카드(2026-10-09) — 쟁점 이름으로 짝을 찾는다. 묶음(소제목+줄, 출처) → 함정(틀린 문장 → 바른 문장) */
   function cardHTML(nd) {
     var c = window.CARD && (CARD["#" + nd.no] || CARD[nd.name]); if (!c) return "";
@@ -377,7 +376,7 @@
     else if (k === "enter") { var n = $("nx"); if (n) { e.preventDefault(); n.click(); } }
   });
 
-  if (mode === "read") { showRead(nodeNo, false); $("ttl").textContent = (window.CARD && (CARD["#" + nodeNo] || CARD[(GB.node(nodeNo) || {}).name])) ? "개념 카드" : "맞는 문장 읽기"; return; }
+  if (mode === "read") { showRead(nodeNo, false); $("ttl").textContent = (window.CARD && (CARD["#" + nodeNo] || CARD[(GB.node(nodeNo) || {}).name])) ? "개념 카드" : "쟁점 요점"; return; }
   if (mode === "speed") { runSpeed(); return; }
   if (!seq.length) {
     var noPair = !GB.pairs().length;

@@ -92,7 +92,7 @@
     h = '<h2>' + (nm ? esc(nm) + ", " : "") + (t.done ? "이어서 " : "오늘 ") + t.min + "분</h2>" +
         '<p class="t">약 ' + t.min + "분 · " + t.total + "개</p>" +
         "<ul>" +
-        (t.re ? "<li><b class=\"num\">" + t.re + "개</b><span>복습 — 전에 틀렸거나 다시 볼 날이 된 문장</span></li>" : "") +
+        (t.re ? "<li><b class=\"num\">" + t.re + "개</b><span>복습 — 전에 틀린 문장, 다시 볼 날이 된 문장</span></li>" : "") +
         "<li><b class=\"num\">" + newN + "개</b><span>새 문제 — " + esc(foci.join(" · ")) + "</span></li>" +
         (prN ? "<li><b class=\"num\">" + prN + "개</b><span>둘 중 맞는 문장</span></li>" : "") +
         "</ul>" +

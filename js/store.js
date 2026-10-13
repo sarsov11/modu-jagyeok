@@ -8,7 +8,7 @@
      · 학생에게 고르게 하지 않는다. 홈은 「오늘 할 것」 하나.
      · 분량은 문항 수가 아니라 **시간**으로 말한다(하루 10·15·20·30분).
      · 판정은 확신도 × 정오답(judge.js). 확신도는 답보다 먼저 묻는다.
-     · 되돌리기(간격 복습)가 새 문장보다 먼저다.
+     · 복습(간격 복습)이 새 문장보다 먼저다.
    ═══════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
@@ -231,7 +231,7 @@
     var 몫 = (예산 - 40 - 쓴) / Math.max(1, foci.length);   /* 짝 둘 몫 40초는 남긴다 */
     foci.forEach(function (n, i) { 담기(n.no, 쓴 + 몫); });
     if (쓴 < 예산 - 60) focusNodes(12).slice(3).forEach(function (n) { if (쓴 < 예산 - 60) 담기(n.no, 예산 - 40); });
-    /* 헷갈리는 짝 둘 — 오늘 쟁점에서, 안 푼 것 */
+    /* 둘 중 맞는 문장 둘 — 오늘 쟁점에서, 안 푼 것 */
     var ps = [];
     foci.forEach(function (n) { pairs(n.no).forEach(function (p) { if (!S.pairs[p.id] && ps.length < 2) ps.push(p.id); }); });
     if (ps.length < 2) PR.forEach(function (p) { if (!S.pairs[p.id] && ps.length < 2 && ps.indexOf(p.id) < 0) ps.push(p.id); });
