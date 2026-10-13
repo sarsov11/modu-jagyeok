@@ -101,7 +101,8 @@
     series: function () {
       var e = GB.exam();
       if (!e.series) return go(STEPS.indexOf("subs"));
-      $("scr").innerHTML = "<h1>어느 직렬이에요?</h1><p class=\"lead\">" + esc(e.name) + " — 직렬마다 전문과목이 달라요.</p>" +
+      if (e.series.length === 1) { GB.setExam(e.id, e.series[0].id); return go(STEPS.indexOf("subs")); }   /* 고를 것이 하나뿐이면 묻지 않는다 */
+      $("scr").innerHTML = "<h1>" + esc(e.seriesQ || "어느 급수예요?") + "</h1><p class=\"lead\">" + esc(e.name) + " · " + esc(e.seriesLead || "급수마다 과목이 달라요.") + "</p>" +
         '<div class="body"><div class="opts" id="op">' + e.series.map(function (x) {
           return '<button type="button" data-v="' + x.id + '">' + x.name + "<small>" +
             x.subs.map(function (k) { return CATALOG.name(k); }).join(" · ") + "</small></button>";
