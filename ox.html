@@ -215,6 +215,10 @@
           var o = nearestO(q);
           if (o) 해설 += '<div class="pair"><div class="lab">같은 쟁점의 맞는 기출 문장 · ' + esc(GB.src(o)) + "</div><p>" + GB.markDiff(o.t, q.t)[0] + "</p></div>";
         }
+        /* 원 문항 해설(TREE.hx — 문항 id 별, 1019 물류관리사). O·X 문장은 id 끝 「-선지번호」를 떼어 원 문항 해설을 찾는다 */
+        var hx = (window.TREE && TREE.hx) || {}, hid = mc ? q.i : q.i.replace(/-\d$/, ""), hs = hx[hid];
+        if (hs) 해설 += '<div class="pair"><div class="lab">해설 · ' + esc([q.y ? q.y + "년" : "", q.qn ? q.qn + "번" : "", !mc && q.m ? "(이 문장은 " + q.m + " 선지)" : ""].filter(Boolean).join(" ") || "문항") +
+          '</div><p style="white-space:pre-line">' + esc(hs) + "</p></div>";
         /* 판정 코칭 문장(j.say)은 내지 않고 그 자리에 해설을 펼쳐 둔다(1014 — 전문직과 같게) */
         if (해설) h += '<div class="expl open" id="expl"><div class="body">' + 해설 + "</div></div>";
         if (extra) h += '<p class="more">다음에 ' + esc(GB.node(q.n).name) + " 문제 1개 더</p>";
