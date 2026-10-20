@@ -51,6 +51,7 @@
 <script src="js/boot.js"></script>
 <script src="js/judge.js"></script>
 <script src="js/store.js"></script>
+<script src="js/strat.js?v=1020a"></script>
 <script>
 (function () {
   "use strict";
@@ -113,6 +114,7 @@
     },
     subs: function () {
       var ss = GB.subs();
+      MJSTRAT.auto();   /* 시험(급수)을 고른 직후 — 합격전략 브리핑을 처음 한 번 */
       $("scr").innerHTML = "<h1>이 과목들을 봐요</h1><p class=\"lead\">" + esc(GB.track().name) + " 시험 과목이에요. 준비된 과목부터 풀 수 있어요.</p>" +
         '<div class="body"><div class="opts">' + ss.map(function (k) {
           var r = CATALOG.ready(k);

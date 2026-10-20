@@ -35,6 +35,7 @@
 
   <details open><summary>공부</summary><div class="in">
     <div class="f"><label>시험 · 과목</label><div class="seg"><button type="button" id="trk"></button></div></div>
+    <div class="f"><label>합격전략</label><div id="strat"></div></div>
     <div class="f"><label>시험 날짜 <span class="chip" id="gm"></span></label><input type="date" id="goal"></div>
     <div class="f"><label>하루 시간</label><div class="seg" id="min"></div></div>
     <div class="f"><label>부를 이름</label><input type="text" id="nm" maxlength="12" placeholder="닉네임"></div>
@@ -57,6 +58,7 @@
 <script src="data/ready.js"></script>
 <script src="js/boot.js"></script>
 <script src="js/store.js"></script>
+<script src="js/strat.js?v=1020a"></script>
 <script>
 (function () {
   "use strict";
@@ -99,6 +101,7 @@
   $("rs").onclick = function () { if (confirm("푼 기록을 전부 지울까요? 되돌릴 수 없어요.")) { GB.reset(); location.reload(); } };
 })();
 </script>
+<script>MJSTRAT.button(document.getElementById("strat"));</script>
 <script src="js/zzsfx.js?v=1009a" defer></script><script src="js/zzajan.js?v=1009a" defer></script>
 </body>
 </html>
