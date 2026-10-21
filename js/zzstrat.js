@@ -223,6 +223,14 @@
     if (!(G > 0) || !R) return "";
     var n = R.rows.length;
     if (!R.grade) {
+      /* 커트가 하나로 고정된 시험(절대평가)은 「몇 개 중 몇 개 위」가 아니라 선과의 차이만 (10-21 NCS 창) */
+      var uniq = R.rows.map(function (r) { return r.cuts.P; }).filter(function (v, i, a) { return a.indexOf(v) === i; });
+      if (uniq.length === 1 || d.방식 === "절대") {
+        var line = Math.max.apply(null, uniq), gap = Math.round((G - line) * 10) / 10, u = (d.합격선 || {}).단위 != null ? d.합격선.단위 : L.pt, up = gap >= 0;
+        return LANG === "ko" ? L.goal + " " + G + u + " → " + L.line + " " + line + u + "보다 " + Math.abs(gap) + u + " " + (up ? "위" : "아래")
+          : LANG === "ja" ? L.goal + " " + G + " → " + L.line + line + "より" + Math.abs(gap) + u + (up ? "上" : "下")
+          : "Target " + G + " is " + Math.abs(gap) + (up ? " above" : " below") + " the pass line " + line;
+      }
       var ok = R.rows.filter(function (r) { return G >= r.cuts.P; }).length;
       return LANG === "ko" ? L.goal + " " + G + " → 최근 커트 " + n + "개 중 " + ok + "개 위" : LANG === "ja" ? L.goal + " " + G + " → 直近" + n + "回中" + ok + "回合格ライン以上" : "Target " + G + " clears " + ok + " of " + n + " recent cutoffs";
     }
@@ -241,7 +249,11 @@
   }
   function graphKind(d) {
     var q = ""; try { q = (location.search.match(/[?&]zsg=([ABC])/) || [])[1] || ""; } catch (e) { }
-    return d.그래프 || W.ZZSTRAT_GRAPH || q || "A";
+    if (d.그래프 || W.ZZSTRAT_GRAPH || q) return d.그래프 || W.ZZSTRAT_GRAPH || q;
+    /* 10-21 대표님: 등급컷은 C(등급 카드), 소방처럼 지역·연도별 커트가 여럿이면 B(회차별 점), 커트가 하나뿐이면 A(구간 막대) */
+    if (isGrade(d)) return "C";
+    var R = rowsOf(d);
+    return R && R.rows.length >= 3 ? "B" : "A";
   }
   function goalPin(S, goal) { return goal > 0 ? '<div class="gp" data-zs="goal" style="left:' + S.pct(goal) + '%"><b>' + L.goal + ' ' + goal + '</b></div>' : ""; }
   /* A — 구간 막대: 등급(또는 합격) 구역을 색으로 칠하고, 회차마다 흔들린 컷 범위는 빗금, 목표는 위에 깃발 */
@@ -369,7 +381,7 @@
     else if (h.목표근거) o += '<p class="desc" data-zs="goalwhy">' + esc(h.목표근거) + '</p>';
     o += stackHTML(d, g);
     if (isGrade(d)) o += cutTable(d);
-    else if (h.커트 && h.커트.length) o += '<table data-zs="cuts"><tr><th>' + L.cut + '</th><th></th><th></th></tr>' + h.커트.map(function (x) { return '<tr><td>' + esc(x.연도 || "") + '</td><td>' + esc(x.구분 || "") + (x.비고 ? ' <span class="mu">' + esc(x.비고) + '</span>' : '') + '</td><td class="n">' + esc(x.점수) + '</td></tr>'; }).join("") + '</table>';
+    else if (h.커트 && h.커트.length) o += '<table data-zs="cuts"><tr><th>' + (d.방식 === "상대" ? L.cut : L.line) + '</th><th></th><th></th></tr>' + h.커트.map(function (x) { return '<tr><td>' + esc(x.연도 || "") + '</td><td>' + esc(x.구분 || "") + (x.비고 ? ' <span class="mu">' + esc(x.비고) + '</span>' : '') + '</td><td class="n">' + esc(x.점수) + '</td></tr>'; }).join("") + '</table>';
     if (h.가산점 && h.가산점.length) o += '<table data-zs="bonus" style="margin-top:14px"><tr><th>' + L.bonus + '</th><th></th><th></th></tr>' + h.가산점.map(function (x) { return '<tr><td>' + esc(x.항목) + '</td><td class="n">' + esc(x.점수) + '</td><td class="mu">' + esc(x.비고 || "") + '</td></tr>'; }).join("") + '</table>';
     var pr = d.합격률 || h.합격률;
     if (pr && pr.length) o += '<table data-zs="rate" style="margin-top:14px"><tr><th>' + L.rate + '</th><th>' + L.writ + '</th><th>' + L.prac + '</th></tr>' + pr.map(function (x) { return '<tr><td>' + esc(x.연도 || "") + (x.비고 ? ' <span class="mu">' + esc(x.비고) + '</span>' : '') + '</td><td class="n">' + esc(x.필기 || "") + '</td><td class="n">' + esc(x.실기 || "") + '</td></tr>'; }).join("") + '</table>';
