@@ -116,9 +116,9 @@
     "#zs .ga .z{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center}#zs .ga .z.rest{background:#E7E3DA}",
     "#zs .ga .z em{font:900 13px/1 system-ui,sans-serif;color:#fff;font-style:normal;white-space:nowrap}#zs .ga .z.rest em{color:#8A8F9A}",
     "#zs .ga .f{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(-45deg,var(--c) 0 3px,transparent 3px 8px);opacity:.55}",
-    "#zs .ga .ticks{position:relative;height:42px}",
+    "#zs .ga .ticks{position:relative;height:58px}",
     "#zs .ga .tk{position:absolute;top:8px;transform:translateX(-50%);font:800 12px/1 system-ui,sans-serif;white-space:nowrap}#zs .ga .tk.dn{top:26px}",
-    "#zs .ga .ax{position:absolute;top:8px;font:700 11px/1 system-ui,sans-serif;color:#A0A4AE}#zs .ga .ax.l{left:0}#zs .ga .ax.r{right:0}",
+    "#zs .ga .ax{position:absolute;top:44px;font:700 11px/1 system-ui,sans-serif;color:#A0A4AE}#zs .ga .ax.l{left:0}#zs .ga .ax.r{right:0}",
     "#zs .gp{position:absolute;top:0;transform:translateX(-50%);z-index:2;transition:left .4s cubic-bezier(.2,1,.3,1)}",
     "#zs .gp b{display:block;background:var(--zs-tx);color:#fff;font:900 12.5px/1 system-ui,sans-serif;padding:7px 9px;border-radius:8px;white-space:nowrap}",
     "#zs .gp::after{content:'';position:absolute;left:50%;top:100%;margin-left:-1.5px;width:3px;height:52px;background:var(--zs-tx)}",
@@ -268,7 +268,12 @@
       top = s.lo;
     });
     o += '<i class="z rest" style="left:0;width:' + S.pct(top) + '%">' + (S.pct(top) > 18 ? '<em>' + (R.grade ? (LANG === "ko" ? "그 아래" : "below") : L.failz) + '</em>' : '') + '</i></div><div class="ticks">';
-    ks.forEach(function (k, i) { var s = span(R, k); if (s) o += '<span class="tk' + (i % 2 ? ' dn' : '') + '" style="left:' + S.pct((s.lo + s.hi) / 2) + '%;color:' + (GCOL[k] || "#555") + '">' + cName(k) + ' ' + fmt(s.lo, s.hi) + '</span>'; });
+    ks.forEach(function (k, i) {
+      var s = span(R, k); if (!s) return;
+      /* 막대 끝 가까이면 가운데 맞춤 대신 끝 맞춤 — 375px 에서 첫 글자가 잘리던 것(10-21 자격 창) */
+      var x = S.pct((s.lo + s.hi) / 2), pos = x < 18 ? 'left:0;transform:none' : x > 82 ? 'left:auto;right:0;transform:none' : 'left:' + x + '%';
+      o += '<span class="tk' + (i % 2 ? ' dn' : '') + '" style="' + pos + ';color:' + (GCOL[k] || "#555") + '">' + cName(k) + ' ' + fmt(s.lo, s.hi) + '</span>';
+    });
     return o + '<span class="ax l">' + S.a0 + '</span><span class="ax r">' + S.max + '</span></div></div>';
   }
   /* B — 회차별 점: 회차(또는 연도·구분)마다 한 줄, 컷을 점으로 찍고 목표를 세로선으로 내리긋는다 */
