@@ -296,13 +296,37 @@
     var W=Math.max(340,Math.round(st?st.clientWidth:1180));
     var k=Math.max(.52,Math.min(1,W/1180));
     var H=Math.round(W<640?W*1.30 : W<900?W*.88 : W*.58);
-    LAY={W:W,H:H,CX:W/2,CY:H/2,k:k,
+    var nar=W<640;   /* 폰: 이름표를 원 위·아래 가운데로 붙이고 글자를 고정 크기로(10-21 대표님 「스킬트리 꾸겨짐」) */
+    LAY={W:W,H:H,CX:W/2,CY:H/2,k:k,nar:nar,
          rCore:Math.round(74*k+12),
          fCore:Math.round(28*k+8),
-         fName:Math.round(11*k+4),
-         fSub:Math.round(9*k+3)};
+         fName:nar?14:Math.round(11*k+4),
+         fSub:nar?12:Math.round(9*k+3)};
     return LAY;
   }
+  /* 폰: 이름표가 판 폭을 넘으면 그림 전체가 줄어든다 — 이름은 9자에서 자르고 전체 이름은 눌러서 본다 */
+  /* 폰: 이름을 원 안에 두 줄로 — 바깥 이름표는 원에서 떨어져 어느 원 이름인지 알아보기 어렵다(10-21) */
+  function inName(gp,x,y,rr,name,col){
+    var fs=12, per=Math.max(3,Math.floor(rr*2*.82/fs)), t=String(name||"").replace(/\s+/g," ").trim(), rows=[];
+    if(t.length<=per) rows=[t];
+    else{ var cut=t.lastIndexOf(" ",per); if(cut<2) cut=t.indexOf("·")>1&&t.indexOf("·")<=per?t.indexOf("·")+1:per;
+      var a=t.slice(0,cut).trim(), b=t.slice(cut).trim(); if(b.length>per) b=b.slice(0,per-1)+"…"; rows=[a,b]; }
+    rows.forEach(function(r,i){ txt(gp,r,{x:x,y:y+fs*.38+(i-(rows.length-1)/2)*fs*1.18,"text-anchor":"middle",fill:col||SINK,
+      "font-size":fs,"font-weight":800,"font-family":cv("--kr"),"pointer-events":"none"}); });
+  }
+  /* 폰: 원 개수만큼 둘레가 나오게 궤도를 세로로 늘리고, 둘레 길이로 고르게 놓는다(각도로 나누면 위아래가 붙는다) */
+  function ring(L,m,rmax){
+    var a=L.W/2-rmax-8, b=Math.max(L.H*.30,L.rCore+rmax+18), need=m*(2*rmax+14);
+    function P(a,b){ return Math.PI*(3*(a+b)-Math.sqrt((3*a+b)*(a+3*b))); }
+    while(P(a,b)<need) b+=6;
+    var N=720, pts=[], acc=[0], i;
+    for(i=0;i<=N;i++){ var t=-Math.PI/2+i*2*Math.PI/N; pts.push([Math.cos(t)*a,Math.sin(t)*b]);
+      if(i) acc.push(acc[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1])); }
+    var tot=acc[N], out=[], k=0;
+    for(var j=0;j<m;j++){ var sv=tot*j/m; while(acc[k]<sv) k++; out.push({x:L.CX+pts[k][0],y:L.CY+pts[k][1]}); }
+    return {a:a,b:b,p:out};
+  }
+  function nmFit(t,L){ t=String(t||""); return (L.nar&&t.length>9)?t.slice(0,8)+"…":t; }
   var uid=0;
   function svgEl(){ return document.getElementById("orbit"); }
   function fitView(layer){
@@ -315,6 +339,13 @@
     var x=bb.x-pad, y=bb.y-pad, w=bb.width+pad*2, h=bb.height+pad*2;
     /* 그려 놓은 판의 비율에 맞춰 모자란 쪽을 늘린다 — 안 그러면 남는 쪽이 빈 띠로 남는다 */
     var box=svg.getBoundingClientRect();
+    /* 폰: 판 높이를 알맹이에 맞춰 늘린다 — 높이를 못 박아 두면 이름표가 위아래로 밀린 만큼 그림 전체가 줄어든다 */
+    if(LAY.nar&&box.width){
+      if(w<box.width){ x-=(box.width-w)/2; w=box.width; }
+      svg.style.height=Math.round(h*box.width/w)+"px";
+      svg.setAttribute("viewBox",[x.toFixed(0),y.toFixed(0),w.toFixed(0),h.toFixed(0)].join(" "));
+      return;
+    }
     var want=(box.width&&box.height)?(box.width/box.height):(w/h);
     if(w/h < want){ var nw=h*want; x-=(nw-w)/2; w=nw; }
     else{ var nh=w/want; y-=(nh-h)/2; h=nh; }
@@ -353,6 +384,7 @@
     var ln=title.length;
     var fs=ln<=3?L.fCore : ln<=5?Math.round(L.fCore*.76) : ln<=8?Math.round(L.fCore*.55)
           : Math.round(L.fCore*.44);
+    if(L.nar) fs=Math.max(fs,13);   /* 폰에서 가운데 이름이 10px 아래로 내려가지 않게 */
     var rows=[title], dy=0;
     if(ln>6){
       var cut=title.lastIndexOf(" ", Math.ceil(ln/2)+1);
@@ -412,23 +444,27 @@
     function hit(a,b,pad){ pad=pad||0;
       return a.x<b.x+b.width+pad && a.x+a.width+pad>b.x &&
              a.y<b.y+b.height+pad && a.y+a.height+pad>b.y; }
+    /* getBBox 는 자기 transform 을 빼고 잰다 — 옮긴 만큼(dx,dy)을 더해서 본다(10-21: 빼고 재서 겹침이 끝까지 안 풀렸다) */
+    function at(A){ return {x:A.b0.x+A.dx,y:A.b0.y+A.dy,width:A.b0.width,height:A.b0.height}; }
     var st=gs.map(function(x,i){
       var b=box(x), ux=(+x.dataset.cx)-cx, uy=(+x.dataset.cy)-cy, m=Math.hypot(ux,uy)||1;
-      return {g:x,b:b,ux:ux/m,uy:uy/m,dx:0,dy:0,own:i};
-    }).filter(function(x){ return x.b; });
-    for(var pass=0;pass<5;pass++){
+      return {g:x,b0:b,ux:ux/m,uy:uy/m,dx:0,dy:0,own:i};
+    }).filter(function(x){ return x.b0; });
+    for(var pass=0;pass<(LAY.nar?24:5);pass++){
       var moved=false;
       for(var i=0;i<st.length;i++){
-        var A=st[i], push=false;
-        for(var j=0;j<st.length;j++){ if(i!==j&&hit(A.b,st[j].b,2)){ push=true; break; } }
+        var A=st[i], push=false, AB=at(A);
+        /* 폰: 이름표끼리 겹치면 뒤에 그린 쪽만 민다(둘 다 밀면 같이 움직여 안 풀린다) */
+        for(var j=0;j<st.length;j++){ if(i!==j&&(!LAY.nar||j<i)&&hit(AB,at(st[j]),3)){ push=true; break; } }
         if(!push) for(var c=0;c<circles.length;c++){
           if(c===A.own) continue;
-          if(boxCircle(A.b,circles[c])){ push=true; break; }
+          if(boxCircle(AB,circles[c])){ push=true; break; }
         }
         if(push){
-          A.dx+=A.ux*9; A.dy+=A.uy*9;
+          /* 폰: 옆으로 밀면 그림 전체가 줄어든다 — 위아래로만 민다 */
+          if(LAY.nar){ A.dy+=(A.uy<0?-6:6); } else { A.dx+=A.ux*9; A.dy+=A.uy*9; }
           A.g.setAttribute("transform","translate("+A.dx.toFixed(1)+","+A.dy.toFixed(1)+")");
-          A.b=box(A.g); moved=true;
+          moved=true;
         }
       }
       if(!moved) break;
@@ -446,7 +482,8 @@
     var L=layout(); sky(g0,"all");
     var g=el("g",{class:"ink"},g0);
     /* 판은 가로로 넓은데 궤도가 정원이면 좌우가 텅 빈다 — 타원으로 눕힌다(2026-08-31 실측) */
-    var RX=Math.round(L.W*.30), RY=Math.round(L.H*.30);
+    var RX=Math.round(L.W*(L.nar?.31:.30)), RY=Math.round(L.H*.30);
+    var RG=L.nar?ring(L,T.parts.length,42):null; if(RG){ RX=RG.a; RY=RG.b; }
     el("ellipse",{cx:L.CX,cy:L.CY,rx:RX,ry:RY,fill:"none",stroke:SLINE,"stroke-width":1,opacity:".6"},g);
     var link=el("g",{},g), nodes=el("g",{},g), labs=el("g",{},g);
     var vols=T.parts.map(function(p){ return GB.partStat(p.no).vol; });
@@ -455,26 +492,28 @@
     T.parts.forEach(function(p,i){
       var a=-90+i*(360/n), hue=PC[p.no].hex, ps=GB.partStat(p.no);
       var x=L.CX+RX*Math.cos(rad(a)), y=L.CY+RY*Math.sin(rad(a));
+      if(RG){ x=RG.p[i].x; y=RG.p[i].y; }
       el("line",{x1:L.CX,y1:L.CY,x2:x,y2:y,stroke:hue,"stroke-width":1.5,opacity:".28"},link);
-      var rr=Math.round((30+20*Math.sqrt(ps.vol/maxV))*L.k+8);
+      var rr=L.nar?Math.round(34+8*Math.sqrt(ps.vol/maxV)):Math.round((30+20*Math.sqrt(ps.vol/maxV))*L.k+8);
       var gp=orb(nodes,x,y,rr,hue,ps.achieve,{bold:true});
       gp.setAttribute("aria-label",p.name+" 열기 · 성취도 "+ps.achieve+"퍼센트");
       /* 편 이름은 길다(국민의 권리와 의무). 원 안에 넣으면 잘려서 바깥 이름표와 겹쳐 보인다 —
          원 안에는 편 번호만 두고 이름은 바깥 이름표에만 쓴다(2026-08-31 실측). */
-      txt(gp,"제"+p.no+"편",{x:x,y:y+L.fName*.42,"text-anchor":"middle",fill:SINK,
+      if(L.nar) inName(gp,x,y,rr,p.name); else txt(gp,"제"+p.no+"편",{x:x,y:y+L.fName*.42,"text-anchor":"middle",fill:SINK,
         "font-size":Math.round(L.fName*1.15),"font-weight":900,
         "font-family":cv("--title")||"Noto Sans KR","pointer-events":"none"});
       /* 이름표는 반드시 바깥쪽으로 — 안쪽에 놓으면 가운데 코어와 겹친다(2026-08-31 실측) */
       var ca=Math.cos(rad(a)), sa=Math.sin(rad(a)), off=rr+14;
-      var anc=ca>.3?"start":ca<-.3?"end":"middle";
-      var up=(anc==="middle"&&sa<0);
-      var y0=y+sa*off+(anc==="middle"?(sa>0?L.fName+6:-6):L.fName*.34);
+      var anc=L.nar?"middle":(ca>.3?"start":ca<-.3?"end":"middle");
+      var up=L.nar?(sa<-.3):(anc==="middle"&&sa<0);
+      var y0=L.nar?(up?y-rr-6:y+rr+L.fName+6):y+sa*off+(anc==="middle"?(sa>0?L.fName+6:-6):L.fName*.34);
       var lg=el("g",{class:"lblg"},labs);
       lg.dataset.cx=x; lg.dataset.cy=y; lg.dataset.r=rr;
-      var l1=txt(lg,p.name,{x:x+ca*off,y:up?y0-L.fSub-5:y0,"text-anchor":anc,fill:SINK,
+      if(L.nar) lg.style.display="none";
+      var l1=txt(lg,nmFit(p.name,L),{x:L.nar?x:x+ca*off,y:up?y0-L.fSub-5:y0,"text-anchor":anc,fill:SINK,
         "font-size":L.fName+2,"font-weight":700,"font-family":cv("--kr")});
-      var l2=txt(lg,ps.vol+"쪽 · 기출 "+ps.n+" · 성취도 "+ps.achieve+"%",
-        {x:x+ca*off,y:up?y0:y0+L.fSub+5,"text-anchor":anc,fill:SINK2,
+      var l2=txt(lg,L.nar?("기출 "+ps.n+" · "+ps.achieve+"%"):(ps.vol+"쪽 · 기출 "+ps.n+" · 성취도 "+ps.achieve+"%"),
+        {x:L.nar?x:x+ca*off,y:up?y0:y0+L.fSub+5,"text-anchor":anc,fill:SINK2,
          "font-size":L.fSub+1,"font-weight":600,"font-family":cv("--kr")});
       [l1,l2].forEach(function(e){ e.classList.add("lbl"); });
       function open(){ if(!busy) goPart(p.no,x,y); }
@@ -508,28 +547,32 @@
     sky(g0,"p"+pno);
     var g=el("g",{class:"ink"},g0);
     var chs=GB.chsOf(pno);
-    var RX=Math.round(L.W*(chs.length>8?.335:.30)), RY=Math.round(L.H*(chs.length>8?.335:.30));
+    var RX=Math.round(L.W*(L.nar?.31:(chs.length>8?.335:.30))), RY=Math.round(L.H*(chs.length>8?.335:.30));
+    var RG=L.nar?ring(L,chs.length,38):null; if(RG){ RX=RG.a; RY=RG.b; }
     el("ellipse",{cx:L.CX,cy:L.CY,rx:RX,ry:RY,fill:"none",stroke:SLINE,"stroke-width":1,opacity:".6"},g);
     var link=el("g",{},g), nodes=el("g",{},g), labs=el("g",{},g);
     var maxV=Math.max.apply(null,chs.map(function(c){ return GB.chStat(c.key).vol; }))||1;
     chs.forEach(function(c,i){
       var a=-90+i*(360/chs.length);
       var x=L.CX+RX*Math.cos(rad(a)), y=L.CY+RY*Math.sin(rad(a));
+      if(RG){ x=RG.p[i].x; y=RG.p[i].y; }
       var st=GB.chStat(c.key);
       el("line",{x1:L.CX,y1:L.CY,x2:x,y2:y,stroke:hue,"stroke-width":1.4,opacity:".3"},link);
-      var rr=Math.round((22+16*Math.sqrt(st.vol/maxV))*L.k+10);
+      var rr=L.nar?Math.round(32+6*Math.sqrt(st.vol/maxV)):Math.round((22+16*Math.sqrt(st.vol/maxV))*L.k+10);
       var gp=orb(nodes,x,y,rr,hue,st.achieve,{bold:true});
+      if(L.nar) inName(gp,x,y,rr,c.name);
       gp.setAttribute("aria-label",c.name+" 열기 · 성취도 "+st.achieve+"퍼센트");
       var ca=Math.cos(rad(a)), sa=Math.sin(rad(a)), off=rr+13;
-      var anc=ca>.3?"start":ca<-.3?"end":"middle";
-      var up=(anc==="middle"&&sa<0);
-      var y0=y+sa*off+(anc==="middle"?(sa>0?L.fName+4:-4):L.fName*.34);
+      var anc=L.nar?"middle":(ca>.3?"start":ca<-.3?"end":"middle");
+      var up=L.nar?(sa<-.3):(anc==="middle"&&sa<0);
+      var y0=L.nar?(up?y-rr-5:y+rr+L.fName+5):y+sa*off+(anc==="middle"?(sa>0?L.fName+4:-4):L.fName*.34);
       var lg=el("g",{class:"lblg"},labs);
       lg.dataset.cx=x; lg.dataset.cy=y; lg.dataset.r=rr;
-      var l1=txt(lg,c.name,{x:x+ca*off,y:up?y0-L.fSub-4:y0,"text-anchor":anc,fill:SINK,
+      if(L.nar) lg.style.display="none";
+      var l1=txt(lg,nmFit(c.name,L),{x:L.nar?x:x+ca*off,y:up?y0-L.fSub-4:y0,"text-anchor":anc,fill:SINK,
         "font-size":L.fName+1,"font-weight":700,"font-family":cv("--kr")});
-      var l2=txt(lg,c.nodes.length+"쟁점 · "+st.vol+"쪽 · "+st.achieve+"%",
-        {x:x+ca*off,y:up?y0:y0+L.fSub+4,"text-anchor":anc,fill:SINK2,
+      var l2=txt(lg,L.nar?(c.nodes.length+"쟁점 · "+st.achieve+"%"):(c.nodes.length+"쟁점 · "+st.vol+"쪽 · "+st.achieve+"%"),
+        {x:L.nar?x:x+ca*off,y:up?y0:y0+L.fSub+4,"text-anchor":anc,fill:SINK2,
          "font-size":L.fSub,"font-weight":600,"font-family":cv("--kr")});
       [l1,l2].forEach(function(e){ e.classList.add("lbl"); });
       liven(gp,[l1,l2],function(){ chPeek(c,gp); },hidePeek);
@@ -555,32 +598,36 @@
     sky(g0,key);
     var g=el("g",{class:"ink"},g0);
     var list=chNodes(key), m=list.length;
-    var RX=Math.round(L.W*(m>9?.335:.30)), RY=Math.round(L.H*(m>9?.335:.30));
+    var RX=Math.round(L.W*(L.nar?.31:(m>9?.335:.30))), RY=Math.round(L.H*(m>9?.335:.30));
+    var RG=L.nar?ring(L,m,35):null; if(RG){ RX=RG.a; RY=RG.b; }
     el("ellipse",{cx:L.CX,cy:L.CY,rx:RX,ry:RY,fill:"none",stroke:SLINE,"stroke-width":1,opacity:".6"},g);
     var link=el("g",{},g), nodes=el("g",{},g), labs=el("g",{},g);
     var maxV=Math.max.apply(null,list.map(function(n){ return n.vol; }))||1;
-    var two=(m>=9);
+    var two=(m>=9)&&!L.nar;
     list.forEach(function(n,k){
       var a=-90+k*(360/m);
       var f2=(two&&(k%2===1))?1.30:1;
       var x=L.CX+RX*f2*Math.cos(rad(a)), y=L.CY+RY*f2*Math.sin(rad(a));
+      if(RG){ x=RG.p[k].x; y=RG.p[k].y; }
       var st=GB.nodeStat(n.no), tier=tierOf(st.achieve,st.solved>0), lock=(tier==="L");
       el("line",{x1:L.CX,y1:L.CY,x2:x,y2:y,stroke:lock?SLINE:hue,"stroke-width":lock?.9:1.4,
         opacity:lock?".45":".34","stroke-dasharray":lock?"3 5":"none"},link);
-      var rr=Math.round((14+Math.sqrt(n.vol/maxV)*15)*L.k+8);
+      var rr=L.nar?Math.round(30+5*Math.sqrt(n.vol/maxV)):Math.round((14+Math.sqrt(n.vol/maxV)*15)*L.k+8);
       var gp=orb(nodes,x,y,rr,tone(c.part,tier),st.achieve,{});
+      if(L.nar) inName(gp,x,y,rr,n.title);
       gp.setAttribute("aria-label",n.title+" 열기 · 성취도 "+st.achieve+"퍼센트");
       var ca=Math.cos(rad(a)), sa=Math.sin(rad(a)), off=rr+13;
-      var anc=ca>.3?"start":ca<-.3?"end":"middle";
-      var up=(anc==="middle"&&sa<0);
-      var y0=y+sa*off+(anc==="middle"?(sa>0?L.fName+4:-4):L.fName*.34);
+      var anc=L.nar?"middle":(ca>.3?"start":ca<-.3?"end":"middle");
+      var up=L.nar?(sa<-.3):(anc==="middle"&&sa<0);
+      var y0=L.nar?(up?y-rr-5:y+rr+L.fName+5):y+sa*off+(anc==="middle"?(sa>0?L.fName+4:-4):L.fName*.34);
       var lg=el("g",{class:"lblg"},labs);
       lg.dataset.cx=x; lg.dataset.cy=y; lg.dataset.r=rr;
+      if(L.nar) lg.style.display="none";
       var short=n.title.length>22?n.title.slice(0,21)+"…":n.title;
-      var l1=txt(lg,short,{x:x+ca*off,y:up?y0-L.fSub-4:y0,"text-anchor":anc,
+      var l1=txt(lg,nmFit(short,L),{x:L.nar?x:x+ca*off,y:up?y0-L.fSub-4:y0,"text-anchor":anc,
         fill:lock?SINK2:SINK,"font-size":L.fName,"font-weight":700,"font-family":cv("--kr")});
-      var l2=txt(lg,n.vol+"쪽 · 기출 "+n.q+(lock?"":" · "+st.achieve+"%"),
-        {x:x+ca*off,y:up?y0:y0+L.fSub+4,"text-anchor":anc,fill:SINK2,
+      var l2=txt(lg,L.nar?("기출 "+n.q+(lock?"":" · "+st.achieve+"%")):(n.vol+"쪽 · 기출 "+n.q+(lock?"":" · "+st.achieve+"%")),
+        {x:L.nar?x:x+ca*off,y:up?y0:y0+L.fSub+4,"text-anchor":anc,fill:SINK2,
          "font-size":L.fSub,"font-weight":600,"font-family":cv("--kr")});
       [l1,l2].forEach(function(e){ e.classList.add("lbl"); });
       liven(gp,[l1,l2],function(){ nodePeek(n,gp); },hidePeek);

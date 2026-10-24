@@ -58,7 +58,7 @@
   if (mode === "today") {
     var t = GB.today();
     t.seq.forEach(function (s, i) { if (!s.done) { seq.push(s); todayIdx.push(i); } });
-    $("ttl").textContent = "오늘 " + t.min + "분";
+    $("ttl").textContent = "오늘 " + GB.minText(t.min);
   } else if (mode === "node") {
     var nd = GB.node(nodeNo);
     var wrong = GB.qs(nodeNo).filter(function (q) { var a = GB.answered(q.i); return a && !a.ok; });

@@ -77,7 +77,10 @@
   function setGoal(d, mine) { P.goal = d || null; P.goalMine = !!mine; savePref(); }
   function dday() { return dayNo(goal()) - TODAYN; }
 
-  function minutes() { return P.minutes || 15; }
+  function minOpts() { var e = exam(); return (e && e.mins) || [30, 60, 90, 120]; }
+  function minutes() { var o = minOpts(), e = exam(); return o.indexOf(P.minutes) >= 0 ? P.minutes : ((e && e.minDef) || o[1]); }
+  /* 90 → 1시간 30분, 120 → 2시간 */
+  function minText(m) { var h = Math.floor(m / 60), r = m % 60; return h ? h + "시간" + (r ? " " + r + "분" : "") : m + "분"; }
   function setMinutes(m) { P.minutes = m; savePref(); delete S.today; save(); }
   function name() { return P.name || ""; }
   function setName(v) { P.name = String(v || "").trim().slice(0, 12); savePref(); }
@@ -414,7 +417,7 @@
     today: today, markToday: markToday, streak: streak, todayCount: todayCount, tier: tier, tierOn: tierOn, setTierOn: setTierOn, days: days, SEC_PER: SEC_PER,
     placementSet: placementSet, setPlacement: setPlacement, placement: function () { return S.place || null; },
     track: track, setTrack: setTrack, exam: exam, setExam: setExam, subs: subs, cur: cur, setCur: setCur, seriesName: seriesName, goal: goal, goalMark: goalMark, setGoal: setGoal, dday: dday,
-    minutes: minutes, setMinutes: setMinutes, name: name, setName: setName,
+    minutes: minutes, minOpts: minOpts, minText: minText, setMinutes: setMinutes, name: name, setName: setName,
     onboarded: onboarded, setOnboarded: setOnboarded,
     skin: skin, setSkin: setSkin, SKINS: SKINS,
     mountNav: mountNav, mountNext: mountNext,

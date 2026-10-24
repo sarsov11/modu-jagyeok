@@ -119,6 +119,20 @@
     { id: "ipat", name: "지식재산능력시험", sub: "IPAT", date: "2026-11-15", subs: ["ip_1", "ip_2", "ip_3", "ip_4"] }
   ];
 
+  /* 하루 공부 시간 선택지 — 시험 무게에 맞춘다(10-21 대표님 「경영지도사는 15분씩 해서 붙을 수 없는 시험」).
+     구간은 합격수기에 나온 하루 공부 시간을 보고 잡은 추정. 첫 값이 가장 짧은 선택, def 가 추천 */
+  var MINS = {
+    heavy: { o: [120, 180, 240, 300], d: 180 },   /* 변리사·보험계리사 */
+    pro:   { o: [60, 90, 120, 180], d: 120 },     /* 1차 과목 5개 안팎의 전문자격 */
+    mid:   { o: [30, 60, 90, 120], d: 60 },
+    light: { o: [30, 45, 60, 90], d: 60 }
+  };
+  var MINTIER = { patent: "heavy", actuary: "heavy",
+    mgmtc: "pro", firemgr: "pro", safetyc: "pro", housing: "pro", ad: "pro", franchise: "pro", social1: "pro",
+    logi: "mid", damage: "mid", sg: "mid", youth: "mid", jaegyeong: "mid",
+    jeonsan2: "light", ipat: "light" };
+  EXAMS.forEach(function (e) { var t = MINS[MINTIER[e.id] || "mid"]; e.mins = t.o; e.minDef = t.d; });
+
   function exam(id) { return EXAMS.filter(function (e) { return e.id === id; })[0] || null; }
   function series(examId, sid) {
     var e = exam(examId); if (!e || !e.series) return null;

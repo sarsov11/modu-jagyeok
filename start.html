@@ -52,7 +52,7 @@
 <script src="js/boot.js"></script>
 <script src="js/judge.js"></script>
 <script src="js/store.js"></script>
-<script src="js/strat.js?v=1021d"></script>
+<script src="js/strat.js?v=1024a"></script>
 <script>
 (function () {
   "use strict";
@@ -140,10 +140,10 @@
     },
     min: function () {
       var cur = GB.minutes();
-      $("scr").innerHTML = "<h1>하루 몇 분?</h1><p class=\"lead\">정한 시간만큼만 내요. 나중에 설정에서 바꿀 수 있어요.</p>" +
-        '<div class="body"><div class="opts g2" id="op">' + [10, 15, 20, 30].map(function (m) {
-          return '<button type="button" data-v="' + m + '" aria-pressed="' + (m === cur) + '">' + m + "분<small>약 " + Math.round(m * 60 / GB.SEC_PER) + "개</small>" +
-            (m === 15 ? '<span class="bdg">추천</span>' : "") + "</button>";
+      $("scr").innerHTML = "<h1>하루 공부 시간</h1><p class=\"lead\">" + esc(GB.exam().name) + " 합격자들이 하루에 쓰는 시간 기준이에요. 설정에서 바꿀 수 있어요.</p>" +
+        '<div class="body"><div class="opts g2" id="op">' + GB.minOpts().map(function (m) {
+          return '<button type="button" data-v="' + m + '" aria-pressed="' + (m === cur) + '">' + GB.minText(m) + "<small>약 " + Math.round(m * 60 / GB.SEC_PER) + "개</small>" +
+            (m === GB.exam().minDef ? '<span class="bdg">추천</span>' : "") + "</button>";
         }).join("") + "</div></div>";
       $("op").querySelectorAll("button").forEach(function (b) {
         b.onclick = function () { GB.setMinutes(+b.dataset.v); b.setAttribute("aria-pressed", "true"); setTimeout(nextStep, 120); };

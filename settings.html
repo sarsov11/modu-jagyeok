@@ -58,7 +58,7 @@
 <script src="data/ready.js"></script>
 <script src="js/boot.js"></script>
 <script src="js/store.js"></script>
-<script src="js/strat.js?v=1021d"></script>
+<script src="js/strat.js?v=1024a"></script>
 <script>
 (function () {
   "use strict";
@@ -80,7 +80,7 @@
   $("trk").onclick = function () { location.href = "start.html?step=exam"; };
   drawGoal();
   $("goal").onchange = function () { if (this.value) { GB.setGoal(this.value, true); drawGoal(); } };
-  seg($("min"), [10, 15, 20, 30].map(function (m) { return { v: m, n: m + "분" }; }), GB.minutes(), function (v) { GB.setMinutes(+v); });
+  seg($("min"), GB.minOpts().map(function (m) { return { v: m, n: GB.minText(m) }; }), GB.minutes(), function (v) { GB.setMinutes(+v); });
   $("nm").value = GB.name();
   $("nm").onchange = function () { GB.setName(this.value); };
   seg($("tier"), [{ v: "1", n: "보기" }, { v: "0", n: "숨기기" }], GB.tierOn() ? "1" : "0", function (v) { GB.setTierOn(v === "1"); });

@@ -66,7 +66,7 @@
 <script src="data/ready.js"></script>
 <script src="js/boot.js"></script>
 <script src="js/store.js"></script>
-<script src="js/strat.js?v=1021d"></script>
+<script src="js/strat.js?v=1024a"></script>
 <script>
 (function () {
   "use strict";
@@ -92,8 +92,8 @@
     h = '<h2>오늘 분량 완료</h2><p class="t">' + t.total + "개 완료. 더 풀려면 어려운 O·X.</p>" +
         '<div style="margin-top:18px"><a class="btn block" href="ox.html?mode=hard">어려운 O·X</a></div>';
   } else {
-    h = '<h2>' + (nm ? esc(nm) + ", " : "") + (t.done ? "이어서 " : "오늘 ") + t.min + "분</h2>" +
-        '<p class="t">약 ' + t.min + "분 · " + t.total + "개</p>" +
+    h = '<h2>' + (nm ? esc(nm) + ", " : "") + (t.done ? "이어서 " : "오늘 ") + GB.minText(t.min) + "</h2>" +
+        '<p class="t">약 ' + GB.minText(t.min) + " · " + t.total + "개</p>" +
         "<ul>" +
         (t.re ? "<li><b class=\"num\">" + t.re + "개</b><span>복습 — 전에 틀린 문장, 다시 볼 날이 된 문장</span></li>" : "") +
         "<li><b class=\"num\">" + newN + "개</b><span>새 문제 — " + esc(foci.join(" · ")) + "</span></li>" +
