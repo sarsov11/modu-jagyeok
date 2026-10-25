@@ -3,7 +3,7 @@
    MJSTRAT.button(요소)  그 자리에 「합격전략」 다시 보기 버튼을 넣는다 */
 (function () {
   "use strict";
-  var V = "1024a", 읽음 = {};
+  var V = "1025a", 읽음 = {};
   function id() {
     try {
       var p = JSON.parse(localStorage.getItem("mj.pref.v1") || "{}");

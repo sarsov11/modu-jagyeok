@@ -75,7 +75,7 @@
   .peek.on{opacity:1;transform:none}
   .peek[hidden]{display:none}
   .pk-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .pk-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--stage-ink-2)}
+  .pk-eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--stage-ink-2)}
   .pk-tier{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--stage);
     padding:3px 10px;border-radius:6px;letter-spacing:.06em}
   .pk-title{font-size:20px;color:var(--stage-ink);margin:9px 0 0;line-height:1.3}
@@ -85,11 +85,11 @@
   .pk-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .pk-stats b{display:block;font-family:var(--mono);font-size:20px;font-weight:600;
     color:var(--stage-ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-  .pk-stats span{font-size:11.5px;color:var(--stage-ink-2)}
+  .pk-stats span{font-size:12px;color:var(--stage-ink-2)}
   .pk-keys{display:flex;flex-wrap:wrap;gap:5px;margin-top:11px}
   .pk-key{font-size:12.5px;padding:4px 10px;border-radius:7px;background:var(--surface-2);
     color:var(--ink-2);border:1px solid var(--line-2)}
-  .pk-foot{margin-top:11px;font-size:11.5px;color:var(--stage-ink-2);font-family:var(--mono)}
+  .pk-foot{margin-top:11px;font-size:12px;color:var(--stage-ink-2);font-family:var(--mono)}
 
   /* 노드 시트 */
   .sheet{position:fixed;inset:0;z-index:90;display:flex;align-items:center;
@@ -106,7 +106,7 @@
   .sheet.on .sheetcard{opacity:1;transform:none}
   .sh-top{position:sticky;top:0;z-index:2;background:var(--surface);padding:22px 26px 16px;
     border-bottom:1px solid var(--line)}
-  .sh-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--ink-4)}
+  .sh-eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--ink-4)}
   .sh-top h3{font-size:25px;margin:8px 0 0;letter-spacing:-.04em;
     font-family:var(--title);font-weight:var(--tw)}
   .sh-x{position:absolute;right:18px;top:18px;width:34px;height:34px;border-radius:50%;
@@ -114,7 +114,7 @@
     cursor:pointer;font-size:15px;line-height:1;transition:.16s}
   .sh-x:hover{color:var(--ink);border-color:var(--line-3)}
   .sh-facts{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}
-  .fact{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);border:1px solid var(--line);
+  .fact{font-family:var(--mono);font-size:12px;color:var(--ink-3);border:1px solid var(--line);
     background:var(--surface-2);padding:5px 10px;border-radius:7px}
   .fact b{color:var(--ink);font-weight:600}
   .sh-body{padding:18px 26px 26px}
@@ -126,7 +126,7 @@
     border:1px solid var(--line);color:var(--ink-2)}
   .qprev{border:1px solid var(--line);border-radius:var(--r1);background:var(--surface-2);
     padding:13px 15px;margin-bottom:8px;font-size:14px;line-height:1.65;color:var(--ink-2)}
-  .qprev .m{font-family:var(--mono);font-size:11.5px;color:var(--ink-4);display:flex;gap:9px;
+  .qprev .m{font-family:var(--mono);font-size:12px;color:var(--ink-4);display:flex;gap:9px;
     flex-wrap:wrap;margin-top:7px}
   .qprev .m .ox{font-weight:700}
   .qprev .m .ox.o{color:var(--mint)} .qprev .m .ox.x{color:var(--red-2)}
@@ -149,7 +149,7 @@
     border-bottom:1px solid var(--line);background:var(--surface-2)}
   .grp .gh .cd{font-family:var(--mono);font-size:13px;font-weight:700}
   .grp .gh h3{font-size:16px;flex:1;min-width:0}
-  .grp .gh .n{font-family:var(--mono);font-size:11.5px;color:var(--ink-4)}
+  .grp .gh .n{font-family:var(--mono);font-size:12px;color:var(--ink-4)}
   .mrow{display:flex;align-items:center;gap:11px;padding:13px 16px;cursor:pointer;
     border-bottom:1px solid var(--line);background:var(--surface)}
   .mrow:last-child{border-bottom:0}
@@ -307,7 +307,7 @@
   /* 폰: 이름표가 판 폭을 넘으면 그림 전체가 줄어든다 — 이름은 9자에서 자르고 전체 이름은 눌러서 본다 */
   /* 폰: 이름을 원 안에 두 줄로 — 바깥 이름표는 원에서 떨어져 어느 원 이름인지 알아보기 어렵다(10-21) */
   function inName(gp,x,y,rr,name,col){
-    var fs=12, per=Math.max(3,Math.floor(rr*2*.82/fs)), t=String(name||"").replace(/\s+/g," ").trim(), rows=[];
+    var fs=13, per=Math.max(3,Math.floor(rr*2*.82/fs)), t=String(name||"").replace(/\s+/g," ").trim(), rows=[];
     if(t.length<=per) rows=[t];
     else{ var cut=t.lastIndexOf(" ",per); if(cut<2) cut=t.indexOf("·")>1&&t.indexOf("·")<=per?t.indexOf("·")+1:per;
       var a=t.slice(0,cut).trim(), b=t.slice(cut).trim(); if(b.length>per) b=b.slice(0,per-1)+"…"; rows=[a,b]; }
@@ -316,7 +316,7 @@
   }
   /* 폰: 원 개수만큼 둘레가 나오게 궤도를 세로로 늘리고, 둘레 길이로 고르게 놓는다(각도로 나누면 위아래가 붙는다) */
   function ring(L,m,rmax){
-    var a=L.W/2-rmax-8, b=Math.max(L.H*.30,L.rCore+rmax+18), need=m*(2*rmax+14);
+    var a=L.W/2-rmax-30, b=Math.max(L.H*.30,L.rCore+rmax+18), need=m*(2*rmax+14);
     function P(a,b){ return Math.PI*(3*(a+b)-Math.sqrt((3*a+b)*(a+3*b))); }
     while(P(a,b)<need) b+=6;
     var N=720, pts=[], acc=[0], i;
@@ -400,7 +400,7 @@
       if(!t) t=e;
     });
     var s2=txt(g,sub,{x:L.CX,y:L.CY+(rows.length>1?fs*1.5:L.fCore*.78),"text-anchor":"middle",
-      fill:SINK2,"font-size":Math.round(L.fName*.92),"font-weight":700,
+      fill:SINK2,"font-size":L.nar?13:Math.round(L.fName*.92),"font-weight":700,
       "font-family":cv("--kr"),"letter-spacing":"-.3"});
     if(onClick) [c,t,s2].forEach(function(e){ e.style.cursor="pointer"; e.addEventListener("click",onClick); });
   }
