@@ -8,6 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <script>try{document.documentElement.dataset.skin=localStorage.getItem("mj.skin")||"white"}catch(e){document.documentElement.dataset.skin="white"}</script>
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/diagram.css?v=1026a">
 <style>
   .hd{display:flex;align-items:center;gap:10px;padding:18px 0 0}
   .hd h1{font-size:20px;flex:1;min-width:0}
@@ -28,6 +29,8 @@
   .cardv-src{margin-top:16px} .cardv-src summary{cursor:pointer;font-weight:800;font-size:14.5px;color:var(--ink-3)}
   .empty{padding:48px 8px;text-align:center;color:var(--ink-3)}
   .spd{font-size:40px;font-weight:900;text-align:center;letter-spacing:-.05em}
+  .yodo-src{margin-top:16px}
+  .yodo-src summary{cursor:pointer;font-weight:800;font-size:14.5px;color:var(--ink-3);padding:8px 0}
 </style>
 </head>
 <body class="focus">
@@ -42,6 +45,7 @@
 <script src="js/boot.js"></script>
 <script src="js/judge.js"></script>
 <script src="js/store.js"></script>
+<script src="js/diagram.js?v=1026a"></script>
 <script>
 (function () {
   "use strict";
@@ -64,6 +68,13 @@
     var wrong = GB.qs(nodeNo).filter(function (q) { var a = GB.answered(q.i); return a && !a.ok; });
     seq = wrong.concat(GB.freshOf(nodeNo, 10)).slice(0, 10).map(function (q) { return { k: "ox", id: q.i }; });
     GB.pairs(nodeNo).slice(0, 2).forEach(function (p, i) { seq.splice(3 + i * 4, 0, { k: "pair", id: p.id }); });
+    /* 스킬트리 소주제(잎)에서 왔으면 그 소주제 문장만(공용 stree 1025) — 문장 id 는 skilltree.html 이 sessionStorage 에 넣는다 */
+    if (qsp.get("leaf")) { try { var leafIds = JSON.parse(sessionStorage.getItem("stree.ids") || "null"); if (leafIds && leafIds.length) {
+      var lset = {}; leafIds.forEach(function (i) { lset[i] = 1; });
+      var lqs = GB.qs(nodeNo).filter(function (q) { return lset[q.i]; }), A = function (q) { return GB.answered(q.i); };
+      seq = lqs.filter(function (q) { return A(q) && !A(q).ok; }).concat(lqs.filter(function (q) { return !A(q); }), lqs.filter(function (q) { return A(q) && A(q).ok; }))
+        .slice(0, 10).map(function (q) { return { k: "ox", id: q.i }; });
+    } } catch (e) {} }
     $("ttl").textContent = nd ? nd.name : "O·X";
   } else if (mode === "wrong") {
     seq = GB.wrongList().slice(0, 15).map(function (id) { return { k: "ox", id: id }; });
@@ -283,10 +294,18 @@
       return '<li><s>' + esc(h.x) + '</s><b>' + esc(h.o) + '</b></li>'; }).join("") + '</ul></section>' : "") + '</div>';
   }
   function showRead(no, back) {
+    /* 도식(2026-10-26 대표님 「모든 과목 개념을 도식으로」) — data/dosik/<과목>.js 가 있으면 위에 도식, 원래 글은 아래에 접는다 */
+    var dkey = (window.TREE && TREE.key) || "";
+    if (dkey && window.DIAGRAM && !(window.DOSIK && DOSIK[dkey]) && !showRead.불러봄) {
+      showRead.불러봄 = 1;
+      var dsc = document.createElement("script"); dsc.src = "data/dosik/" + dkey + ".js";
+      dsc.onload = dsc.onerror = function () { showRead(no, back); }; document.head.appendChild(dsc); return;
+    }
+    var 도식 = (function () { var D = window.DOSIK && DOSIK[dkey]; if (!D) return ""; var nd0 = GB.node(no); var b = D[String(no)] || D["#" + no] || (nd0 && D[nd0.name]); return b ? '<div class="yodo">' + b.map(DIAGRAM.html).join("") + "</div>" : ""; })();
     var nd = GB.node(no), 카드 = cardHTML(nd);
     if (카드) {
       var os0 = GB.qs(no).filter(function (q) { return q.ox === "O"; });
-      $("stage").innerHTML = '<div class="readhd"><h2>' + esc(nd.name) + '</h2></div>' + 카드 +
+      $("stage").innerHTML = '<div class="readhd"><h2>' + esc(nd.name) + '</h2></div>' + (도식 ? 도식 + '<details class="yodo-src"><summary>개념 카드 원문</summary>' + 카드 + '</details>' : 카드) +
         (os0.length ? '<details class="cardv-src"><summary>맞는 기출 문장 ' + os0.length + '개</summary><div class="readlist">' +
           os0.map(function (q) { return "<p>" + esc(q.t) + "<small>" + esc(GB.src(q)) + "</small></p>"; }).join("") + '</div></details>' : '') +
         '<div class="acts">' + (back ? '<button class="btn" id="nx">이어서 풀기</button>' : '<a class="btn" href="ox.html?node=' + no + '">이 쟁점 O·X 풀기</a>') + '</div>';
@@ -297,7 +316,7 @@
       .sort(function (a, b) { return (b.y || 0) - (a.y || 0); }).slice(0, 12);
     var h = '<div class="readhd"><h2>' + esc(nd.name) + " — 맞는 기출 문장</h2></div>" +
       '<p class="muted" style="margin:4px 0 0;font-size:14.5px">시험에 맞는 문장으로 나온 것만 모았어요. 최근 것부터.</p>' +
-      '<div class="readlist">' + os.map(function (q) { return "<p>" + esc(q.t) + "<small>" + esc(GB.src(q)) + "</small></p>"; }).join("") + "</div>" +
+      (도식 ? 도식 + '<details class="yodo-src"><summary>맞는 기출 문장 ' + os.length + '개</summary>' : "") + '<div class="readlist">' + os.map(function (q) { return "<p>" + esc(q.t) + "<small>" + esc(GB.src(q)) + "</small></p>"; }).join("") + "</div>" + (도식 ? "</details>" : "") +
       '<div class="acts">' + (back ? '<button class="btn" id="nx">이어서 풀기</button>'
                                    : '<a class="btn" href="ox.html?node=' + no + '">이 쟁점 O·X 풀기</a>') + "</div>";
     $("stage").innerHTML = h;

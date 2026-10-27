@@ -1,0 +1,21 @@
+/* 지금 공부하는 과목의 자료(data/<id>.js)를 싣는다 — 화면마다 store.js 앞에 둔다.
+   catalog.js · data/ready.js 가 먼저 실려 있어야 한다.
+   고른 과목이 아직 준비 중이면, 그 학생 과목 중 준비된 첫 과목 → 그것도 없으면 준비된 아무 과목. */
+(function () {
+  "use strict";
+  var P = {};
+  try { P = JSON.parse(localStorage.getItem("mj.pref.v1") || "{}"); } catch (e) {}
+  var R = window.READY || {};
+  var want = new URLSearchParams(location.search).get("s");
+  var cur = want && R[want] ? want : P.cur;
+  if (!R[cur]) cur = (P.subs || []).filter(function (s) { return R[s]; })[0] || Object.keys(R)[0];
+  if (want && R[want] && P.cur !== want) {
+    P.cur = want;
+    try { localStorage.setItem("mj.pref.v1", JSON.stringify(P)); } catch (e) {}
+  }
+  window.JG_CUR = cur;
+  if (cur) document.write('<script src="data/' + cur + '.js?v=' + (R[cur].v || "") + '"><\/script>');
+  /* 개념카드(2026-10-09) — card_ready.js 에 있는 과목이면 card_<키>.js 를 싣는다. 없으면 「쟁점 요점」(맞는 기출 문장)으로 남는다 */
+  if (cur) document.write('<script src="data/card_ready.js?t=' + Math.floor(Date.now() / 3600000) + '"><\/script>' +
+    '<script src="js/cardload.js"><\/script>');
+})();
