@@ -301,7 +301,7 @@
       var dsc = document.createElement("script"); dsc.src = "data/dosik/" + dkey + ".js";
       dsc.onload = dsc.onerror = function () { showRead(no, back); }; document.head.appendChild(dsc); return;
     }
-    var 도식 = (function () { var D = window.DOSIK && DOSIK[dkey]; if (!D) return ""; var nd0 = GB.node(no); var b = D[String(no)] || D["#" + no] || (nd0 && D[nd0.name]); return b ? '<div class="yodo">' + b.map(DIAGRAM.html).join("") + "</div>" : ""; })();
+    var 도식 = (function () { var D = window.DOSIK && DOSIK[dkey]; if (!D) return ""; var nd0 = GB.node(no); var b = D["#" + no] || D[String(no)] || (nd0 && D[nd0.name]); return b ? '<div class="yodo">' + b.map(DIAGRAM.html).join("") + "</div>" : ""; })();
     var nd = GB.node(no), 카드 = cardHTML(nd);
     if (카드) {
       var os0 = GB.qs(no).filter(function (q) { return q.ox === "O"; });
