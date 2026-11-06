@@ -390,8 +390,8 @@
     $("stage").innerHTML = '<div class="done">' +
       (n ? '<div class="big num">' + ok + " / " + n + "</div>" : '<div class="big">끝</div>') +
       '<p class="muted">' + (todayDone ? "오늘 분량 완료." : "이번 묶음을 다 풀었어요.") + "</p>" +
-      '<div class="grid3"><div><b class="num">' + ok + "</b><span>맞힘</span></div><div><b class=\"num\" style=\"color:var(--warn)\">" + mis +
-      '</b><span>확신했는데 틀림</span></div><div><b class="num">' + GB.streak() + "</b><span>연속 일</span></div></div>" +
+      '<div class="grid3" style="grid-template-columns:repeat(2,1fr)"><div><b class="num">' + ok + "</b><span>맞힘</span></div><div><b class=\"num\" style=\"color:var(--warn)\">" + mis +
+      '</b><span>확신했는데 틀림</span></div></div>' +
       '<div class="acts" style="margin-top:22px"><a class="btn ghost" href="index.html">홈</a>' +
       (mis ? '<a class="btn" href="ox.html?mode=hard">어려운 O·X</a>' : '<a class="btn" href="ox.html?mode=wrong">틀린 것 다시</a>') + "</div></div>";
   }
@@ -423,6 +423,7 @@
 </script>
 <script src="js/zzsfx.js?v=1009a" defer></script><script src="js/zzajan.js?v=1009a" defer></script>
 <script src="js/terrahome.js?v=1021a" data-slot=".nav .in" defer></script>
+<script src="js/supa.config.js"></script>
 <script src="js/research.js" data-service="jagyeok"></script>
 </body>
 </html>

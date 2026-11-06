@@ -85,11 +85,12 @@
   }
 
   /* ── 올리기 ─────────────────────────────────────────── */
-  var C = window.SUPA, 켜짐 = !!(C && C.url && C.anon);
+  /* C.research 는 IRB 승인 전까지 false(supa.config.js). 서버 연결과 별개로 연구 기록과 동의 내용은 서버에 나가지 않는다 */
+  var C = window.SUPA, 켜짐 = !!(C && C.url && C.anon && C.research);
   var sb = null;
   function 클라이언트() {
     if (sb) return sb;
-    if (켜짐 && window.supabase) sb = window.supabase.createClient(C.url, C.anon);
+    if (켜짐 && C.client) sb = C.client();   // auth.js 와 같은 연결을 쓴다
     return sb;
   }
   /* 로그인한 학생은 그 계정으로, 로그인 안 한 학생은 익명 계정으로 올린다(이름·이메일 없음). */

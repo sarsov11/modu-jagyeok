@@ -22,7 +22,7 @@
   .todo li b{min-width:52px;font-weight:900}
   .todo li span{color:var(--ink-2)}
   .todo .bar{margin-bottom:16px}
-  .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .mini{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
   .mini div{padding:12px 10px;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface)}
   .mini b{display:block;font-size:21px;font-weight:900;letter-spacing:-.04em}
   .mini span{font-size:13px;color:var(--ink-3)}
@@ -106,12 +106,10 @@
   $("todo").innerHTML = h;
 
   /* 불꽃(연속) · 방패(등급) · 출석(주간 + 월간) — 선호대장 1차 */
-  var FLAME = '<svg viewBox="0 0 24 24"><path fill="#F97316" d="M12 2c1 3.5 4.5 5.2 4.5 9.5A4.5 4.5 0 0 1 12 16a4.5 4.5 0 0 1-4.5-4.5c0-1.8.8-3.1 1.8-4.1.1 1.5.9 2.6 2 2.9C11 8 11.2 4.6 12 2z"/><path fill="#FDBA74" d="M12 22a6 6 0 0 1-6-6c0-2.3 1.2-4 2.6-5.3-.1 2.5 1.4 4.3 3.4 4.3s3.5-1.6 3.4-4.3C16.8 12 18 13.7 18 16a6 6 0 0 1-6 6z"/></svg>';
   var SHIELD = ["#B7794B", "#9CA3AF", "#EAB308", "#22D3EE", "#60A5FA"];
   var tr2 = GB.tier();
   var shield = '<svg viewBox="0 0 34 38"><path d="M17 1 32 6v12c0 9.5-6.4 16.2-15 19C8.4 34.2 2 27.5 2 18V6z" fill="' + SHIELD[tr2.rank] + '"/><path d="M17 5 28 9v9c0 7.2-4.6 12.4-11 14.8C10.6 30.4 6 25.2 6 18V9z" fill="rgba(255,255,255,.28)"/></svg>';
   $("mini").innerHTML =
-    '<div><b class="num flame">' + FLAME + GB.streak() + "일</b><span>연속</span></div>" +
     (GB.tierOn() ? '<div><b class="shield">' + shield + '<span style="font-size:16px">' + tr2.name + "</span></b><span>오래 기억한 문장 " + GB.num(tr2.held) + "개</span></div>"
                  : '<div><b class="num">' + GB.overall().prog + "%</b><span>푼 문장</span></div>") +
     '<div><b class="num">' + GB.todayCount() + "</b><span>오늘 푼 문장</span></div>";
@@ -143,6 +141,7 @@
 </script>
 <script src="js/zzsfx.js?v=1009a" defer></script><script src="js/zzajan.js?v=1009a" defer></script>
 <script src="js/terrahome.js?v=1021a" data-slot=".nav .in" defer></script>
+<script src="js/supa.config.js"></script>
 <script src="js/research.js" data-service="jagyeok"></script>
 </body>
 </html>
