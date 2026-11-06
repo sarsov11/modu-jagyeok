@@ -238,13 +238,25 @@
     var ps = [];
     foci.forEach(function (n) { pairs(n.no).forEach(function (p) { if (!S.pairs[p.id] && ps.length < 2) ps.push(p.id); }); });
     if (ps.length < 2) PR.forEach(function (p) { if (!S.pairs[p.id] && ps.length < 2 && ps.indexOf(p.id) < 0) ps.push(p.id); });
-    /* 순서 — 복습 먼저, 새 문장 중간중간에 짝 */
-    var seq = due.map(function (id) { return { k: "ox", id: id, re: 1 }; });
-    fresh.forEach(function (id, i) {
-      seq.push({ k: "ox", id: id });
-      if (ps.length && (i === Math.floor(fresh.length / 3) || i === Math.floor(fresh.length * 2 / 3))) seq.push({ k: "pair", id: ps.shift() });
+    /* ★ 먼저 읽고 푼다(11-06 대표님 「개념공부 없이 바로 문풀 싫다」). 쟁점마다 [읽기 → 그 쟁점 새 문장], 짝은 중간중간, 복습은 맨 끝.
+       읽을 것(맞는 기출 문장)이 없는 쟁점은 읽기를 넣지 않는다 */
+    var 쟁점별 = {}, base = [];
+    fresh.forEach(function (id) { var no = ITEM[id].n; (쟁점별[no] = 쟁점별[no] || []).push(id); });
+    foci.forEach(function (n) {
+      if (qs(n.no).some(function (q) { return q.ox === "O"; })) base.push({ k: "learn", n: n.no });
+      (쟁점별[n.no] || []).forEach(function (id) { base.push({ k: "ox", id: id }); });
+      delete 쟁점별[n.no];
+    });
+    Object.keys(쟁점별).forEach(function (no) { 쟁점별[no].forEach(function (id) { base.push({ k: "ox", id: id }); }); });
+    var seq = [], 푼수 = 0;
+    base.forEach(function (x) {
+      seq.push(x);
+      if (x.k !== "ox") return;
+      if (ps.length && (푼수 === Math.floor(fresh.length / 3) || 푼수 === Math.floor(fresh.length * 2 / 3))) seq.push({ k: "pair", id: ps.shift() });
+      푼수++;
     });
     ps.forEach(function (id) { seq.push({ k: "pair", id: id }); });
+    due.forEach(function (id) { seq.push({ k: "ox", id: id, re: 1 }); });
     S.today = { date: TODAY, min: minutes(), seq: seq, foci: foci.map(function (n) { return n.no; }), pos: 0 };
     save();
     return decorate(S.today);

@@ -293,6 +293,13 @@
     }).join("") + (c.함정 && c.함정.length ? '<section class="trap"><h3>함정</h3><ul>' + c.함정.map(function (h) {
       return '<li><s>' + esc(h.x) + '</s><b>' + esc(h.o) + '</b></li>'; }).join("") + '</ul></section>' : "") + '</div>';
   }
+  /* 오늘 학습의 읽기 칸(11-06) — 카드를 보여 주고, 다 읽으면 끝낸 표시 뒤 다음 칸. 맞힘 수에는 안 넣는다 */
+  var 읽는중 = null;
+  function showLearn(s) { if (!GB.node(s.n)) { 읽기끝(); return; } 읽는중 = s; showRead(s.n, true); }
+  function 읽기끝() {
+    if (읽는중) { 읽는중 = null; if (mode === "today") GB.markToday(todayIdx[pos]); }
+    next();
+  }
   function showRead(no, back) {
     /* 도식(2026-10-26 대표님 「모든 과목 개념을 도식으로」) — data/dosik/<과목>.js 가 있으면 위에 도식, 원래 글은 아래에 접는다 */
     var dkey = (window.TREE && TREE.key) || "";
@@ -305,22 +312,22 @@
     var nd = GB.node(no), 카드 = cardHTML(nd);
     if (카드) {
       var os0 = GB.qs(no).filter(function (q) { return q.ox === "O"; });
-      $("stage").innerHTML = '<div class="readhd"><h2>' + esc(nd.name) + '</h2></div>' + (도식 ? 도식 + '<details class="yodo-src"><summary>개념 카드 원문</summary>' + 카드 + '</details>' : 카드) +
+      $("stage").innerHTML = '<div class="readhd">' + (읽는중 ? '<span class="chip">먼저 읽기</span>' : "") + '<h2>' + esc(nd.name) + '</h2></div>' + (도식 ? 도식 + '<details class="yodo-src"><summary>개념 카드 원문</summary>' + 카드 + '</details>' : 카드) +
         (os0.length ? '<details class="cardv-src"><summary>맞는 기출 문장 ' + os0.length + '개</summary><div class="readlist">' +
           os0.map(function (q) { return "<p>" + esc(q.t) + "<small>" + esc(GB.src(q)) + "</small></p>"; }).join("") + '</div></details>' : '') +
         '<div class="acts">' + (back ? '<button class="btn" id="nx">이어서 풀기</button>' : '<a class="btn" href="ox.html?node=' + no + '">이 쟁점 O·X 풀기</a>') + '</div>';
-      if (back) $("nx").onclick = next;
+      if (back) $("nx").onclick = 읽기끝;
       window.scrollTo(0, 0); return;
     }
     var os = GB.qs(no).filter(function (q) { return q.ox === "O"; })
       .sort(function (a, b) { return (b.y || 0) - (a.y || 0); }).slice(0, 12);
-    var h = '<div class="readhd"><h2>' + esc(nd.name) + " — 맞는 기출 문장</h2></div>" +
+    var h = '<div class="readhd">' + (읽는중 ? '<span class="chip">먼저 읽기</span>' : "") + '<h2>' + esc(nd.name) + " — 맞는 기출 문장</h2></div>" +
       '<p class="muted" style="margin:4px 0 0;font-size:14.5px">시험에 맞는 문장으로 나온 것만 모았어요. 최근 것부터.</p>' +
       (도식 ? 도식 + '<details class="yodo-src"><summary>맞는 기출 문장 ' + os.length + '개</summary>' : "") + '<div class="readlist">' + os.map(function (q) { return "<p>" + esc(q.t) + "<small>" + esc(GB.src(q)) + "</small></p>"; }).join("") + "</div>" + (도식 ? "</details>" : "") +
       '<div class="acts">' + (back ? '<button class="btn" id="nx">이어서 풀기</button>'
                                    : '<a class="btn" href="ox.html?node=' + no + '">이 쟁점 O·X 풀기</a>') + "</div>";
     $("stage").innerHTML = h;
-    if (back) $("nx").onclick = next;
+    if (back) $("nx").onclick = 읽기끝;
     window.scrollTo(0, 0);
   }
 
@@ -370,7 +377,7 @@
     drawProg();
     if (pos >= seq.length) return finish();
     var s = seq[pos];
-    if (s.k === "pair") showPair(s); else showOX(s);
+    if (s.k === "pair") showPair(s); else if (s.k === "learn") showLearn(s); else showOX(s);
     window.scrollTo(0, 0);
   }
 
