@@ -329,8 +329,8 @@
         if (p) {
           var d = GB.markDiff(p.o.t, p.x.t);
           해설 += '<div class="pair"><div class="lab">같은 내용을 맞게 낸 기출 · ' + esc((p.o.y || "") + " " + (p.o.e || "")) + "</div>" +
-               '<p><b style="color:var(--ok)">맞음</b> ' + d[0] + "</p>" +
-               '<p><b style="color:var(--no)">틀림</b> ' + d[1] + "</p></div>";
+               '<p><b class="ok" style="color:var(--ok)">맞음</b> ' + d[0] + "</p>" +
+               '<p><b class="no" style="color:var(--no)">틀림</b> ' + d[1] + "</p></div>";
         } else if (!mc && q.ox === "X") {
           var o = nearestO(q);
           if (o) 해설 += '<div class="pair"><div class="lab">같은 쟁점의 맞는 기출 문장 · ' + esc(GB.src(o)) + "</div><p>" + GB.markDiff(o.t, q.t)[0] + "</p></div>";

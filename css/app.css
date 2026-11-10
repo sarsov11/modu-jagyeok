@@ -595,3 +595,16 @@ html body .tm-t:hover{box-shadow:none;transform:none}
 html body .stones{position:sticky;top:56px;z-index:19;background:var(--bg);margin:0 -20px;padding:12px 20px 8px}
 html body .tpad-btn{margin-bottom:22px}
 html body b,html body strong{font-weight:700}
+/* 작은 칩(「예상」 딱지 · 과목 알약 · 「알고 맞힘」 딱지 · 쟁점 이름)은 한 가지 모양: 높이 28 · 모서리 999 · 13px 600 */
+html body .chip,html body .qcard .chip,html body .subs a,html body .subs span{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 12px;border:0;border-radius:999px;font-size:13px;font-weight:600;line-height:1;background:var(--surface-2);color:var(--ink-3);white-space:nowrap;box-sizing:border-box}
+html body .chip.cta,html body .subs a.on{background:var(--pt-soft);color:var(--pt-ink);font-weight:700}
+html body .subs span small{font-size:13px;margin-left:2px}
+/* 성취 계단 · 갈래 색은 포인트 색 한 가지의 진하기로만 */
+:root,:root[data-skin="white"]{--lv1:color-mix(in srgb,var(--cta) 22%,#fff);--lv2:color-mix(in srgb,var(--cta) 55%,#fff);--lv3:var(--cta);--pt1:var(--cta);--pt2:var(--cta-2);--pt3:color-mix(in srgb,var(--cta) 55%,#fff);--pt4:var(--cta);--pt5:var(--cta-2);--pt6:color-mix(in srgb,var(--cta) 55%,#fff);--fam-geo:var(--cta);--fam-soc:var(--cta-2);--fam-eth:color-mix(in srgb,var(--cta) 55%,#fff);--mint:var(--cta-2)}
+/* 접힌 칸 — 설명 · 근거 글은 접어 둔다 */
+details.fold{margin-top:12px;border:1px solid var(--l1);border-radius:18px;background:var(--surface)}
+details.fold>summary{cursor:pointer;list-style:none;padding:14px 16px;font-size:14px;font-weight:700;color:var(--ink-3);display:flex;justify-content:space-between}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::after{content:"+"}
+details.fold[open]>summary::after{content:"−"}
+details.fold>div,details.fold>ul{margin:0 16px 14px}
