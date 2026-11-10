@@ -2,7 +2,8 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>스킬트리 — 모두의 자격</title>
+<meta name="theme-color" content="#15803D">
+<title>합격 지도 — 모두의 자격</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="icon" href="icons/favicon.svg">
 <link rel="manifest" href="manifest.webmanifest">
@@ -10,225 +11,19 @@
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/stree.css?v=1025">
 <style>
-  /* 1025 대표님 「구김 없이, 넘기면 다 보이게」 — 궤도(원 배치) 판은 _skilltree_궤도전_1025.html */
-  .wrapx{max-width:1360px;margin:0 auto;padding:0 var(--s3) var(--s6)}
-  .sheet{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px}
-  .sheet[hidden]{display:none}
-  .sheetbg{position:absolute;inset:0;background:rgba(4,6,10,.62);backdrop-filter:blur(6px);opacity:0;transition:opacity .34s}
-  .sheet.on .sheetbg{opacity:1}
-  .sheetcard{position:relative;width:min(720px,100%);max-height:86vh;overflow:auto;background:var(--surface);
-    border:1px solid var(--line-2);border-radius:var(--r3);box-shadow:0 40px 90px -30px rgba(0,0,0,.8);opacity:0;
-    transform:scale(.94) translateY(14px);transition:opacity .3s ease,transform .44s cubic-bezier(.32,.72,0,1)}
-  .sheet.on .sheetcard{opacity:1;transform:none}
-  .sh-top{position:sticky;top:0;z-index:2;background:var(--surface);padding:22px 26px 16px;border-bottom:1px solid var(--line)}
-  .sh-eyebrow{font-size:12.5px;font-weight:700;color:var(--ink-4)}
-  .sh-top h3{font-size:24px;margin:6px 0 0;letter-spacing:-.04em;font-family:var(--title);font-weight:var(--tw)}
-  .sh-x{position:absolute;right:18px;top:18px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line-2);
-    background:var(--surface-2);color:var(--ink-3);cursor:pointer;font-size:15px;line-height:1}
-  .sh-facts{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
-  .fact{font-size:12.5px;color:var(--ink-3);border:1px solid var(--line);background:var(--surface-2);padding:5px 10px;border-radius:7px}
-  .fact b{color:var(--ink);font-weight:700}
-  .sh-body{padding:18px 26px 26px}
-  .sh-leaves{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
-  .sh-leaf{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;
-    background:var(--surface-2);cursor:pointer;font-size:14.5px;font-weight:700;color:var(--ink-2);text-decoration:none}
-  .sh-leaf:hover{border-color:var(--line-3)}
-  .sh-leaf span{flex:1;min-width:0}
-  .sh-leaf small{font-size:12.5px;font-weight:600;color:var(--ink-4);white-space:nowrap}
-  .sh-p{font-size:14px;color:var(--ink-3);line-height:1.65;margin:4px 0 0}
-  .goact{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-  @media(max-width:760px){
-    .sheet{padding:0;align-items:flex-end}
-    .sheetcard{width:100%;max-height:90vh;border-radius:var(--r3) var(--r3) 0 0;transform:translateY(40px)}
-  }
+  .mapwrap{max-width:1180px;margin:0 auto;padding:16px 20px calc(62px + 40px + env(safe-area-inset-bottom))}
 </style>
 </head>
 <body>
-<div class="wrapx">
-  <span class="kicker"><i></i>스킬트리</span>
-  <div id="stree"></div>
-</div>
-
-<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true">
-  <div class="sheetbg" id="sheetbg"></div>
-  <div class="sheetcard">
-    <div class="sh-top">
-      <button class="sh-x" id="shx" aria-label="닫기">✕</button>
-      <span class="sh-eyebrow" id="shEyebrow"></span>
-      <h3 id="shTitle"></h3>
-      <div class="sh-facts" id="shFacts"></div>
-    </div>
-    <div class="sh-body" id="shBody"></div>
-  </div>
-</div>
-
+<div class="mapwrap"><div id="map"></div></div>
 <script src="js/catalog.js"></script>
 <script src="data/ready.js"></script>
 <script src="js/boot.js"></script>
 <script src="js/store.js"></script>
-<script src="js/stree.js?v=1025"></script>
-<script>
-/* ══ stree 어댑터 — GB(TREE·QBANK·기록) → 공용 넘김 스킬트리 ══
-   대단원·소주제는 data/st/<과목>.js(STREE_DEF, 단원\<과목>\_스킬트리.json 에서 sonnet 이 문항을 읽고 나눈 것).
-   STREE_DEF 가 없는 과목은 편(part) → 장을 대단원으로, 소주제 없이 그린다. */
-(function(){
-  var T=GB.T, esc=GB.esc, D=window.STREE_DEF||null;
-  GB.mountNav("skilltree.html");
-  /* 앱마다 store.js 판이 달라 없는 함수가 있다(공시엔 qCount 가 없다) — 여기서 채운다 */
-  var QC=GB.qCount||(function(){
-    var ys={}; T.nodes.forEach(function(n){ GB.qs(n.no).forEach(function(q){ if(q.y) ys[q.y]=1; }); });
-    var Y=Math.max(1,Object.keys(ys).length);
-    return function(nos){ var seen={}, k=0; (nos||[]).forEach(function(no){ GB.qs(no).forEach(function(q){ if(q.bk) return; var u=(q.e||"")+q.y+"_"+(q.qn||q.i); if(!seen[u]){ seen[u]=1; k++; } }); });
-      return { n:k, years:Y, avg:Math.round(k/Y*10)/10 }; };
-  })();
-  if(!GB.qCount) GB.qCount=QC;
-  if(!GB.track) GB.track=function(){ return { name:"" }; };
-
-  function unitKey(q){ return q.bk ? "bk:"+q.i : (q.e+"|"+q.y+"|"+q.qn); }
-  function statOf(list){   /* store.js nodeStat 과 같은 식(풀었나 55 + 맞았나 45, 열 문장 전엔 덜) */
-    var solved=0, correct=0;
-    list.forEach(function(q){ var a=GB.answered(q.i); if(a){ solved++; if(a.ok) correct++; } });
-    var n=list.length, pct=solved?correct/solved*100:0, prog=n?solved/n*100:0;
-    var ach=n?Math.round(prog*.55+pct*.45*Math.min(1,solved/10)):0;
-    return { n:n, solved:solved, achieve:ach, state: !n?"empty": ach>=80?"done": solved?"wip":"none" };
-  }
-  function avgOf(list){
-    var seen={}, k=0; list.forEach(function(q){ if(q.bk) return; var u=q.e+q.y+"_"+q.qn; if(!seen[u]){ seen[u]=1; k++; } });
-    return k/GB.qCount([]).years;
-  }
-  function heat(a){ return a>=2?3 : a>=.8?2 : a>0?1 : 0; }
-  var rec=(GB.focusNodes?GB.focusNodes(1):[])[0];
-
-  function nodeOf(no){
-    var n=GB.node(no); if(!n) return null;
-    var qs=GB.qs(no), st=GB.nodeStat(no), av=GB.qCount([no]).avg;
-    var leaves=[];
-    var L=D&&D.leaves&&D.leaves[no];
-    if(L&&L.length){
-      var by={}, byI={}; qs.forEach(function(q){ (by[unitKey(q)]=by[unitKey(q)]||[]).push(q); byI[q.i]=q; });
-      leaves=L.map(function(l){
-        /* 단위 키 = 문항(시험|연도|번호) 또는 문장 id(공시 절 나누기 결과) */
-        var list=[]; l.units.forEach(function(k){ if(by[k]) list=list.concat(by[k]); else if(byI[k]) list.push(byI[k]); });
-        var s=statOf(list);
-        return { name:l.name, list:list, avg:avgOf(list), pct:s.achieve, state:s.state, n:list.length };
-      }).filter(function(l){ return l.n; });
-    }
-    return { id:no, raw:n, name:(D&&D.names&&D.names[no])||n.title, full:n.title, avg:av, pct:st.achieve,
-             state:!st.n?"empty": st.achieve>=80?"done": st.solved?"wip":"none",
-             badge:(rec&&rec.no===no)?"추천":"", heat:heat(av), leaves:leaves };
-  }
-  function groupOf(name,nos){
-    var nodes=nos.map(nodeOf).filter(Boolean);
-    var all=[]; nos.forEach(function(no){ all=all.concat(GB.qs(no)); });
-    var ach=nodes.length?Math.round(nodes.reduce(function(a,n){ return a+n.pct; },0)/nodes.length):0;
-    /* 원이 하나뿐인 장은 그 소주제를 원으로 올려 그린다 — 원 하나에 잎만 길게 달린 장이 되지 않게 */
-    if(nodes.length===1&&nodes[0].leaves.length>=2){
-      var P0=nodes[0];
-      nodes=P0.leaves.map(function(l){ return { name:l.name, full:l.name, avg:l.avg, pct:l.pct, state:l.state, heat:heat(l.avg), leaves:[], leafRef:l, parent:P0, raw:P0.raw, id:P0.id }; });
-    }
-    return { name:name, nodes:nodes, avg:GB.qCount(nos).avg, pct:ach };
-  }
-  /* 장 하나를 중단원 원으로, 그 안 쟁점을 잎으로(STREE_DEF 가 없고 편마다 장이 여럿인 과목 — 편→장→쟁점 세 층을 그대로 쓴다) */
-  function chNodeOf(c){
-    var st=GB.chStat(c.key), av=GB.qCount(c.nodes).avg;
-    return { id:"ch:"+c.key, ch:c, name:c.name, full:c.name, avg:av, pct:st.achieve,
-             state:!st.n?"empty": st.achieve>=80?"done": st.solved?"wip":"none", heat:heat(av),
-             badge:(rec&&c.nodes.indexOf(rec.no)>=0)?"추천":"",
-             leaves:c.nodes.map(function(no){ var n=GB.node(no), s=GB.nodeStat(no);
-               return { name:n.title, gnode:no, avg:GB.qCount([no]).avg, pct:s.achieve, n:s.n,
-                        state:!s.n?"empty": s.achieve>=80?"done": s.solved?"wip":"none" }; }) };
-  }
-  var groups, perPart=T.chs.length/Math.max(1,T.parts.length);
-  if(D&&D.groups) groups=D.groups.map(function(g){ return groupOf(g.name,g.nodes); });
-  else if(T.parts.length>1&&perPart>=1.5) groups=T.parts.map(function(p){
-      var chs=GB.chsOf(p.no), nos=[]; chs.forEach(function(c){ nos=nos.concat(c.nodes); });
-      var nodes=chs.map(chNodeOf);
-      return { name:p.name, nodes:nodes, avg:GB.qCount(nos).avg, pct:GB.partStat(p.no).achieve }; });
-  else if(T.parts.length>1) groups=T.parts.map(function(p){
-      var nos=[]; GB.chsOf(p.no).forEach(function(c){ nos=nos.concat(c.nodes); }); return groupOf(p.name,nos); });
-  else groups=T.chs.map(function(c){ return groupOf(c.name,c.nodes); });
-  var tot=GB.qCount(T.nodes.map(function(n){ return n.no; }));
-  var leafN=groups.reduce(function(a,g){ return a+g.nodes.reduce(function(b,n){ return b+n.leaves.length; },0); },0);
-  var nodeN=groups.reduce(function(a,g){ return a+g.nodes.length; },0);
-  var ST=STREE.mount(document.getElementById("stree"),{
-    key:"mj."+(window.JG_CUR||T.key), title:T.subject,
-    sub:GB.track().name+" · 대단원 "+groups.length+" · 중단원 "+nodeN+(leafN?" · 소주제 "+leafN:"")+" · 해마다 약 "+tot.avg+"문제("+tot.years+"개년 기출)",
-    groups:groups,
-    onNode:function(n,g){ openNode(n,g); },
-    onLeaf:function(l,n,g){ openLeaf(l,n,g); }
-  });
-
-  /* ══ 시트 ══ */
-  var sheet=document.getElementById("sheet");
-  function howFar(s){ return !s.n?"붙은 기출 선지가 없어요": !s.solved?"아직 시작 전": s.achieve<30?"이제 막 시작": s.achieve<60?"절반쯤": s.achieve<80?"감이 잡히는 중":"든든해요"; }
-  function show(eyebrow,title,facts,body){
-    document.getElementById("shEyebrow").textContent=eyebrow;
-    document.getElementById("shTitle").textContent=title;
-    document.getElementById("shFacts").innerHTML=facts;
-    document.getElementById("shBody").innerHTML=body;
-    sheet.hidden=false; requestAnimationFrame(function(){ sheet.classList.add("on"); });
-    document.body.style.overflow="hidden";
-  }
-  function goLeaf(no,list){ try{ sessionStorage.setItem("stree.ids",JSON.stringify(list.map(function(q){ return q.i; }))); }catch(e){} location.href="ox.html?node="+no+"&leaf=1"; }
-  function openNode(n,g){
-    if(n.ch) return openCh(n,g);
-    if(n.leafRef) return openLeaf(n.leafRef,n.parent,g);
-    var st=GB.nodeStat(n.id), raw=n.raw;
-    var facts='<span class="fact">해마다 약 <b>'+n.avg+'</b>문제</span><span class="fact">기출 선지 <b>'+raw.q+'</b></span>'+
-      (raw.bq?'<span class="fact">교재 O·X <b>'+raw.bq+'</b></span>':'')+
-      '<span class="fact">'+howFar(st)+(st.solved?' · <b>'+st.achieve+'</b>%':'')+'</span>';
-    var body='';
-    if(n.leaves.length){
-      body+='<div class="sh-leaves">'+n.leaves.map(function(l,i){
-        return '<a class="sh-leaf" data-li="'+i+'"><span>'+esc(l.name)+'</span><small>'+l.n+'문장 · '+(l.state==="none"?"시작 전":l.pct+"%")+'</small></a>'; }).join("")+'</div>'+
-        '<p class="sh-p">소주제를 누르면 그 소주제 문장만 풉니다. 답은 풀고 나서 보여 줘요.</p>';
-    }else body='<p class="sh-p">'+(GB.qs(n.id).length?'이 중단원 기출 문장 '+GB.qs(n.id).length+'개. 답은 풀고 나서 보여 줘요.':'이 중단원에 붙은 기출 문장이 아직 없어요.')+'</p>';
-    body+=GB.qs(n.id).length?'<div class="goact"><a class="btn" href="ox.html?node='+n.id+'">중단원 전체 O·X 풀기</a><a class="btn ghost" href="ox.html?read='+n.id+'">요점 보기</a></div>':'';
-    show(g.name+(n.full!==n.name?" · "+n.full:""),n.name,facts,body);
-    [].forEach.call(document.querySelectorAll(".sh-leaf"),function(a){ a.onclick=function(){ var l=n.leaves[+a.dataset.li]; goLeaf(n.id,l.list); }; });
-  }
-  function openCh(n,g){
-    var st=GB.chStat(n.ch.key);
-    var facts='<span class="fact">해마다 약 <b>'+n.avg+'</b>문제</span><span class="fact">쟁점 <b>'+n.leaves.length+'</b></span><span class="fact">기출 선지 <b>'+st.n+'</b></span>'+
-      '<span class="fact">'+howFar(st)+(st.solved?' · <b>'+st.achieve+'</b>%':'')+'</span>';
-    var body='<div class="sh-leaves">'+n.leaves.map(function(l,i){
-      return '<a class="sh-leaf" data-li="'+i+'"><span>'+esc(l.name)+'</span><small>'+l.n+'문장 · '+(l.state==="none"?"시작 전":l.state==="empty"?"준비 중":l.pct+"%")+'</small></a>'; }).join("")+'</div>'+
-      '<p class="sh-p">쟁점을 누르면 그 쟁점만 풉니다.</p>';
-    show(g.name,n.name,facts,body);
-    [].forEach.call(document.querySelectorAll(".sh-leaf"),function(a){ a.onclick=function(){ openNode(nodeOf(n.leaves[+a.dataset.li].gnode),g); }; });
-  }
-  function openLeaf(l,n,g){
-    if(l.gnode) return openNode(nodeOf(l.gnode),g);
-    var s=statOf(l.list);
-    var facts='<span class="fact">해마다 약 <b>'+(Math.round(l.avg*10)/10)+'</b>문제</span><span class="fact">문장 <b>'+l.n+'</b></span>'+
-      '<span class="fact">'+howFar(s)+(s.solved?' · <b>'+s.achieve+'</b>%':'')+'</span>';
-    var body='<p class="sh-p">'+esc(g.name===n.name?n.name:g.name+' › '+n.name)+' 안의 소주제입니다. 답은 풀고 나서 보여 줘요.</p>'+
-      '<div class="goact"><a class="btn" id="leafgo">이 소주제 O·X 풀기</a><a class="btn ghost" href="ox.html?read='+n.id+'">중단원 요점</a></div>';
-    show(g.name===n.name?n.name:g.name+" › "+n.name,l.name,facts,body);
-    document.getElementById("leafgo").onclick=function(){ goLeaf(n.id,l.list); };
-  }
-  function closeSheet(){ sheet.classList.remove("on"); document.body.style.overflow=""; setTimeout(function(){ sheet.hidden=true; },340); }
-  document.getElementById("shx").onclick=closeSheet;
-  document.getElementById("sheetbg").onclick=closeSheet;
-  document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&!sheet.hidden) closeSheet(); });
-
-  var want=+new URLSearchParams(location.search).get("node");
-  if(want) groups.forEach(function(g,gi){ g.nodes.forEach(function(n){
-    if(n.id===want||(n.ch&&n.ch.nodes.indexOf(want)>=0)) setTimeout(function(){ ST.go(gi,false); openNode(n.ch?nodeOf(want):n,g); },300); }); });
-  window.addEventListener("terra:skin",function(){ location.reload(); });
-  GB.mountNext();
-})();
-</script>
-<script src="js/zzsfx.js?v=1009a" defer></script><script src="js/zzajan.js?v=1009a" defer></script><script src="js/zzcoach.js?v=1009a" defer></script>
-<script>
-/* 첫 진입 안내(zzcoach.js, defer 라 load 뒤에 부른다). 한 번 보면 다시 안 뜬다. 1025 넘김판으로 바꾸며 키를 새로 */
-window.addEventListener("load", function () { if (!window.ZZCOACH) return; ZZCOACH.run("modu-jagyeok.skilltree2", [
-  { el: ".st-map", text: "대단원 전부. 누르면 그 장으로 넘어가요" },
-  { el: ".st-page", text: "옆으로 넘기면 다음 대단원. 원은 중단원, 고리가 찰수록 성취도가 높아요" },
-  { el: ".st-leaves", text: "잎은 소주제. 누르면 그 소주제 문장만 풀어요" }
-], { delay: 900 }); });
-</script>
-<script src="js/terrahome.js?v=1021a" data-slot=".nav .in" defer></script>
+<script src="js/tera-map.js"></script>
+<script>window.PM_PRE = "mj";</script>
+<script src="js/passmap.js"></script>
+<script>if (window.GB) GB.mountNav("skilltree.html");</script>
 <script src="js/supa.config.js"></script>
 <script src="js/research.js" data-service="jagyeok"></script>
 </body>

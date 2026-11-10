@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<meta name="theme-color" content="#15803D">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>설정 — 모두의 자격</title>
 <link rel="icon" href="icons/favicon.svg">
@@ -22,7 +23,7 @@
   .seg{display:flex;flex-wrap:wrap;gap:6px}
   .seg button{appearance:none;border:1.5px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:var(--r2);
     padding:9px 13px;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:6px}
-  .seg button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);background:var(--surface-3)}
+  .seg button[aria-pressed="true"]{border-color:var(--cta);color:var(--cta-2);background:var(--cta-soft)}
   .seg i{width:14px;height:14px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(128,128,128,.5)}
   input[type=text],input[type=date]{font:inherit;font-size:16px;padding:10px 12px;border:1.5px solid var(--line-2);border-radius:var(--r2);background:var(--surface);color:var(--ink)}
   textarea{width:100%;min-height:80px;font:12px/1.4 monospace;border:1px solid var(--line-2);border-radius:var(--r2);background:var(--surface-2);color:var(--ink-2)}
@@ -35,7 +36,7 @@
 
   <details open><summary>공부</summary><div class="in">
     <div class="f"><label>시험 · 과목</label><div class="seg"><button type="button" id="trk"></button></div></div>
-    <div class="f"><label>합격전략</label><div id="strat"></div></div>
+    <div class="f"><label>합격 전략</label><div id="strat"></div></div>
     <div class="f"><label>시험 날짜 <span class="chip" id="gm"></span></label><input type="date" id="goal"></div>
     <div class="f"><label>하루 시간</label><div class="seg" id="min"></div></div>
     <div class="f"><label>부를 이름</label><input type="text" id="nm" maxlength="12" placeholder="닉네임"></div>
@@ -106,5 +107,18 @@
 <script src="js/terrahome.js?v=1021a" data-slot=".nav .in" defer></script>
 <script src="js/supa.config.js"></script>
 <script src="js/research.js" data-service="jagyeok"></script>
+<script>
+/* 화면표준 10절 — 하루 시간 단추 중 앱이 권하는 시간에 「추천」 표시 */
+(function () {
+  function mark() {
+    try {
+      var rec = GB.MIN_REC || (GB.exam && GB.exam().minDef), t = GB.minText ? GB.minText(rec) : GB.hm(rec), host = document.getElementById("min");
+      if (!host || host.querySelector(".recpill")) return;
+      Array.prototype.forEach.call(host.querySelectorAll("button"), function (b) { if (b.textContent.trim() === t) b.insertAdjacentHTML("beforeend", '<em class="recpill">추천</em>'); });
+    } catch (e) {}
+  }
+  mark(); try { new MutationObserver(mark).observe(document.getElementById("min"), { childList: true, subtree: true }); } catch (e) {}
+})();
+</script>
 </body>
 </html>

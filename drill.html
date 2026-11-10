@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<meta name="theme-color" content="#15803D">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>훈련 — 모두의 자격</title>
 <link rel="icon" href="icons/favicon.svg">
@@ -34,11 +35,13 @@
     ["ox.html?mode=hard", "어려운 O·X", "맞는 문장과 한두 마디만 다른 함정 문장" + (mis ? " · 확신했는데 틀린 " + mis + "개 먼저" : ""), (GB.pairs().length ? GB.pairs().length + "개" : "없음")],
     ["ox.html?mode=pair", "둘 중 맞는 문장", "한두 마디만 다른 기출 두 문장", (GB.pairs().length ? done + " / " + GB.pairs().length : "없음")],
     ["ox.html?mode=speed", "60초 스피드", "확신도 없이 반응만. 짧은 문장으로", "60초"],
-    ["ox.html?mode=wrong", "틀린 문장 다시", wrong ? "최근에 틀린 것부터" : "아직 틀린 문장이 없어요", wrong + "개"],
-    ["skilltree.html", "쟁점 골라 풀기", "스킬트리에서 쟁점을 누르면 그 쟁점만 풀어요", GB.nodes.length + "쟁점"]
+    ["ox.html?mode=wrong", "복습", wrong ? "최근에 틀린 것부터" : "아직 복습할 문장이 없어요", wrong + "개"],
+    ["skilltree.html", "합격 지도", "합격 지도에서 쟁점을 누르면 그 쟁점만 풀어요", GB.nodes.length + "쟁점"]
   ];
+  /* 지금 할 것: 복습할 문항이 있으면 복습, 없으면 목록 첫 줄 */
+  var REC = (typeof wrong !== "undefined" && wrong && rows.filter(function (r) { return /mode=wrong/.test(r[0]); })[0]) ? "ox.html?mode=wrong" : rows[0][0];
   document.getElementById("ls").innerHTML = rows.map(function (r) {
-    return '<a class="row" href="' + r[0] + '"><span class="t"><b>' + r[1] + "</b><span>" + GB.esc(r[2]) + '</span></span><span class="n num">' + r[3] + "</span></a>";
+    return '<a class="row" href="' + r[0] + '"><span class="t"><b>' + r[1] + (r[0] === REC ? '<em class="recpill">추천</em>' : "") + "</b><span>" + GB.esc(r[2]) + '</span></span><span class="n num">' + r[3] + "</span></a>";
   }).join("");
 })();
 </script>

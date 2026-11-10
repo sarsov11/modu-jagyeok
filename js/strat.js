@@ -1,6 +1,6 @@
-/* 합격전략 브리핑 붙이기 (2026-10-20) — 엔진 js/zzstrat.js(허브 공용 복사본) + 데이터 js/strat/jagyeok_<시험>[_<급수>].js
+/* 합격 전략 붙이기 (2026-10-20) — 엔진 js/zzstrat.js(허브 공용 복사본) + 데이터 js/strat/jagyeok_<시험>[_<급수>].js
    MJSTRAT.auto()       학생 시험의 브리핑을 처음 한 번 튜토리얼로 띄운다(본 뒤에는 안 뜬다)
-   MJSTRAT.button(요소)  그 자리에 「합격전략」 다시 보기 버튼을 넣는다 */
+   MJSTRAT.button(요소)  그 자리에 「합격 전략」 다시 보기 버튼을 넣는다 */
 (function () {
   "use strict";
   var V = "1025a", 읽음 = {};
