@@ -41,7 +41,7 @@
       var prog = Math.round(s / n * 100), pct = s ? Math.round(c / s * 100) : 0;
       return Math.round(prog * 0.55 + pct * 0.45 * Math.min(1, s / 10));
     }
-    function nodeName(n) { return n.name || n.title || String(n.no); }
+    function nodeName(n) { var t = n.name || n.title || String(n.no); return t.length > 30 ? t.replace(/\s*[\(（].*$/, "") : t; }
     var nodes = (T.nodes || []).filter(function (n) { return qs(n.no).length; });
     var chs = T.chs || [], parts = T.parts || [];
     function item(label, nos, kids) {

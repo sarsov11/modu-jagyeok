@@ -13,29 +13,29 @@
   /* 첫 설정 — 한 화면에 질문 하나, 큰 단추 하나(모두의 통사 start.html · 헤이링 방식) */
   .wrap{max-width:520px;margin:0 auto;padding:28px 16px 48px;min-height:100vh;display:flex;flex-direction:column}
   .dots{display:flex;gap:6px;margin-bottom:28px}
-  .dots i{flex:1;height:4px;border-radius:99px;background:var(--surface-3)}
+  .dots i{flex:1;height:4px;border-radius:999px;background:var(--surface-3)}
   .dots i.on{background:var(--cta)}
-  h1{font-size:27px;letter-spacing:-.05em}
+  h1{font-size:26px;letter-spacing:-.05em}
   .lead{color:var(--ink-3);font-size:16px;margin:8px 0 0}
   .body{flex:1;margin-top:26px}
   .opts{display:flex;flex-direction:column;gap:10px}
   .opts button{appearance:none;position:relative;text-align:left;border:1.5px solid var(--line-2);background:var(--surface);
-    border-radius:var(--r3);padding:16px 18px;font-size:17px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+    border-radius:var(--r3);padding:16px 18px;font-size:16px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
   .opts button small{font-size:14px;color:var(--ink-3);font-weight:600}
   .opts button[aria-pressed="true"]{border:2px solid var(--cta);background:var(--cta-soft)}
   .opts.g2{display:grid;grid-template-columns:1fr 1fr}
-  input[type=text],input[type=date]{width:100%;font:inherit;font-size:19px;padding:15px 16px;border:1.5px solid var(--line-2);
+  input[type=text],input[type=date]{width:100%;font:inherit;font-size:20px;padding:15px 16px;border:1.5px solid var(--line-2);
     border-radius:var(--r3);background:var(--surface);color:var(--ink)}
   input:focus{outline:none;border-color:var(--cta)}
   .foot{display:flex;flex-direction:column;gap:10px;margin-top:24px}
-  .skip{appearance:none;border:0;background:none;color:var(--ink-4);font-size:15px;cursor:pointer;padding:6px;position:relative}
+  .skip{appearance:none;border:0;background:none;color:var(--ink-4);font-size:14px;cursor:pointer;padding:6px;position:relative}
   .skip .tip{display:none;position:absolute;bottom:130%;left:50%;transform:translateX(-50%);width:250px;background:var(--ink);color:var(--bg);
-    font-size:13.5px;padding:8px 10px;border-radius:var(--r1);line-height:1.45}
+    font-size:14px;padding:8px 10px;border-radius:var(--r1);line-height:1.45}
   .skip:hover .tip,.skip:focus .tip,.skip.on .tip{display:block}
-  .dateline{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:28px;font-weight:900;letter-spacing:-.05em}
-  .qhd{display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--ink-3);font-weight:700}
+  .dateline{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:26px;font-weight:800;letter-spacing:-.05em}
+  .qhd{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink-3);font-weight:700}
   .perpart{display:flex;flex-direction:column;gap:10px;margin-top:18px}
-  .perpart div{display:grid;grid-template-columns:1fr 60px;gap:6px 10px;align-items:center;font-size:15px}
+  .perpart div{display:grid;grid-template-columns:1fr 60px;gap:6px 10px;align-items:center;font-size:14px}
   .perpart .bar{grid-column:1 / -1}
   .from{margin-top:20px;padding:16px;border:1px solid var(--line);border-radius:var(--r3);background:var(--surface)}
   .from b{display:block;font-size:14px;color:var(--ink-3);margin-bottom:6px}
@@ -53,7 +53,7 @@
 <script src="js/boot.js"></script>
 <script src="js/judge.js"></script>
 <script src="js/store.js"></script>
-<script src="js/strat.js?v=1025a"></script>
+<script src="js/strat.js?v=1110c"></script>
 <script>
 (function () {
   "use strict";
@@ -73,7 +73,6 @@
   var 화면 = {
     intro: function () {
       $("scr").innerHTML = '<h1>자격증,<br>요점을 읽고 기출로 확인합니다</h1>' +
-        '<p class="lead">주택관리사 · 물류관리사 · 행정사 · 사회복지사 · 손해평가사 · 경비지도사. 하루 정한 시간만큼, 오늘 할 것은 우리가 골라요.</p>' +
         '<div class="body"></div><div class="foot"><button class="btn block" id="n">시작</button></div>';
       $("n").onclick = nextStep;
     },
@@ -128,7 +127,7 @@
     },
     date: function () {
       var tr = GB.track();
-      $("scr").innerHTML = "<h1>시험 날짜</h1><p class=\"lead\">" + String(GB.exam().date || "2027").slice(0, 4) + "년 " + esc(GB.exam().name) + " 일정은 아직 공고 전이에요. 예년 기준 예상 날짜를 넣어 뒀어요.</p>" +
+      $("scr").innerHTML = "<h1>시험 날짜</h1>" +
         '<div class="body"><div class="dateline num"><span id="dv">' + GB.goal().replace(/-/g, ".") + '</span><span class="chip" id="dm">' + GB.goalMark() + "</span></div>" +
         '<input type="date" id="di" value="' + GB.goal() + '"></div>' +
         '<div class="foot"><button class="btn block" id="n">이 날짜로</button></div>';
@@ -141,7 +140,7 @@
     },
     min: function () {
       var cur = GB.minutes();
-      $("scr").innerHTML = "<h1>하루 공부 시간</h1><p class=\"lead\">" + esc(GB.exam().name) + " 합격자들이 하루에 쓰는 시간 기준이에요. 설정에서 바꿀 수 있어요.</p>" +
+      $("scr").innerHTML = "<h1>하루 공부 시간</h1>" +
         '<div class="body"><div class="opts g2" id="op">' + GB.minOpts().map(function (m) {
           return '<button type="button" data-v="' + m + '" aria-pressed="' + (m === cur) + '">' + GB.minText(m) + "<small>약 " + Math.round(m * 60 / GB.SEC_PER) + "개</small>" +
             (m === GB.exam().minDef ? '<span class="bdg">추천</span>' : "") + "</button>";
@@ -171,7 +170,7 @@
         var q = set[i]; t0 = Date.now();
         $("scr").innerHTML = '<div class="qhd"><span>실력 확인 ' + (i + 1) + " / " + set.length + '</span><span class="chip">' + esc(GB.node(q.n).name) + "</span></div>" +
           '<div class="tmr" id="tm"><i style="width:100%"></i></div>' +
-          '<div class="qcard" style="margin-top:14px"><p class="sent">' + esc(q.t) + "</p></div>" +
+          '<div class="qcard" style="margin-top:14px"><p class="sent stemq">' + esc(q.t) + "</p></div>" +
           '<div class="oxb" id="oxb"><button type="button" data-a="O">O</button><button type="button" data-a="X">X</button></div>' +
           '<div class="foot"><button class="skip" id="sk">건너뛰기<span class="tip">스무 문장을 다 풀어야 어디서부터 할지 정확히 골라요.</span></button></div>';
         var locked = false;

@@ -13,25 +13,25 @@
 <style>
   .hd{display:flex;align-items:center;gap:10px;padding:18px 0 0}
   .hd h1{font-size:20px;flex:1;min-width:0}
-  .hd .cnt{font-size:15px;color:var(--ink-3)}
-  .hd a.x{color:var(--ink-4);text-decoration:none;font-size:22px;line-height:1;padding:4px}
+  .hd .cnt{font-size:14px;color:var(--ink-3)}
+  .hd a.x{color:var(--ink-4);text-decoration:none;font-size:20px;line-height:1;padding:4px}
   .lock{opacity:.35;pointer-events:none}
-  .more{margin-top:10px;font-size:14.5px;color:var(--ink-3)}
+  .more{margin-top:10px;font-size:14px;color:var(--ink-3)}
   .readhd{display:flex;align-items:center;gap:10px;margin-top:18px}
-  .readhd h2{font-size:18px;flex:1}
+  .readhd h2{font-size:16px;flex:1}
   .cardv section{margin-top:16px;border:1px solid var(--line-2);border-radius:14px;padding:12px 14px;background:var(--surface)}
-  .cardv h3{font-size:15.5px;font-weight:900;margin:0 0 8px;color:var(--ink)}
-  .cardv ul{margin:0;padding-left:18px} .cardv li{font-size:15px;line-height:1.65;margin:4px 0}
+  .cardv h3{font-size:16px;font-weight:800;margin:0 0 8px;color:var(--ink)}
+  .cardv ul{margin:0;padding-left:18px} .cardv li{font-size:14px;line-height:1.65;margin:4px 0}
   .cardv li small{display:block;font-size:13px;color:var(--ink-3);font-weight:600}
   .cardv .trap li{list-style:none;margin-left:-18px;padding:8px 0;border-top:1px dashed var(--line-2)}
   .cardv .trap li:first-child{border-top:0}
   .cardv .trap s{display:block;color:var(--ink-3);font-size:14px}
-  .cardv .trap b{display:block;font-size:15px;color:var(--ink)}
-  .cardv-src{margin-top:16px} .cardv-src summary{cursor:pointer;font-weight:800;font-size:14.5px;color:var(--ink-3)}
+  .cardv .trap b{display:block;font-size:14px;color:var(--ink)}
+  .cardv-src{margin-top:16px} .cardv-src summary{cursor:pointer;font-weight:800;font-size:14px;color:var(--ink-3)}
   .empty{padding:48px 8px;text-align:center;color:var(--ink-3)}
-  .spd{font-size:40px;font-weight:900;text-align:center;letter-spacing:-.05em}
+  .spd{font-size:26px;font-weight:800;text-align:center;letter-spacing:-.05em}
   .yodo-src{margin-top:16px}
-  .yodo-src summary{cursor:pointer;font-weight:800;font-size:14.5px;color:var(--ink-3);padding:8px 0}
+  .yodo-src summary{cursor:pointer;font-weight:800;font-size:14px;color:var(--ink-3);padding:8px 0}
 </style>
 </head>
 <body class="focus">
@@ -301,7 +301,7 @@
         var pick = b.dataset.a, ok = pick === 정답, ms = Date.now() - t0;
         $("oxb").querySelectorAll("button").forEach(function (x) {
           x.disabled = true;
-          if (x.dataset.a === 정답) x.dataset.s = "ok"; else if (x === b) x.dataset.s = "no";
+          if (x.dataset.a === 정답) { x.dataset.s = "ok"; x.classList.add("ok"); } else if (x === b) { x.dataset.s = "no"; x.classList.add("no"); }
         });
         var st = GB.nodeStat(q.n), prev = GB.answered(q.i); noteTier(q.n);
         var j = JUDGE.판정({ ok: ok, conf: conf, ms: ms, attempt: prev ? prev.n + 1 : 1, mastery: st.mastery,
@@ -321,7 +321,7 @@
           if (more && extraCnt < Math.max(4, Math.ceil(planned / 3))) { extraCnt++; extra = more; seq.splice(pos + 1, 0, { k: "ox", id: more.i, add: 1 }); if (mode === "today") todayIdx.splice(pos + 1, 0, -1); drawProg(); }
         }
 
-        var h = '<div class="verdict ' + j.tone + '"><div class="top"><span class="mk">' + (ok ? "O" : "✕") + "</span>" +
+        var h = '<div class="verdict ' + j.tone + (j.tone === "warn" ? " bad" : "") + '"><div class="top"><span class="mk">' + (ok ? "O" : "✕") + "</span>" +
           (ok ? '<span class="reward">+1</span>' : "") + '<span class="chip">' + esc(j.label || { "재시도정답": "다시 풀어 맞힘", "연속오답": "연속 오답" }[j.kind] || j.kind) + "</span></div>" +
           '<p class="ans">정답 <b>' + (mc ? "①②③④⑤"[+정답 - 1] : q.ox) + "</b></p>";
         var 해설 = "";
@@ -363,7 +363,7 @@
     var A = flip ? [p.x, p.o] : [p.o, p.x], done = false;
     $("stage").innerHTML =
       '<div class="qcard"><div class="src">' + nodeChip(p.n) + '<span class="chip cta">둘 중 맞는 문장</span></div>' +
-      '<p class="sent" style="font-size:17px">두 기출 문장 중 <b>맞는 문장</b>을 고르세요.</p>' +
+      '<p class="sent" style="font-size:16px">두 기출 문장 중 <b>맞는 문장</b>을 고르세요.</p>' +
       '<div class="two" id="two">' + A.map(function (x, i) {
         return '<button type="button" data-i="' + x.i + '"><b>' + "가나"[i] + '</b><span class="tx">' + esc(x.t) + "</span></button>";
       }).join("") + "</div></div><div id=\"after\"></div>";
@@ -376,7 +376,7 @@
           x.disabled = true;
           var isO = x.dataset.i === p.o.i;
           x.querySelector(".tx").innerHTML = isO ? d[0] : d[1];
-          if (isO) x.dataset.s = "ok"; else if (x === b) x.dataset.s = "no";
+          if (isO) { x.dataset.s = "ok"; x.classList.add("ok"); } else if (x === b) { x.dataset.s = "no"; x.classList.add("no"); }
         });
         GB.pairAnswer(p.id, ok);
         if (window.ZZ) { if (ok) ZZ.ok(b); else ZZ.no(b); }
@@ -431,7 +431,7 @@
     var os = GB.qs(no).filter(function (q) { return q.ox === "O"; })
       .sort(function (a, b) { return (b.y || 0) - (a.y || 0); }).slice(0, 12);
     var h = '<div class="readhd">' + (읽는중 ? '<span class="chip">개념</span>' : "") + '<h2>' + esc(nd.name) + " — 맞는 기출 문장</h2></div>" +
-      '<p class="muted" style="margin:4px 0 0;font-size:14.5px">시험에 맞는 문장으로 나온 것만 모았어요. 최근 것부터.</p>' +
+      '<p class="muted" style="margin:4px 0 0;font-size:14px">시험에 맞는 문장으로 나온 것만 모았어요. 최근 것부터.</p>' +
       (도식 ? 도식 + '<details class="yodo-src"><summary>맞는 기출 문장 ' + os.length + '개</summary>' : "") + '<div class="readlist">' + os.map(function (q) { return "<p>" + esc(q.t) + "<small>" + esc(GB.src(q)) + "</small></p>"; }).join("") + "</div>" + (도식 ? "</details>" : "") +
       '<div class="acts">' + (back ? '<button class="btn" id="nx">시작</button>'
                                    : '<a class="btn" href="ox.html?node=' + no + '">이 쟁점 O·X 풀기</a>') + "</div>";
@@ -460,7 +460,7 @@
       $("oxb").querySelectorAll("button").forEach(function (b) {
         b.onclick = function () {
           var good = b.dataset.a === q.ox; n++; if (good) ok++;
-          b.dataset.s = good ? "ok" : "no";
+          b.dataset.s = good ? "ok" : "no"; b.classList.add(good ? "ok" : "no");
           if (window.ZZ) { if (good) ZZ.ok(b); else ZZ.no(b); }
           GB.answer(q.i, good, { ms: Date.now() - t0 });
           setTimeout(one, good ? 250 : 900);
@@ -495,14 +495,15 @@
     var mis = results.filter(function (r) { return r && r.kind === "오개념"; }).length;
     var tomorrow = GB.dueList().length;
     $("prog").innerHTML = ""; $("cnt").textContent = "";
+    var tb = document.getElementById("tqbar"); if (tb) tb.hidden = true; document.body.classList.remove("tq-on");
     var todayDone = mode === "today"; cheerEnd(ok, n);
     $("stage").innerHTML = '<div class="done">' +
       (n ? '<div class="big num">' + ok + " / " + n + "</div>" : '<div class="big">끝</div>') +
       '<p class="muted">' + (todayDone ? "오늘 분량 완료." : "이번 묶음을 다 풀었어요.") + "</p>" +
-      '<div class="grid3" style="grid-template-columns:repeat(2,1fr)"><div><b class="num">' + ok + "</b><span>맞힘</span></div><div><b class=\"num\" style=\"color:var(--warn)\">" + mis +
+      '<div class="grid3" style="grid-template-columns:repeat(2,1fr)"><div><b class="num">' + ok + "</b><span>맞힘</span></div><div><b class=\"num\">" + mis +
       '</b><span>확신했는데 틀림</span></div></div>' +
       '<div class="acts" style="margin-top:22px"><a class="btn ghost" href="index.html">오늘</a>' +
-      (mis ? '<a class="btn" href="ox.html?mode=hard">어려운 O·X</a>' : '<a class="btn" href="ox.html?mode=wrong">틀린 것 다시</a>') + "</div></div>";
+      (mis ? '<a class="btn" href="ox.html?mode=hard">어려운 O·X</a>' : '<a class="btn" href="ox.html?mode=wrong">복습</a>') + "</div></div>";
   }
 
   /* 키보드 — 1·2·3 확신도, O·X, Enter 다음 */

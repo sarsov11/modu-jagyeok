@@ -12,35 +12,35 @@
 <style>
   /* 홈은 「이거 하세요」 하나 — 모두의 통사 0919 대표님 지시. 카드·통계·목록을 다시 늘리지 않는다. */
   .exam{padding:26px 0 6px}
-  .exam .k{font-size:15px;color:var(--ink-3);font-weight:700;display:flex;gap:6px;align-items:center}
-  .exam .d{font-size:44px;font-weight:900;letter-spacing:-.06em;line-height:1.05;margin-top:2px}
-  .exam .d small{font-size:17px;color:var(--ink-3);font-weight:700;letter-spacing:-.02em;margin-left:8px}
+  .exam .k{font-size:14px;color:var(--ink-3);font-weight:700;display:flex;gap:6px;align-items:center}
+  .exam .d{font-size:26px;font-weight:800;letter-spacing:-.06em;line-height:1.05;margin-top:2px}
+  .exam .d small{font-size:16px;color:var(--ink-3);font-weight:700;letter-spacing:-.02em;margin-left:8px}
   .todo{margin-top:18px;padding:22px 20px;border:1.5px solid var(--cta-line);border-radius:var(--r3);background:var(--surface);position:relative}
-  .todo h2{font-size:23px}
-  .todo .t{font-size:15.5px;color:var(--ink-3);margin-top:4px}
+  .todo h2{font-size:20px}
+  .todo .t{font-size:16px;color:var(--ink-3);margin-top:4px}
   .todo ul{list-style:none;padding:0;margin:16px 0 18px;display:flex;flex-direction:column;gap:8px}
   .todo li{display:flex;gap:10px;align-items:baseline;font-size:16px}
-  .todo li b{min-width:52px;font-weight:900}
+  .todo li b{min-width:52px;font-weight:800}
   .todo li span{color:var(--ink-2)}
   .todo .bar{margin-bottom:16px}
   .mini{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
   .mini div{padding:12px 10px;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface)}
-  .mini b{display:block;font-size:21px;font-weight:900;letter-spacing:-.04em}
+  .mini b{display:block;font-size:20px;font-weight:800;letter-spacing:-.04em}
   .mini span{font-size:13px;color:var(--ink-3)}
   /* 과목 고르기 — 학생 시험의 과목만. 준비 안 된 과목은 흐리게 */
   .subs{display:flex;gap:6px;overflow-x:auto;padding:16px 0 2px;scrollbar-width:none}
   .subs::-webkit-scrollbar{display:none}
-  .subs a,.subs span{flex:none;text-decoration:none;font-size:15px;font-weight:800;padding:8px 14px;border-radius:99px;
+  .subs a,.subs span{flex:none;text-decoration:none;font-size:14px;font-weight:800;padding:8px 14px;border-radius:999px;
     border:1.5px solid var(--line-2);color:var(--ink-2);background:var(--surface);white-space:nowrap}
   .subs a.on{background:var(--cta-soft);border-color:var(--cta-line);color:var(--cta-2)}
   .subs span{color:var(--ink-4);border-style:dashed;font-weight:700}
-  .subs span small{font-size:12px;margin-left:4px}
+  .subs span small{font-size:11.5px;margin-left:4px}
   .att{margin-top:18px;padding:14px 16px;border-radius:var(--r3);background:var(--surface-2)}
-  .att h3{font-size:15px;color:var(--ink-2)}
-  .att summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--ink-2)}
+  .att h3{font-size:14px;color:var(--ink-2)}
+  .att summary{cursor:pointer;font-weight:800;font-size:14px;color:var(--ink-2)}
   .mini div{background:var(--surface-2);border:0}
   .alt{margin-top:28px}
-  .alt h3{font-size:15px;color:var(--ink-3);margin-bottom:8px}
+  .alt h3{font-size:14px;color:var(--ink-3);margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -49,7 +49,6 @@
   <div class="exam">
     <div class="k" id="ek"></div>
     <div class="d num" id="ed"></div>
-    <div id="strat" style="margin-top:12px"></div>
   </div>
 
   <div class="todo" id="todo"></div>
@@ -58,7 +57,7 @@
   <div class="att" id="att"></div>
 
   <div class="alt">
-    <h3>다른 걸 연습하고 싶다면</h3>
+    <h3>더 하려면</h3>
     <div class="list" id="alt"></div>
   </div>
 </div>
@@ -67,7 +66,7 @@
 <script src="data/ready.js"></script>
 <script src="js/boot.js"></script>
 <script src="js/store.js"></script>
-<script src="js/strat.js?v=1025a"></script>
+<script src="js/strat.js?v=1110c"></script>
 <script>
 (function () {
   "use strict";
@@ -76,7 +75,7 @@
 
   var tr = GB.track(), dd = GB.dday();
   $("ek").textContent = tr.name + " · " + GB.subject;
-  MJSTRAT.button($("strat")); MJSTRAT.auto();
+  MJSTRAT.auto();
   $("subs").innerHTML = GB.subs().map(function (k) {
     if (!CATALOG.ready(k)) return "<span>" + esc(CATALOG.name(k)) + "<small>준비 중</small></span>";
     return '<a href="index.html?s=' + k + '"' + (k === GB.cur() ? ' class="on"' : "") + ">" + esc(CATALOG.name(k)) + "</a>";
@@ -96,9 +95,9 @@
     h = '<h2>' + (nm ? esc(nm) + ", " : "") + (t.done ? "이어서 " : "오늘 ") + GB.minText(t.min) + "</h2>" +
         '<p class="t">약 ' + GB.minText(t.min) + " · " + t.total + "개</p>" +
         "<ul>" +
-        (t.re ? "<li><b class=\"num\">" + t.re + "개</b><span>복습 — 전에 틀린 문장, 다시 볼 날이 된 문장</span></li>" : "") +
+        (t.re ? "<li><b class=\"num\">" + t.re + "개</b><span>복습 — 다시 볼 날이 된 문장</span></li>" : "") +
         (lrN ? "<li><b class=\"num\">" + lrN + "쟁점</b><span>개념 — 개념 카드와 맞는 기출 문장</span></li>" : "") +
-        "<li><b class=\"num\">" + newN + "개</b><span>기출 — " + esc(foci.join(" · ")) + "</span></li>" +
+        "<li><b class=\"num\">" + newN + "개</b><span>기출 — " + esc(foci[0] || "") + (foci.length > 1 ? " 외 " + (foci.length - 1) + "쟁점" : "") + "</span></li>" +
         (prN ? "<li><b class=\"num\">" + prN + "개</b><span>둘 중 맞는 문장</span></li>" : "") +
         "</ul>" +
         (t.done ? '<div class="bar"><i style="width:' + Math.round(t.done / t.total * 100) + '%"></i></div>' : "") +
@@ -137,7 +136,9 @@
   $("alt").innerHTML =
     '<a class="row" href="ox.html?mode=hard"><span class="t"><b>어려운 O·X</b><span>한두 마디만 바꾼 함정 문장</span></span><span class="go">›</span></a>' +
     '<a class="row" href="ox.html?mode=pair"><span class="t"><b>둘 중 맞는 문장</b><span>한두 마디만 다른 기출 두 문장</span></span><span class="go">›</span></a>' +
-    (wrong ? '<a class="row" href="ox.html?mode=wrong"><span class="t"><b>복습</b><span>' + wrong + "개</span></span><span class=\"go\">›</span></a>" : "");
+    (wrong ? '<a class="row" href="ox.html?mode=wrong"><span class="t"><b>복습</b><span>' + wrong + "개</span></span><span class=\"go\">›</span></a>" : "") +
+    '<a class="row" href="#" id="zsrow"><span class="t"><b>합격 전략</b><span>합격선과 과목별 목표</span></span><span class="go">›</span></a>';
+  $("zsrow").onclick = function (e) { e.preventDefault(); MJSTRAT.open(); };
 })();
 </script>
 <script src="js/zzsfx.js?v=1009a" defer></script><script src="js/zzajan.js?v=1009a" defer></script>
