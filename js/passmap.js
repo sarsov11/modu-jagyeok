@@ -64,6 +64,19 @@
       items = [item(name, nodes.map(function (n) { return n.no; }), leafOf(nodes))];
     }
     items = items.filter(Boolean);
+    /* 카드가 하나(또는 둘 이하이면서 줄 합이 6개 이상)면 한 단계 내려 잡는다 — 추천이 과목 통째로 나오지 않게.
+       카드의 줄(쟁점·장)을 카드로 올리고, 그 아래 단계(장 아래 쟁점)가 있으면 줄로 넣는다. 없으면 줄 없는 머리만 둔다. */
+    var lsum = 0; items.forEach(function (it) { lsum += (it.leaves || []).length; });
+    if (items.length && (items.length === 1 || (items.length <= 2 && lsum >= 6)) && lsum >= 2) {
+      var flat = [];
+      items.forEach(function (it) {
+        (it.leaves || []).forEach(function (l) {
+          var ns = (l.nos && l.nos.length > 1) ? l.nos.map(function (no) { return (T.nodes || []).filter(function (n) { return n.no === no; })[0]; }).filter(Boolean) : [];
+          flat.push({ id: name + ":" + l.name, name: l.name, avg: l.avg, pct: l.pct, nos: l.nos, leaves: ns.length > 1 ? leafOf(ns) : [] });
+        });
+      });
+      if (flat.length) items = flat;
+    }
     var allNos = []; items.forEach(function (it) { allNos = allNos.concat(it.nos); });
     return { name: name, avg: avg(allNos), pct: ach(allNos), nodes: items };
   }
