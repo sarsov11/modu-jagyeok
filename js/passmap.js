@@ -76,6 +76,20 @@
         });
       });
       if (flat.length) items = flat;
+    } else if (items.length > 1) {
+      /* 한 카드가 과목 비중의 절반 이상이고 줄이 6개 이상이면 그 카드만 한 단계 내려 잡는다 */
+      var tot = 0; items.forEach(function (it) { tot += it.avg || 0; });
+      var out = [];
+      items.forEach(function (it) {
+        var L = it.leaves || [];
+        if (tot > 0 && (it.avg || 0) >= tot / 2 && L.length >= 6) {
+          L.forEach(function (l) {
+            var ns = (l.nos && l.nos.length > 1) ? l.nos.map(function (no) { return (T.nodes || []).filter(function (n) { return n.no === no; })[0]; }).filter(Boolean) : [];
+            out.push({ id: name + ":" + l.name, name: l.name, avg: l.avg, pct: l.pct, nos: l.nos, leaves: ns.length > 1 ? leafOf(ns) : [] });
+          });
+        } else out.push(it);
+      });
+      items = out;
     }
     var allNos = []; items.forEach(function (it) { allNos = allNos.concat(it.nos); });
     return { name: name, avg: avg(allNos), pct: ach(allNos), nodes: items };
