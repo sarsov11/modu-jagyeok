@@ -9,7 +9,7 @@
  *     title: "소방 공채", sub: "합격 지도", dday: "D-116", unit: "문제",
  *     mark: "star",            // 중요도 표시. "star" 별 1~3개(대입·공무원·전문직) · "tier" S·A·B·C(기술·NCS·자격·중개사). 옛 tiers:true 는 "tier" 와 같다
  *     look: "grid",            // "grid" 가안: 과목이 줄, 같은 크기 타일 격자 · "board" 나안: 과목이 세로 칸
- *     groups: [{ name, nodes: [{ id, name, avg(해마다 몇 문제), pct(0~100), tier, order, dim(범위 밖은 흐리게),
+ *     groups: [{ name, weight(그 과목의 시험 문항 수. 주면 avg 를 이 합에 맞춘다), nodes: [{ id, name, avg(해마다 몇 문제), pct(0~100), tier, order, dim(범위 밖은 흐리게),
  *        leaves: [{ name, avg, pct }] }] }],
  *     recommend: 3, onNode(node, group), onLeaf(leaf, node, group), onStart(node, group)
  *   })
@@ -17,7 +17,7 @@
  * 색: 앱의 --pt(없으면 --t-app, --cta). 클래스는 전부 tm- 로 시작한다(앱 css 와 겹치지 않게).
  */
 (function () {
-  if (window.TERA_MAP && window.TERA_MAP.version >= 3) return;
+  if (window.TERA_MAP && window.TERA_MAP.version >= 3.1) return;
   var d = document, styled = false;
   var CSS = [
     ".tm{--p:var(--pt,var(--t-app,var(--cta,#E5202E)));--pi:color-mix(in srgb,var(--p) 80%,#111419);--pf:color-mix(in srgb,var(--p) 20%,#fff);",
@@ -111,6 +111,18 @@
   function mount(host, o) {
     if (!styled) { var st = d.createElement("style"); st.textContent = CSS; d.head.appendChild(st); styled = true; }
     var G = (o.groups || []).map(function (g) { return { src: g, name: g.name, nodes: (g.nodes || []).slice() }; });
+    /* 과목 문항 수(weight)를 주면 그 과목 파트·세부 단원의 avg 를 합이 weight 가 되게 맞춘다.
+       기출 모은 양이 과목마다 달라 생기는 쏠림(소방 공채: 세 과목이 25문항씩인데 12%·12%·76%로 보임)을 막는다. */
+    G.forEach(function (g) {
+      var w = +g.src.weight, sum = g.nodes.reduce(function (s, n) { return s + (n.avg > 0 ? n.avg : 0); }, 0);
+      if (!(w > 0) || !(sum > 0)) return;
+      var k = w / sum;
+      g.nodes = g.nodes.map(function (n) {
+        var m = Object.create(n); m.avg = (n.avg || 0) * k;
+        if (n.leaves) m.leaves = n.leaves.map(function (l) { var q = Object.create(l); q.avg = (l.avg || 0) * k; return q; });
+        return m;
+      });
+    });
     var all = [], unit = o.unit || "문제";
     G.forEach(function (g) { g.nodes.forEach(function (n) { all.push({ n: n, g: g }); }); });
     var noAvg = !all.some(function (x) { return x.n.avg > 0; });
@@ -200,5 +212,5 @@
     return { recommend: rec.map(function (x) { return x.n; }), whole: whole };
   }
 
-  window.TERA_MAP = { mount: mount, version: 3 };
+  window.TERA_MAP = { mount: mount, version: 3.1 };
 })();

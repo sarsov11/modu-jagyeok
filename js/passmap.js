@@ -68,6 +68,28 @@
     return { name: name, avg: avg(allNos), pct: ach(allNos), nodes: items };
   }
 
+  /* 과목별 시험 문항 수(weight) — 합격 전략 자료(strat\)의 과목 「문항」 값. 공시는 catalog.mockSpec(과목별 문항 수).
+     자료에 없는 시험(전산세무 2급 등)은 weight 를 주지 않는다. 공인회계사 회계학은 배점이 달라 배점 비중을 문항 수 합(194)에 맞춰 환산했다(150/510×194). */
+  var PMW = {
+    hm_acct: 40, hm_build: 40, hm_law: 40, lg_logi: 40, lg_transport: 40, lg_intl: 40, lg_storage: 40, lg_law: 40,
+    ad_civil: 25, ad_admin: 25, ad_pubad: 25, ia_law: 25, ia_agrireg: 25, ia_crop: 25, sg_law: 40, sg_civ: 40,
+    sw_human: 25, sw_research: 25, sw_practice: 25, sw_skill: 25, sw_community: 25, sw_policy: 25, sw_admin: 25, sw_law: 25,
+    fm_theory: 25, fm_hydro: 25, fm_law: 25, fm_hazmat: 25, fm_system: 25, sa_gen: 25, sa_law: 25, sa_mgmt: 25,
+    fr_econ: 40, fr_civil: 40, fr_biz: 40, mg_diag: 25, mg_mgmt: 25, mg_survey: 25, mg_law: 25, mg_acct: 25,
+    ac_law: 40, ac_acct: 40, ac_econ: 40, ac_math: 40, jk_fa: 40, jk_tax: 40, jk_ca: 40, ip_1: 15, ip_2: 15, ip_3: 15, ip_4: 15,
+    pt_iplaw: 40, pt_civil: 40, pt_natsci: 40,
+    bm_1: 50, bm_2: 50, bm_3: 50, bm_4: 50, gs_law: 40, gs_tax: 40, gs_eng: 40, gs_acct: 40,
+    nm_labor1: 40, nm_labor2: 40, nm_civil: 40, nm_social: 40, nm_biz: 40, nm_econ: 40,
+    sm_fin: 40, sm_tax: 40, sm_acct: 40, sm_comm: 40, sm_civil: 40, sm_admin: 40,
+    cp_comm: 38, cp_acct: 57, cp_biz: 30.5, cp_tax: 38, cp_econ: 30.5
+  };
+  function wOf(id) {
+    try {
+      if (window.CATALOG && CATALOG.mockSpec) { var n = CATALOG.mockSpec(GB.exam().id, id).n; return n > 0 ? n : 0; }
+    } catch (e) {}
+    if (/^yc_/.test(id)) return 25;
+    return PMW[id] || 0;
+  }
   var subs = GB.subs().filter(function (k) { return window.CATALOG && CATALOG.ready(k); });
   var cur = GB.T.key || GB.T.subject;
   var done = {}, left = subs.length, shown = false, timer = 0, tr = GB.track ? GB.track() : { name: "" }, dd = GB.dday ? GB.dday() : null;
@@ -104,7 +126,7 @@
     } else {
       p = loadSubject(id).then(function (r) { return r ? build(nm, r.T, r.Q, readAns(PRE + "." + (r.T.key || r.T.subject) + ".v1")) : null; });
     }
-    p.catch(function () { return null; }).then(function (g) { done[id] = g; left--; later(); });
+    p.catch(function () { return null; }).then(function (g) { if (g) { var wt = wOf(id); if (wt) g.weight = wt; } done[id] = g; left--; later(); });
   });
   if (!subs.length) host.innerHTML = "";
 
