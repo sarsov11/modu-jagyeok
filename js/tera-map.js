@@ -1,4 +1,4 @@
-/* 테라러닝 합격 지도 2판 — 시험 한 개의 전체 구조·진척·중요도·추천 순서를 한 장에 (2026-11-10 허브)
+/* 테라러닝 합격 지도 3판(11-10 저녁: 파트 카드 안에 세부 단원을 전부 펼친다. 대표님 「훨씬 더 상세하게 나와야 함」. detail:false 를 주면 2판 타일 격자) · 2판 — 시험 한 개의 전체 구조·진척·중요도·추천 순서를 한 장에 (2026-11-10 허브)
  *   1판(고리 칸 + 범례 줄 + 추천 띠)은 대표님 「직관적으로 눈에 안 들어옴. 조잡해 보임」 → 표시를 덜어 냄.
  *   타일 크기는 전부 같다(대표님 「타일이 넓을수록은 안 됨. 디자인 통일성 위배」).
  *   타일이 채워진 만큼 = 내 진척. 지금 할 것 세 개에만 번호, 1번에만 「추천」.
@@ -17,7 +17,7 @@
  * 색: 앱의 --pt(없으면 --t-app, --cta). 클래스는 전부 tm- 로 시작한다(앱 css 와 겹치지 않게).
  */
 (function () {
-  if (window.TERA_MAP && window.TERA_MAP.version >= 2) return;
+  if (window.TERA_MAP && window.TERA_MAP.version >= 3) return;
   var d = document, styled = false;
   var CSS = [
     ".tm{--p:var(--pt,var(--t-app,var(--cta,#E5202E)));--pi:color-mix(in srgb,var(--p) 80%,#111419);--pf:color-mix(in srgb,var(--p) 20%,#fff);",
@@ -68,6 +68,26 @@
     ".tm-board .tm-t{height:46px;border-radius:12px;background:linear-gradient(90deg,var(--pf) calc(var(--v)*1%),#fff 0);box-shadow:0 0 0 1px #E6E8EC inset}",
     ".tm-board .tm-t.tm-done{background:var(--p);box-shadow:none}.tm-board .tm-t.tm-rec{box-shadow:0 0 0 2px var(--p) inset}.tm-board .tm-t.tm-first{box-shadow:0 0 0 3px var(--p) inset}",
     ".tm-board .tm-av{display:none}",
+    /* 3판 상세: 파트 = 같은 폭 카드, 카드 안에 세부 단원 줄. 줄의 채움 = 진척, 오른쪽 막대 = 시험 비중 */
+    ".tm-dt .tm-lanes{gap:22px}.tm-dt .tm-lane{grid-template-columns:1fr;gap:10px}",
+    ".tm-dt .tm-lh{display:flex;align-items:center;gap:12px;padding:0}.tm-dt .tm-lh b{font-size:20px;white-space:nowrap}.tm-dt .tm-lh span{margin:0;white-space:nowrap}.tm-dt .tm-lh i{flex:1;max-width:260px;margin:0}",
+    ".tm-dt .tm-row{display:block;columns:220px;column-gap:8px}",
+    ".tm-c{break-inside:avoid;margin:0 0 8px;border-radius:14px;background:#fff;box-shadow:0 0 0 1px #E6E8EC;overflow:hidden}",
+    ".tm-c.tm-crec{box-shadow:0 0 0 2px var(--p)}.tm-c.tm-cfirst{box-shadow:0 0 0 3px var(--p),0 12px 24px -14px var(--p)}.tm-c.tm-cdim{opacity:.42}",
+    ".tm-dt .tm-t{width:100%;height:52px;border-radius:0;box-shadow:none!important;transform:none!important;background:linear-gradient(90deg,var(--pf) calc(var(--v)*1%),#F6F7F9 0)}",
+    ".tm-dt .tm-t.tm-done{background:var(--p)}.tm-dt .tm-t.tm-on{background:#111419;color:#fff}.tm-dt .tm-t.tm-on .tm-pc,.tm-dt .tm-t.tm-on .tm-q{color:#fff}",
+    ".tm-q{flex:none;font-weight:600;font-size:11.5px;line-height:1;color:#5F6670;white-space:nowrap}.tm-done .tm-q{color:rgba(255,255,255,.85)}",
+    ".tm-ll{display:grid;grid-template-columns:minmax(0,1fr);gap:1px;padding:4px}",
+    ".tm-l{display:flex;align-items:center;gap:8px;width:100%;height:28px;padding:0 8px 0 10px;border:0;border-radius:12px;text-align:left;background:linear-gradient(90deg,var(--pf) calc(var(--v)*1%),transparent 0)}",
+    ".tm-l:hover{box-shadow:0 0 0 1px var(--p) inset}",
+    ".tm-l span{flex:1;min-width:0;font-weight:500;font-size:13px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+    ".tm-l.tm-hot span{font-weight:700}.tm-l.tm-ld span{color:#5F6670}",
+    ".tm-l i{flex:none;width:34px;height:5px;border-radius:999px;background:#EFF1F4;overflow:hidden}.tm-l i u{display:block;height:100%;border-radius:999px;background:var(--p)}",
+    ".tm-l em{flex:none;width:30px;text-align:right;font-weight:700;font-size:11.5px;line-height:1;color:#5F6670}.tm-l.tm-ld em{color:var(--pi);font-weight:800}",
+    ".tm-more{justify-content:center;font-weight:700;font-size:11.5px;color:#5F6670;background:#F6F7F9}",
+    ".tm-key{display:flex;align-items:center;gap:14px;font-weight:600;font-size:11.5px;line-height:1;color:#5F6670;margin:-8px 0 14px}",
+    ".tm-key span{display:inline-flex;align-items:center;gap:6px}.tm-key i{display:inline-block;width:26px;height:10px;border-radius:999px;background:linear-gradient(90deg,var(--pf) 60%,#EFF1F4 0)}.tm-key i.b{height:5px;background:linear-gradient(90deg,var(--p) 70%,#EFF1F4 0)}",
+    "@media(max-width:959px){.tm-dt .tm-row{columns:1}.tm-dt .tm-lh b{font-size:16px}.tm-dt .tm-lh i{max-width:none}}",
     /* 고른 타일 판 */
     ".tm-pv{position:fixed;z-index:2147480000;right:16px;top:76px;bottom:16px;width:340px;border-radius:18px;background:#fff;box-shadow:0 26px 60px -28px rgba(17,20,25,.34),0 0 0 1px #E6E8EC;padding:18px;display:none;flex-direction:column;gap:12px}",
     ".tm-pv.tm-open{display:flex}",
@@ -102,6 +122,8 @@
       var r = i / Math.max(1, arr.length); x.tier = x.n.tier || (!(x.n.avg > 0) ? "C" : r < .2 ? "S" : r < .5 ? "A" : r < .8 ? "B" : "C");
       x.star = x.n.star || (!(x.n.avg > 0) ? 1 : r < .2 ? 3 : r < .5 ? 2 : 1);
     });
+    var detail = o.detail !== false && o.look !== "board" && all.some(function (x) { return (x.n.leaves || []).length > 1; });
+    var lmax = 0, CAP = o.cap || 12; all.forEach(function (x) { (x.n.leaves || []).forEach(function (l) { if (l.avg > lmax) lmax = l.avg; }); });
     var R = Math.max(1, Math.min(3, o.recommend || 3));   // 번호는 세 개까지(앱이 더 달라고 해도)
     var given = all.filter(function (x) { return x.n.order > 0; }).sort(function (a, b) { return a.n.order - b.n.order; });
     var rec = (given.length ? given : all.filter(function (x) { return (x.n.pct || 0) < 80 && W(x.n) > 0 && !x.n.dim; })
@@ -117,6 +139,7 @@
       (rec.length ? '<span class="tm-next">' + rec.map(function (x, i) {
         return (i ? "<s>›</s>" : "") + '<button data-id="' + all.indexOf(x) + '"><i class="tm-no">' + (i + 1) + "</i>" + esc(x.n.name) + "</button>";
       }).join("") + "</span>" : "") + "</div>";
+    if (detail) h += '<div class="tm-key"><span><i></i>진척</span>' + (lmax ? '<span><i class="b"></i>시험 비중 · 해마다 ' + esc(unit) + "</span>" : "") + "</div>";
     h += '<div class="tm-lanes">';
     G.forEach(function (g) {
       var ga = g.nodes.reduce(function (s, n) { return s + W(n); }, 0);
@@ -127,18 +150,28 @@
       g.nodes.forEach(function (n) {
         var x = all.filter(function (y) { return y.n === n; })[0], p = Math.round(n.pct || 0);
         var cls = "tm-t" + (p >= 80 ? " tm-done" : "") + (n.dim ? " tm-dim" : "") + (x.order ? " tm-rec" : "") + (x.order === 1 ? " tm-first" : "");
+        if (detail) h += '<div class="tm-c' + (x.order === 1 ? " tm-cfirst" : x.order ? " tm-crec" : "") + (n.dim ? " tm-cdim" : "") + '">';
         h += '<button class="' + cls + '" data-id="' + all.indexOf(x) + '" style="--v:' + (p >= 80 ? 100 : p) + '"' +
           ' title="' + esc(n.name) + (noAvg ? "" : " · 해마다 " + num(n.avg) + esc(unit)) + " · 진척 " + p + '%">' +
           (x.order ? '<i class="tm-no">' + x.order + "</i>" : tiers ? '<i class="tm-tier tm-' + x.tier + '">' + x.tier + "</i>" : "") +
           '<span class="tm-tx"><span class="tm-nm">' + esc(n.name) + "</span>" +
           (stars ? '<span class="tm-st"><b>' + "★★★".slice(0, x.star) + "</b>" + "★★★".slice(x.star) + "</span>" : "") + "</span>" +
+          (detail && !noAvg && n.avg > 0 ? '<span class="tm-q">' + num(n.avg) + esc(unit) + "</span>" : "") +
           (x.order === 1 ? '<i class="tm-tag">추천</i>' : p >= 80 ? '<span class="tm-pc">✓</span>' : p ? '<span class="tm-pc">' + p + "%</span>" : "") + "</button>";
+        if (detail) {
+          var L = n.leaves || [], id = all.indexOf(x);
+          h += '<div class="tm-ll">' + L.slice(0, CAP).map(function (l, i) {
+            var q = Math.round(l.pct || 0), w = lmax && l.avg > 0 ? Math.max(8, Math.round(l.avg / lmax * 100)) : 0;
+            return '<button class="tm-l' + (lmax && l.avg >= lmax * .5 ? " tm-hot" : "") + (q >= 80 ? " tm-ld" : "") + '" data-n="' + id + '" data-l="' + i + '" style="--v:' + q + '" title="' + esc(l.name) + (l.avg > 0 ? " · 해마다 " + num(l.avg) + esc(unit) : "") + " · 진척 " + q + '%"><span>' + esc(l.name) + "</span>" +
+              (lmax ? '<i><u style="width:' + w + '%"></u></i>' : "") + "<em>" + (q >= 80 ? "✓" : lmax && l.avg > 0 ? num(l.avg) : q ? q + "%" : "") + "</em></button>";
+          }).join("") + (L.length > CAP ? '<button class="tm-l tm-more" data-id="' + id + '">+' + (L.length - CAP) + "</button>" : "") + "</div></div>";
+        }
       });
       h += "</div></section>";
     });
     h += '</div><aside class="tm-pv"></aside>';
-    host.className = host.className.replace(/\btmap\b|\btm-board\b|\btm-two\b/g, "").trim();
-    host.classList.add("tm"); if (o.look === "board") host.classList.add("tm-board"); host.classList.toggle("tm-two", tiers || noAvg);
+    host.className = host.className.replace(/\btmap\b|\btm-board\b|\btm-two\b|\btm-dt\b/g, "").trim();
+    host.classList.add("tm"); if (o.look === "board") host.classList.add("tm-board"); host.classList.toggle("tm-two", tiers || noAvg); host.classList.toggle("tm-dt", detail);
     host.innerHTML = h;
 
     var pv = host.querySelector(".tm-pv"), cur = null;
@@ -155,6 +188,8 @@
       if (typeof o.onNode === "function") o.onNode(n, x.g.src);
     }
     host.onclick = function (e) {
+      var dl = e.target.closest(".tm-l[data-n]");
+      if (dl) { var dx = all[+dl.dataset.n]; if (typeof o.onLeaf === "function") o.onLeaf(dx.n.leaves[+dl.dataset.l], dx.n, dx.g.src); return; }
       var b = e.target.closest("[data-id]");
       if (b) { var x = all[+b.dataset.id]; show(x); if (b.closest(".tm-next")) { var el = host.querySelector('.tm-t[data-id="' + b.dataset.id + '"]'); if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); } return; }
       if (e.target.closest(".tm-x")) { pv.classList.remove("tm-open"); host.querySelectorAll(".tm-on").forEach(function (q) { q.classList.remove("tm-on"); }); return; }
@@ -165,5 +200,5 @@
     return { recommend: rec.map(function (x) { return x.n; }), whole: whole };
   }
 
-  window.TERA_MAP = { mount: mount, version: 2 };
+  window.TERA_MAP = { mount: mount, version: 3 };
 })();

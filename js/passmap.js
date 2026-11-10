@@ -49,20 +49,19 @@
       return { id: name + ":" + label, name: label, avg: a, pct: ach(nos), nos: nos, leaves: kids };
     }
     function leafOf(nlist) { return nlist.map(function (n) { return { name: nodeName(n), avg: avg([n.no]), pct: ach([n.no]), nos: [n.no] }; }); }
+    function nodesOf(c) { return (c.nodes || []).map(function (no) { return (T.nodes || []).filter(function (n) { return n.no === no; })[0]; }).filter(function (n) { return n && qs(n.no).length; }); }
+    /* 3판: 카드 = 장(파트), 줄 = 그 아래 세부 단원(쟁점). 장이 많으면 카드 = 편, 줄 = 장 */
     var items;
-    if (nodes.length && nodes.length <= MAXC) {
-      items = nodes.map(function (n) { return item(nodeName(n), [n.no], []); });
-    } else if (chs.length && chs.length <= MAXC) {
-      items = chs.map(function (c) {
-        var ns = (c.nodes || []).map(function (no) { return (T.nodes || []).filter(function (n) { return n.no === no; })[0]; }).filter(function (n) { return n && qs(n.no).length; });
-        return item(c.name, ns.map(function (n) { return n.no; }), leafOf(ns));
-      });
-    } else {
+    if (chs.length && chs.length <= MAXC) {
+      items = chs.map(function (c) { var ns = nodesOf(c); return item(c.name, ns.map(function (n) { return n.no; }), leafOf(ns)); });
+    } else if (chs.length && parts.length) {
       items = parts.map(function (p) {
         var cs = chs.filter(function (c) { return c.part === p.no; }), nos = [];
-        cs.forEach(function (c) { (c.nodes || []).forEach(function (no) { if (qs(no).length) nos.push(no); }); });
-        return item(p.name, nos, cs.map(function (c) { var cn = (c.nodes || []).filter(function (no) { return qs(no).length; }); return { name: c.name, avg: avg(cn), pct: ach(cn), nos: cn }; }));
+        cs.forEach(function (c) { nodesOf(c).forEach(function (n) { nos.push(n.no); }); });
+        return item(p.name, nos, cs.map(function (c) { var cn = nodesOf(c).map(function (n) { return n.no; }); return { name: c.name, avg: avg(cn), pct: ach(cn), nos: cn }; }).filter(function (l) { return l.nos.length; }));
       });
+    } else {
+      items = [item(name, nodes.map(function (n) { return n.no; }), leafOf(nodes))];
     }
     items = items.filter(Boolean);
     var allNos = []; items.forEach(function (it) { allNos = allNos.concat(it.nos); });
@@ -71,40 +70,45 @@
 
   var subs = GB.subs().filter(function (k) { return window.CATALOG && CATALOG.ready(k); });
   var cur = GB.T.key || GB.T.subject;
-  var jobs = subs.map(function (id) {
-    var nm = CATALOG.name(id);
+  var done = {}, left = subs.length, shown = false, timer = 0, tr = GB.track ? GB.track() : { name: "" }, dd = GB.dday ? GB.dday() : null;
+  function go(n, g, idOf) {
+    var s = idOf[g.name], pick = null;
+    var kids = (n.leaves && n.leaves.length) ? n.leaves : [n];
+    kids.forEach(function (l) { if (!l.nos || !l.nos.length) return; if (!pick || l.pct < pick.pct) pick = l; });
+    var no = pick ? pick.nos[0] : (n.nos && n.nos[0]);
+    if (!no) return;
+    location.href = "ox.html?s=" + encodeURIComponent(s) + "&node=" + no;
+  }
+  function draw() {
+    if (host.querySelector(".tm-pv.tm-open")) { clearTimeout(timer); timer = setTimeout(draw, 1200); return; }
+    var groups = [], idOf = {};
+    subs.forEach(function (id) { var g = done[id]; if (g && g.nodes.length) { groups.push(g); idOf[g.name] = id; } });
+    if (!groups.length) { if (!left) host.innerHTML = ""; return; }
+    TERA_MAP.mount(host, {
+      title: tr.name || GB.subject, sub: "합격 지도", dday: dd == null ? "" : (dd > 0 ? "D-" + dd : dd === 0 ? "D-DAY" : "시험 끝"), unit: "문제",
+      groups: groups, cap: 24,
+      mark: "tier",
+      onStart: function (n, g) { go(n, g, idOf); },
+      onLeaf: function (l, n, g) { go({ leaves: [l], nos: l.nos }, g, idOf); }
+    });
+    if (!left && !shown) { shown = true; tiercard(); }
+  }
+  function later() { clearTimeout(timer); timer = setTimeout(draw, left ? 250 : 0); }
+  subs.forEach(function (id) {
+    var nm = CATALOG.name(id), p;
     if (id === cur || id === window.JG_CUR) {
       var QB = {}, QS = window.QBANK || {};
       Object.keys(QS).forEach(function (k) { QB[k] = QS[k]; });
       var ans = {}; Object.keys(QB).forEach(function (k) { QB[k].forEach(function (q) { var a = GB.answered(q.i); if (a) ans[q.i] = a; }); });
-      return Promise.resolve({ id: id, g: build(nm, GB.T, QB, ans) });
+      p = Promise.resolve(build(nm, GB.T, QB, ans));
+    } else {
+      p = loadSubject(id).then(function (r) { return r ? build(nm, r.T, r.Q, readAns(PRE + "." + (r.T.key || r.T.subject) + ".v1")) : null; });
     }
-    return loadSubject(id).then(function (r) {
-      if (!r) return { id: id, g: null };
-      return { id: id, g: build(nm, r.T, r.Q, readAns(PRE + "." + (r.T.key || r.T.subject) + ".v1")) };
-    });
+    p.catch(function () { return null; }).then(function (g) { done[id] = g; left--; later(); });
   });
+  if (!subs.length) host.innerHTML = "";
 
-  Promise.all(jobs).then(function (rs) {
-    var groups = [], idOf = {};
-    rs.forEach(function (r) { if (r.g && r.g.nodes.length) { groups.push(r.g); idOf[r.g.name] = r.id; } });
-    if (!groups.length) { host.innerHTML = ""; return; }
-    var tr = GB.track ? GB.track() : { name: "" }, dd = GB.dday ? GB.dday() : null;
-    function go(n, g) {
-      var s = idOf[g.name], pick = null;
-      var kids = (n.leaves && n.leaves.length) ? n.leaves : [n];
-      kids.forEach(function (l) { if (!l.nos || !l.nos.length) return; if (!pick || l.pct < pick.pct) pick = l; });
-      var no = pick ? pick.nos[0] : (n.nos && n.nos[0]);
-      if (!no) return;
-      location.href = "ox.html?s=" + encodeURIComponent(s) + "&node=" + no;
-    }
-    TERA_MAP.mount(host, {
-      title: tr.name || GB.subject, sub: "합격 지도", dday: dd == null ? "" : (dd > 0 ? "D-" + dd : dd === 0 ? "D-DAY" : "시험 끝"), unit: "문제",
-      groups: groups,
-      mark: "tier",
-      onStart: function (n, g) { go(n, g); },
-      onLeaf: function (l, n, g) { go({ leaves: [l], nos: l.nos }, g); }
-    });
+  function tiercard() {
     /* 등급 방패(칭호·앰블럼) — 옛 스킬트리·홈에 있던 자료 그대로, 합격 지도 아래에 판 한 장 */
     try {
       if (GB.tier && GB.tierOn && GB.tierOn()) {
@@ -115,5 +119,5 @@
         host.parentNode.appendChild(card);
       }
     } catch (e) {}
-  });
+  }
 })();
