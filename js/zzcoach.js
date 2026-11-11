@@ -31,8 +31,8 @@
     "#zzc .bub .row{display:flex;align-items:center;gap:10px;margin-top:12px}",
     "#zzc .bub .no{font:800 13px/1 system-ui,sans-serif;color:#8A8F98}",
     "#zzc .bub .sk{margin-left:auto;background:none;border:0;color:#8A8F98;font:700 14px/1 inherit;padding:8px 6px;cursor:pointer}",
-    "#zzc .bub .go{background:#E3242B;color:#fff;border:0;border-radius:12px;padding:11px 18px;font:800 15.5px/1 inherit;cursor:pointer}",
-    "#zzc .bub .dots{display:flex;gap:5px}#zzc .bub .dots i{width:7px;height:7px;border-radius:9px;background:#DADDE2}#zzc .bub .dots i.on{background:#E3242B;width:18px}"
+    "#zzc .bub .go{background:#0F766E;color:#fff;border:0;border-radius:12px;padding:11px 18px;font:800 15.5px/1 inherit;cursor:pointer}",
+    "#zzc .bub .dots{display:flex;gap:5px}#zzc .bub .dots i{width:7px;height:7px;border-radius:9px;background:#DADDE2}#zzc .bub .dots i.on{background:#0F766E;width:18px}"
   ].join("\n");
 
   function pick(x) { try { return typeof x === "function" ? x() : typeof x === "string" ? D.querySelector(x) : x; } catch (e) { return null; } }

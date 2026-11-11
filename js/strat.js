@@ -34,7 +34,7 @@
   "use strict";
   var cs = getComputedStyle(document.documentElement);
   function v(n, d) { return (cs.getPropertyValue(n) || "").trim() || d; }
-  var P = v("--cta", "#15803D"), PI = v("--cta-2", "#166534");
+  var P = v("--cta", "#0F766E"), PI = v("--cta-2", "#0B5F59");
   var PS = "color-mix(in srgb," + P + " 10%,#fff)", PM = "color-mix(in srgb," + P + " 55%,#fff)", PL = "color-mix(in srgb," + P + " 18%,#fff)";
   var 덮개 = [
     "#zs,#zst,#zsy{--zs-bg:#FFFFFF;--zs-card:#FFFFFF;--zs-line:#E6E8EC;--zs-red:" + P + ";--zs-blue:" + PM + ";--zs-gold:#7C818C;--zs-soft:#F1F3F6;--zs-tx:#111419;--zs-sub:#5F6670}",

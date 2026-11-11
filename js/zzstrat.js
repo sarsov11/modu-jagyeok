@@ -66,7 +66,7 @@
   function modeName(m) { return { a: L.m_all, l: L.m_lite, g: L.m_guess }[m] || ""; }
 
   var css = [
-    "#zs,#zst,#zsy{--zs-bg:#F6F4EF;--zs-card:#FFFFFF;--zs-line:#E5E2DA;--zs-tx:#16181D;--zs-sub:#6B7080;--zs-red:#E1101C;--zs-blue:#3F4450;--zs-gold:#7C818C;--zs-soft:#F1EFE9}",
+    "#zs,#zst,#zsy{--zs-bg:#F6F4EF;--zs-card:#FFFFFF;--zs-line:#E5E2DA;--zs-tx:#16181D;--zs-sub:#6B7080;--zs-red:#0F766E;--zs-blue:#3F4450;--zs-gold:#7C818C;--zs-soft:#F1EFE9}",
     "#zs{position:fixed;inset:0;z-index:2147481000;background:var(--zs-bg);color:var(--zs-tx);overflow-y:auto;-webkit-overflow-scrolling:touch;",
     " font:500 15px/1.6 var(--zf);letter-spacing:-.01em;animation:zsIn .3s ease-out}",
     "@keyframes zsIn{0%{opacity:0;transform:translateY(18px)}100%{opacity:1;transform:none}}",
@@ -97,7 +97,7 @@
     "#zs .tg.g{background:transparent;color:#9A9EA8;border:1.5px dashed #C9C6BE}",
     /* 게이지 */
     "#zs .gw{padding:34px 4px 32px;margin:6px 0 4px}#zs .gauge{position:relative;height:16px;border-radius:9px;background:#ECE9E2}",
-    "#zs .gauge .fl{position:absolute;left:0;top:0;bottom:0;border-radius:9px 0 0 9px;background:repeating-linear-gradient(45deg,#F3D9DA 0 6px,#FBEDEE 6px 12px)}",
+    "#zs .gauge .fl{position:absolute;left:0;top:0;bottom:0;border-radius:9px 0 0 9px;background:repeating-linear-gradient(45deg,#DCF0EE 0 6px,#FBEDEE 6px 12px)}",
     "#zs .gauge .rg{position:absolute;top:0;bottom:0;background:rgba(124,129,140,.25)}",
     "#zs .gauge .rl{position:absolute;bottom:calc(100% + 10px);transform:translateX(-50%);white-space:nowrap;font:800 12px/1 var(--zf);color:var(--zs-gold)}",
     "#zs .gauge .ax{position:absolute;top:calc(100% + 8px);font:700 12px/1 var(--zf);color:#A0A4AE}",
@@ -139,7 +139,7 @@
     /* 과목 카드 */
     "#zs .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}",
     "#zs .sc{position:relative;background:var(--zs-card);border:2px solid var(--zs-line);border-radius:16px;padding:14px 14px 12px;cursor:pointer;text-align:left;color:inherit;font:inherit;width:100%}",
-    "#zs .sc.s{border-color:color-mix(in srgb,var(--zs-red) 45%,transparent)}#zs .sc.d{border-color:rgba(37,99,235,.45)}#zs .sc.on{background:#FBFAF7}",
+    "#zs .sc.s{border-color:color-mix(in srgb,var(--zs-red) 45%,transparent)}#zs .sc.d{border-color:rgba(15,118,110,.45)}#zs .sc.on{background:#FBFAF7}",
     "#zs .sc .rb{position:absolute;top:12px;right:12px;font:800 12px/1 var(--zf);padding:5px 8px;border-radius:7px}",
     "#zs .sc.s .rb{background:var(--zs-red);color:#fff}#zs .sc.d .rb{background:var(--zs-blue);color:#fff}#zs .sc.b .rb{background:var(--zs-soft);color:#4A4F5C}",
     "#zs .sc .sn{font:800 16.5px/1.3 var(--zf);padding-right:56px;word-break:keep-all}",
@@ -168,7 +168,7 @@
     "#zs ol.ord{margin:0;padding-left:20px}#zs ol.ord li{margin:0 0 6px}",
     "#zs .vl{list-style:none;margin:0;padding:0}#zs .vl li{border-top:1px solid var(--zs-line)}#zs .vl li:first-child{border-top:0}",
     "#zs .vl a,#zs .vl span{display:block;padding:10px 0 10px 28px;position:relative;color:inherit;text-decoration:none}",
-    "#zs .vl i{position:absolute;left:0;top:11px;width:20px;height:20px;border-radius:6px;background:#E1101C;color:#fff;font:800 12px/20px var(--zf);text-align:center;font-style:normal}",
+    "#zs .vl i{position:absolute;left:0;top:11px;width:20px;height:20px;border-radius:6px;background:#0F766E;color:#fff;font:800 12px/20px var(--zf);text-align:center;font-style:normal}",
     "#zs .vl b{display:block;font:800 13.5px/1.35 var(--zf)}#zs .vl em{display:block;font-style:normal;font-size:14px;color:#3A3E48;margin-top:2px;word-break:keep-all}",
     "#zs .vl.sm a,#zs .vl.sm span{padding:7px 0 7px 26px}#zs .vl.sm i{top:8px}#zs .vl.sm em{font-size:13.5px}",
     "#zs .src{font-size:12px;color:#8A8F9A;margin-top:18px;word-break:break-all}",
@@ -219,10 +219,10 @@
   /* 앱 문서에 들어가는 것은 구석 버튼뿐. 브리핑·튜토리얼은 Shadow DOM 안이라 앱 CSS(.row .chip .q 등)가 섞이지 않는다 */
   var docCss = [
     ".zs-fab{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:2147480000;display:flex;align-items:center;gap:6px;",
-    " background:#fff;color:#16181D;border:2px solid #E1101C;border-radius:999px;padding:9px 13px 9px 10px;font-weight:800;font-size:13.5px;line-height:1;font-family:inherit;",
+    " background:#fff;color:#16181D;border:2px solid #0F766E;border-radius:999px;padding:9px 13px 9px 10px;font-weight:800;font-size:13.5px;line-height:1;font-family:inherit;",
     " box-shadow:0 6px 18px rgba(0,0,0,.14);cursor:pointer}",
-    ".zs-fab svg,.zs-btn svg{width:18px;height:18px;flex:none;color:#E1101C}",
-    ".zs-btn{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#16181D;border:2px solid #E1101C;border-radius:12px;padding:9px 13px;font-weight:800;font-size:14px;line-height:1;font-family:inherit;cursor:pointer}",
+    ".zs-fab svg,.zs-btn svg{width:18px;height:18px;flex:none;color:#0F766E}",
+    ".zs-btn{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#16181D;border:2px solid #0F766E;border-radius:12px;padding:9px 13px;font-weight:800;font-size:14px;line-height:1;font-family:inherit;cursor:pointer}",
     "@media print{#zs-host,.zs-fab{display:none!important}}"
   ].join("\n");
   var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>';
@@ -231,12 +231,12 @@
   function appAccent() {
     var m = D.querySelector('meta[name="theme-color"]'), c = m && m.getAttribute("content");
     try {
-      if (!c) return "#E1101C";
+      if (!c) return "#0F766E";
       var x = D.createElement("i"); x.style.color = c; D.body.appendChild(x); var rgb = getComputedStyle(x).color; x.remove();
-      var v = (rgb.match(/\d+/g) || []).map(Number); if (v.length < 3) return "#E1101C";
+      var v = (rgb.match(/\d+/g) || []).map(Number); if (v.length < 3) return "#0F766E";
       var lum = (0.299 * v[0] + 0.587 * v[1] + 0.114 * v[2]) / 255;
-      return lum > 0.78 || lum < 0.08 ? "#E1101C" : "rgb(" + v[0] + "," + v[1] + "," + v[2] + ")";   /* 흰색·검정 테마색이면 기본 빨강 */
-    } catch (e) { return "#E1101C"; }
+      return lum > 0.78 || lum < 0.08 ? "#0F766E" : "rgb(" + v[0] + "," + v[1] + "," + v[2] + ")";   /* 흰색·검정 테마색이면 기본 빨강 */
+    } catch (e) { return "#0F766E"; }
   }
   function themeVars() {
     var a = appAccent(), f = appFont() || "'Pretendard','Noto Sans KR','Noto Sans JP',system-ui,sans-serif";
@@ -249,7 +249,7 @@
   /* ── 점수 그래프 (10-21 대표님 「점수 구간 그래프 너무 별로」 → 세 안: A 구간 막대 · B 회차별 점 · C 등급 카드) ──
    *  대입처럼 등급으로 끊는 시험은 데이터 `등급컷: [{이름:"2026.6 학평", 컷:{1:50, 2:46, 3:41}, 비고}]`.
    *  합불 시험은 기존 `합격선.커트` 를 한 줄씩 행으로 쓴다. 안 고르기: 데이터 `그래프:"A|B|C"` > ZZSTRAT.graph > 주소 ?zsg=B > A */
-  var GCOL = { "1": "#E1101C", "2": "#2B2F38", "3": "#8A8F9A", "4": "#B3B6BD", "5": "#CDD0D5", P: "#E1101C" };   /* 1등급·합격선 = 앱 대표색(열 때 바꿈), 나머지는 회색 단계 */
+  var GCOL = { "1": "#0F766E", "2": "#2B2F38", "3": "#8A8F9A", "4": "#B3B6BD", "5": "#CDD0D5", P: "#0F766E" };   /* 1등급·합격선 = 앱 대표색(열 때 바꿈), 나머지는 회색 단계 */
   function isGrade(d) { return !!(d.등급컷 && d.등급컷.length); }
   function gName(k) { return k === "P" ? L.passz : LANG === "ko" ? k + "등급" : LANG === "ja" ? k + "等級" : "Grade " + k; }
   function cName(k) { return k === "P" ? L.line : LANG === "ko" ? k + "컷" : LANG === "ja" ? k + "等級ライン" : "Grade " + k + " cut"; }

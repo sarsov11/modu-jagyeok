@@ -2,14 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="theme-color" content="#15803D">
+<meta name="theme-color" content="#0F766E">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>O·X — 모두의 자격</title>
 <link rel="icon" href="icons/favicon.svg">
 <link rel="manifest" href="manifest.webmanifest">
 <script>try{document.documentElement.dataset.skin=localStorage.getItem("mj.skin")||"white"}catch(e){document.documentElement.dataset.skin="white"}</script>
-<link rel="stylesheet" href="css/app.css">
-<link rel="stylesheet" href="css/diagram.css?v=1026a">
+<link rel="stylesheet" href="css/app.css?v=1111h">
+<link rel="stylesheet" href="css/diagram.css?v=1111h">
 <style>
   .hd{display:flex;align-items:center;gap:10px;padding:18px 0 0}
   .hd h1{font-size:20px;flex:1;min-width:0}
@@ -41,15 +41,16 @@
   <div id="stage"></div>
 </div>
 
-<script src="js/tera-pad.js?v=1111c"></script>
-<script src="js/tera-q.js?v=1111g"></script>
-<script src="js/journal-rec.js?v=1110v"></script>
-<script src="js/catalog.js"></script>
-<script src="data/ready.js"></script>
-<script src="js/boot.js"></script>
-<script src="js/judge.js"></script>
-<script src="js/store.js"></script>
-<script src="js/diagram.js?v=1026a"></script>
+<script src="js/tera-pad.js?v=1111h"></script>
+<script src="js/tera-ledger.js?v=1111h"></script>
+<script src="js/tera-q.js?v=1111h"></script>
+<script src="js/journal-rec.js?v=1111h"></script>
+<script src="js/catalog.js?v=1111h"></script>
+<script src="data/ready.js?v=1111h"></script>
+<script src="js/boot.js?v=1111h"></script>
+<script src="js/judge.js?v=1111h"></script>
+<script src="js/store.js?v=1111h"></script>
+<script src="js/diagram.js?v=1111h"></script>
 <script>
 (function () {
   "use strict";
@@ -178,6 +179,21 @@
     } catch (e) {}
   }
   function s_id(q) { return (q.t || "").slice(0, 24); }
+
+  /* 분개 · T계정 판(1111) — 분개 드릴이 붙은 회계 과목 문제 화면에만. 풀이 창 단추 옆에 나란히 */
+  var LED_KEYS = ["cp_acct","sm_acct","gs_acct","gp_acct","acct","g7acct","hm_acct","ac_acct","mg_acct","jk_fa","js_fa","js_jn"];
+  function ledgerHook(q, mc) {
+    try {
+      if (!window.TERA_LEDGER) return;
+      var k = (window.TREE && TREE.key) || ""; if (LED_KEYS.indexOf(k) < 0) return;
+      var card = document.querySelector("#stage .qcard"); if (!card) return;
+      var row = card.nextSibling && card.nextSibling.classList && card.nextSibling.classList.contains("padrow") ? card.nextSibling : null;
+      if (!row) { row = document.createElement("div"); row.className = "padrow"; card.parentNode.insertBefore(row, card.nextSibling); }
+      row.style.gap = "8px"; row.style.flexWrap = "wrap";
+      var txt = mc ? (mc.s || "") + " " + (mc.d || "") + " " + (mc.o || []).join(" ") : (q.t || "");
+      TERA_LEDGER.button(row, function () { return { key: "q" + String(q.i || q.id || (q.t || "").slice(0, 24)), text: txt }; });
+    } catch (e) {}
+  }
   /* 풀이 창이 열려 있는 동안 본문 아래 여백·「다음」 단추 자리를 창 높이만큼 비킨다 */
   setInterval(function () {
     var p = document.getElementById("tpad"), on = !!(p && p.classList.contains("on"));
@@ -280,6 +296,7 @@
       '<p class="hint" id="hint">확실한지 먼저 골라요</p>' +
       '<div id="after"></div>';
     padHook(q, mc);
+    ledgerHook(q, mc);
     /* 1110 아래 줄 수정: #tqbar 는 문서 끝에 있다 — 읽기가 끝난 뒤, 그래도 없으면 50ms 간격 20번까지 다시 */
     setTimeout(function () { (function tqGo(n) {
       if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", function () { tqGo(0); }, { once: true }); return; }
@@ -552,10 +569,10 @@
   pos = -1; next();
 })();
 </script>
-<script src="js/zzsfx.js?v=1009a" defer></script><script src="js/zzajan.js?v=1009a" defer></script>
-<script src="js/terrahome.js?v=1021a" data-slot=".nav .in" defer></script>
-<script src="js/supa.config.js"></script>
-<script src="js/research.js" data-service="jagyeok"></script>
+<script src="js/zzsfx.js?v=1111h" defer></script><script src="js/zzajan.js?v=1111h" defer></script>
+<script src="js/terrahome.js?v=1111h" data-slot=".nav .in" defer></script>
+<script src="js/supa.config.js?v=1111h"></script>
+<script src="js/research.js?v=1111h" data-service="jagyeok"></script>
 <div class="tq-bar" id="tqbar" hidden>
   <button type="button" class="tq-tool" id="tqHalf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.7 9.5a2.4 2.4 0 1 1 3.3 2.2c-.7.3-1 .8-1 1.5M12 16.5v.01"/></svg>헷갈림</button>
   <button type="button" class="tq-tool" id="tqExp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 6.5C10.2 5 7.6 4.5 4.5 4.8v13c3.100-.3 5.700.2 7.500 1.700 1.800-1.500 4.400-2 7.500-1.700v-13c-3.100-.3-5.700.2-7.500 1.700zM12 6.500v13"/></svg>해설</button>

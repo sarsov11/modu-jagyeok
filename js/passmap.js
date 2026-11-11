@@ -178,7 +178,7 @@
     /* 등급 방패(칭호·앰블럼) — 옛 스킬트리·홈에 있던 자료 그대로, 합격 지도 아래에 판 한 장 */
     try {
       if (GB.tier && GB.tierOn && GB.tierOn()) {
-        var t2 = GB.tier(), SH = ["#B7794B", "#9CA3AF", "#EAB308", "#22D3EE", "#60A5FA"];
+        var t2 = GB.tier(), SH = ["#7FB8B2", "#9CA3AF", "#0F766E", "#22D3EE", "#0B4F4A"];
         var card = D.createElement("div"); card.className = "tiercard";
         card.innerHTML = '<svg viewBox="0 0 34 38" width="34" height="38"><path d="M17 1 32 6v12c0 9.5-6.4 16.2-15 19C8.4 34.2 2 27.5 2 18V6z" fill="' + SH[t2.rank] + '"/><path d="M17 5 28 9v9c0 7.2-4.6 12.4-11 14.8C10.6 30.4 6 25.2 6 18V9z" fill="rgba(255,255,255,.28)"/></svg>' +
           "<div><b>" + esc(t2.name) + "</b><span>오래 기억한 문장 " + GB.num(t2.held) + "개</span></div>";

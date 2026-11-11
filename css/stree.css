@@ -5,7 +5,7 @@
    색은 앱 변수(--surface·--ink·--pt1~6)를 쓰고, 없으면 아래 기본값. */
 .st{--st-bg:var(--surface,#fff);--st-bg2:var(--surface-2,#F7F8FA);--st-line:var(--line,#E6E8EC);--st-line2:var(--line-2,#D3D7DD);
   --st-ink:var(--ink,#111419);--st-ink2:var(--ink-2,#2B3038);--st-ink3:var(--ink-3,#4B5563);--st-ink4:var(--ink-4,#6B7280);
-  --st-gold:var(--gold,#F5B70A);--st-r:var(--r3,14px);--st-pw:372px;
+  --st-gold:var(--gold,#0F766E);--st-r:var(--r3,14px);--st-pw:372px;
   position:relative;font-family:var(--kr,var(--font,"Pretendard","Noto Sans KR",sans-serif));color:var(--st-ink);
   -webkit-tap-highlight-color:transparent}
 .st *{box-sizing:border-box}
@@ -87,7 +87,7 @@
 .st-nt{min-width:0;flex:1;padding:6px 0}
 .st-nt b{display:block;font-size:15.5px;font-weight:800;letter-spacing:-.035em;line-height:1.3;color:var(--st-ink);transition:color .15s}
 .st-nt small{display:block;font-size:12.5px;font-weight:600;color:var(--st-ink4);margin-top:2px}
-.st-badge{display:inline-block;font-size:11.5px;font-weight:800;color:#fff;background:var(--red,#E5243B);
+.st-badge{display:inline-block;font-size:11.5px;font-weight:800;color:#fff;background:var(--red,#0F766E);
   padding:2px 7px;border-radius:999px;margin-left:6px;vertical-align:2px;letter-spacing:0}
 .st-heat{display:inline-flex;gap:2px;margin-left:6px;vertical-align:1px}
 .st-heat i{width:5px;height:9px;border-radius:2px;background:var(--st-line2)}
@@ -127,8 +127,8 @@
   background:linear-gradient(90deg,transparent,var(--st-fade,var(--bg,#fff)));opacity:var(--st-more,1);transition:opacity .2s}
 
 /* ═══ 안 B — 보드(어두운 게임판) ═══ */
-.st[data-look="board"]{--st-bg:#0E1424;--st-bg2:#151D31;--st-line:#26324D;--st-line2:#34446A;--st-ink:#EEF3FF;--st-ink2:#D5DEF2;
-  --st-ink3:#A9B8D8;--st-ink4:#8698BE;--st-fade:#0A0F1C}
+.st[data-look="board"]{--st-bg:#0E1424;--st-bg2:#151D31;--st-line:#264D4A;--st-line2:#346A66;--st-ink:#F3FAF9;--st-ink2:#D9EEED;
+  --st-ink3:#A9D8D4;--st-ink4:#86BEB9;--st-fade:#0A0F1C}
 .st[data-look="board"] .st-viewport{background:radial-gradient(ellipse 70% 60% at 30% 20%,#18254A,transparent 70%),#0A0F1C;
   border-radius:calc(var(--st-r) + 6px);padding:14px 14px 4px}
 .st[data-look="board"] .st-track{margin:0}
@@ -137,7 +137,7 @@
 .st[data-look="board"] .st-node:not(.st-empty) .st-orb{box-shadow:0 0 calc(var(--p)*.18px + 4px) color-mix(in srgb,var(--c) 70%,transparent)}
 .st[data-look="board"] .st-node.st-done .st-orb{box-shadow:0 0 18px color-mix(in srgb,var(--st-gold) 80%,transparent)}
 .st[data-look="board"] .st-head{background:linear-gradient(180deg,color-mix(in srgb,var(--c) 26%,#0E1424),#0E1424)}
-.st[data-look="board"] .st-tab{background:#0E1424;border-color:#26324D;color:#EEF3FF}
+.st[data-look="board"] .st-tab{background:#0E1424;border-color:#264D4A;color:#F3FAF9}
 .st[data-look="board"] .st-tab[aria-current="true"]{background:color-mix(in srgb,var(--c) 22%,#0E1424);border-color:var(--c)}
 .st[data-look="board"] .st-map{background:#0A0F1C;border-radius:14px;padding:10px;margin:0 0 10px}
 .st[data-look="board"] .st-viewport:after{right:12px;top:14px;bottom:18px}

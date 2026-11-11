@@ -67,8 +67,9 @@
     it.x.forEach(function (n) { if (pool.indexOf(n) < 0 && BY[n]) pool.push(n); });
     var rnd = seeded(it.id + ":" + k), unit = UNIT[it.u];
     var fill = shuffle(unit.accts.concat(COMMON).filter(function (n) { return pool.indexOf(n) < 0 && BY[n]; }), rnd);
-    var want = Math.max(8, pool.length + 2);
+    var want = Math.max(5, ans.length + (ans.length > 5 ? 1 : 0));   /* 후보는 다섯 개(정답이 더 많으면 정답 + 하나) */
     while (pool.length < want && fill.length) pool.push(fill.shift());
+    pool = pool.slice(0, want);
     return shuffle(pool, rnd);
   }
 
@@ -139,6 +140,7 @@
   function openItem() {
     var it = cur.items[cur.i];
     cur.step = 0; cur.past = []; cur.conf = false; cur.itemOk = true; cur.finished = false;
+    cur.mode = canType(it) ? "type" : "pick";
     newStep();
     if (window.TERA_PAD && TERA_PAD.penHide) TERA_PAD.penHide();
     var pen = $("jPen"); if (pen) pen.classList.remove("is-on");
@@ -146,7 +148,7 @@
   }
   function newStep() {
     cur.rows = { d: [{ acct: "", amt: "" }], c: [{ acct: "", amt: "" }] };
-    cur.active = { side: "d", idx: 0 };
+    cur.active = { side: "d", idx: 0 }; cur.help = false; cur.hshown = 0;
     cur.checked = null;
     cur.cands = candidates(cur.items[cur.i], cur.step);
   }
@@ -172,7 +174,8 @@
         out.ok = false;
         var sameAcct = left[side].filter(function (x) { return !x.used && x.a === r.acct; })[0];
         var opp = left[other].filter(function (x) { return !x.used && x.a === r.acct; })[0];
-        g.why = !r.acct ? "계정을 고르세요" : sameAcct ? "금액이 다릅니다" : opp ? "차변 · 대변이 바뀌었습니다" : "이 거래에 없는 계정입니다";
+        g.kind = !r.acct ? "계정" : sameAcct ? "금액" : opp ? "차대" : "계정";
+        g.why = !r.acct ? "계정 비어 있음" : sameAcct ? "금액이 다름" : opp ? "차대 방향이 바뀜" : "이 거래에 없는 계정";
       });
     });
     ["d", "c"].forEach(function (side) { left[side].forEach(function (x) { if (!x.used) { out.ok = false; out.miss.push(side + "|" + x.a + "|" + x.v); } }); });
@@ -181,30 +184,119 @@
     return out;
   }
 
-  /* ── 풀이 화면 ── */
+  /* ── 풀이 화면: 분개 상자(안 C — 줄마다 차변 · 대변이 마주 보는 표, 1111) ──
+     큰 상자 하나 안에 머리 · 테라에이전트 한 줄 · 표 · 후보 · 차대 합 · 단추 · 채점 결과가 다 들어간다.
+     계정 입력: lv1 과 아직 익숙하지 않은 계정은 후보 고르기만, lv2 이상(또는 그 계정을 세 거래 이상 맞힌 뒤)은 직접 치기(치는 대로 후보가 좁혀짐) + 고르기로 돌아가기. */
   var LV = { 1: "계정 고르기", 2: "금액 계산", 3: "이어지는 거래" };
   var CIR = ["①", "②", "③", "④"];
-  function lineHtml(side, i, r) {
-    var g = cur.checked && cur.checked[side][i], cls = "jd-line" + (g && !g.blank ? (g.ok ? " ok" : " no") : "") + (!cur.checked && cur.active.side === side && cur.active.idx === i ? " on" : "");
-    var dis = cur.checked ? " disabled" : "";
-    return '<div class="' + cls + '" data-s="' + side + '" data-i="' + i + '">' +
-      '<button type="button" class="jd-acc' + (r.acct ? " has" : "") + '"' + dis + ">" + esc(r.acct || "계정 고르기") + "</button>" +
-      '<input class="jd-amt" type="text" inputmode="numeric" autocomplete="off" placeholder="금액" aria-label="금액" value="' + esc(r.amt) + '"' + dis + ">" +
-      '<button type="button" class="jd-x" aria-label="줄 지우기"' + (cur.rows[side].length > 1 && !cur.checked ? "" : " hidden") + ">✕</button>" +
-      (g && !g.blank && !g.ok && g.why ? '<p class="jd-why">' + esc(g.why) + "</p>" : "") + "</div>";
+  var AGI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v7a2.5 2.5 0 0 1-2.5 2.5H12l-4 3.5V16h-.5A2.5 2.5 0 0 1 5 13.5z"/><path d="M9.5 9.5h.01M14.5 9.5h.01"/></svg>';
+
+  function canType(it) {
+    if (it.lv >= 2) return true;
+    try { return itemsOf(it.u, it.a).filter(function (x) { return rec(x.id).b >= 1; }).length >= 3; } catch (e) { return false; }
   }
-  function sideHtml(side, title) {
-    return '<div class="jd-side" data-s="' + side + '"><h3>' + title + "</h3>" + cur.rows[side].map(function (r, i) { return lineHtml(side, i, r); }).join("") +
-      (cur.checked ? "" : '<button type="button" class="jd-add" data-s="' + side + '">줄 더하기</button>') + "</div>";
+  function typed() { return cur.mode === "type" && !cur.checked; }
+  function amtFont(s) { var n = (s || "").length; return n > 13 ? ' style="font-size:12.5px"' : n > 11 ? ' style="font-size:14px"' : ""; }
+
+  function cellHtml(side, i) {
+    var r = cur.rows[side][i], g = cur.checked && cur.checked[side][i], done = !!cur.checked;
+    var cls = "jb-cell" + (g && !g.blank ? (g.ok ? " ok" : " no") : "") + (!done && cur.active && cur.active.side === side && cur.active.idx === i ? " on" : "");
+    var acc = typed()
+      ? '<input class="jb-in" type="text" value="' + esc(r.acct) + '" placeholder="계정 치기" aria-label="계정" autocomplete="off" autocapitalize="off" spellcheck="false">'
+      : '<button type="button" class="jb-acc' + (r.acct ? " has" : "") + '"' + (done ? " disabled" : "") + ">" + esc(r.acct || "계정") + "</button>";
+    return '<div class="' + cls + '" data-s="' + side + '" data-i="' + i + '">' + acc +
+      '<input class="jb-amt" type="text" inputmode="numeric" autocomplete="off" placeholder="금액" aria-label="금액" value="' + esc(r.amt) + '"' + amtFont(r.amt) + (done ? " disabled" : "") + ">" +
+      (!done && cur.rows[side].length > 1 ? '<button type="button" class="jb-rm" aria-label="줄 지우기">×</button>' : "") +
+      (g && !g.blank && !g.ok && g.why ? '<p class="jb-why">' + esc(g.why) + "</p>" : "") + "</div>";
+  }
+  function sums() { var t = { d: 0, c: 0 }; ["d", "c"].forEach(function (s) { cur.rows[s].forEach(function (r) { t[s] += amtOf(r.amt); }); }); return t; }
+  function tableHtml() {
+    var n = Math.max(cur.rows.d.length, cur.rows.c.length), t = sums();
+    var h = '<div class="jb-tb"><div class="jb-tr th"><div>차변</div><div>대변</div></div>';
+    for (var i = 0; i < n; i++) h += '<div class="jb-tr">' + ["d", "c"].map(function (s) { return cur.rows[s][i] ? cellHtml(s, i) : '<div class="jb-slot"></div>'; }).join("") + "</div>";
+    h += '<div class="jb-tr sum"><div id="jSd">' + (t.d ? won(t.d) : "") + '</div><div id="jSc">' + (t.c ? won(t.c) : "") + "</div></div>";
+    if (!cur.checked) h += '<div class="jb-tr add"><button type="button" class="jb-add" data-s="d">차변 줄 더하기</button><button type="button" class="jb-add" data-s="c">대변 줄 더하기</button></div>';
+    return h + "</div>";
+  }
+  function sumHtml() {
+    var t = sums(), any = t.d || t.c, eq = t.d === t.c && t.d > 0;
+    return "<span>차변 <b>" + won(t.d) + "</b></span><span>대변 <b>" + won(t.c) + '</b></span><span class="st ' + (any ? (eq ? "ok" : "no") : "") + '">' + (!any ? "" : eq ? "차대 맞음" : "차액 " + won(Math.abs(t.d - t.c))) + "</span>";
+  }
+  function updateSums() {
+    var t = sums(), a = $("jSd"), b = $("jSc"), s = $("jSum");
+    if (a) a.textContent = t.d ? won(t.d) : ""; if (b) b.textContent = t.c ? won(t.c) : ""; if (s) s.innerHTML = sumHtml();
+  }
+  function candList() {
+    if (typed()) {
+      var q = ((cur.active && cur.rows[cur.active.side][cur.active.idx]) || {}).acct || "";
+      q = q.replace(/\s+/g, ""); if (!q) return [];
+      var names = Object.keys(BY).filter(function (n) { return n.replace(/\s+/g, "").indexOf(q) >= 0; });
+      names.sort(function (a, b) { return (a.indexOf(q) === 0 ? 0 : 1) - (b.indexOf(q) === 0 ? 0 : 1) || a.length - b.length; });
+      return names.slice(0, 6);
+    }
+    return cur.cands;
+  }
+  function candHtml() {
+    if (cur.checked || !cur.active) return "";
+    var list = candList(), s = cur.active.side, i = cur.active.idx;
+    if (typed() && !list.length && !(cur.rows[s][i].acct || "")) return "";
+    return '<div class="jb-cand"><h3>' + (s === "d" ? "차변 " : "대변 ") + (i + 1) + " · 계정" + (typed() ? " · 치는 대로 좁혀짐" : "") + '</h3><div class="jb-chips">' +
+      (list.length ? list.map(function (n) { return '<button type="button" class="jb-chip" data-n="' + esc(n) + '">' + esc(n) + "</button>"; }).join("") : '<span class="jb-none">맞는 계정 없음</span>') + "</div></div>";
+  }
+
+  /* 테라에이전트 — 한 단계씩. 자료(계정 성격 · 차대)에서 만든다. 답을 통째로 주지 않는다. */
+  function lineInfo(st) {
+    var out = [];
+    [["d", st.d], ["c", st.c]].forEach(function (p) {
+      p[1].forEach(function (x) {
+        var a = BY[x[0]]; if (!a) return;
+        out.push({ s: p[0], n: x[0], g: a.g, inc: (p[0] === "d") === (a.side === "차"), norm: a.side });
+      });
+    });
+    return out;
+  }
+  function helpSteps(st) {
+    var L = lineInfo(st), cnt = {}, ord = [];
+    L.forEach(function (l) { var k = l.g + (l.inc ? "|늘" : "|줆"); if (!cnt[k]) { cnt[k] = 0; ord.push(k); } cnt[k]++; });
+    var a1 = ord.map(function (k) { var p = k.split("|"); return esc(p[0]) + " " + cnt[k] + "줄 " + (p[1] === "늘" ? "늘어남" : "줄어듦"); }).join(" · ");
+    var seen = {}, rule = [];
+    L.forEach(function (l) { if (seen[l.g]) return; seen[l.g] = 1; rule.push(esc(l.g) + ": 늘면 " + l.norm + "변, 줄면 " + (l.norm === "차" ? "대" : "차") + "변"); });
+    var nm = function (s) { return L.filter(function (l) { return l.s === s; }).map(function (l) { return "<i>" + esc(l.n) + "</i>"; }).join(""); };
+    return [
+      { q: "이 거래에서 늘거나 준 것은?", a: a1 || "자료 없음" },
+      { q: "차변인가 대변인가?", a: rule.join(" · ") + ". 차변 " + st.d.length + "줄, 대변 " + st.c.length + "줄." },
+      { q: "계정 이름은?", a: "차변 " + nm("d") + " 대변 " + nm("c") }
+    ];
+  }
+  function agentHtml() {
+    var st = cur.items[cur.i].steps[cur.step];
+    var h = '<div class="jb-ag">' + AGI + '<b>테라에이전트</b><span class="t">' + (cur.hshown ? cur.hshown + " / 3 단계" : "막히면 한 단계씩") + '</span><button type="button" id="jHelp">' + (cur.help ? "접기" : "도움") + "</button></div>";
+    if (!cur.help) return h;
+    var S3 = helpSteps(st); h += '<div class="jb-agp">';
+    for (var k = 0; k <= cur.hshown && k < 3; k++) {
+      h += '<div class="st"><div class="q">' + (k + 1) + ". " + S3[k].q + "</div>" + (k < cur.hshown ? '<div class="a">' + S3[k].a + "</div>" : '<button type="button" class="go2" data-k="' + k + '">알려 줘</button>') + "</div>";
+    }
+    return h + "</div>";
+  }
+  function agentSay(st, res) {
+    var bad = [];
+    ["d", "c"].forEach(function (s) { res[s].forEach(function (g, i) { if (g && !g.blank && !g.ok) bad.push({ g: g, r: cur.rows[s][i], s: s }); }); });
+    if (!bad.length && !res.miss.length) return "차변 · 대변 모두 맞다.";
+    if (!bad.length) return "빠진 줄이 있다. 차변 " + st.d.length + "줄 · 대변 " + st.c.length + "줄이다.";
+    var b = bad[0], nm = b.r.acct || "빈 줄", more = bad.length > 1 ? " 외 " + (bad.length - 1) + "곳" : "", t;
+    if (b.g.kind === "금액") t = nm + ": 금액이 다르다." + more + (st.calc ? "<br>" + esc(st.calc).replace(/ ; /g, "<br>") : "");
+    else if (b.g.kind === "차대") { var a = BY[b.r.acct]; t = nm + ": 차변과 대변이 바뀌었다." + more + (a ? "<br>" + esc(a.g) + "은 늘면 " + a.side + "변이다." : ""); }
+    else t = nm + ": 이 거래에 없는 계정이다." + more + "<br>늘거나 줄어든 것을 다시 본다.";
+    return t;
   }
   function answerHtml(st, res) {
     function col(arr, side) {
       return arr.map(function (x) {
         var miss = res.miss.indexOf(side + "|" + x[0] + "|" + x[1]) >= 0;
-        return '<p' + (miss ? ' class="miss"' : "") + "><span>" + esc(x[0]) + "</span><b>" + won(x[1]) + "</b></p>";
+        return "<p" + (miss ? ' class="miss"' : "") + "><span>" + esc(x[0]) + "</span><b>" + won(x[1]) + "</b></p>";
       }).join("");
     }
-    return '<div class="jd-ans"><div class="tf"><div><h4>차변</h4>' + col(st.d, "d") + "</div><div><h4>대변</h4>" + col(st.c, "c") + "</div></div></div>";
+    return '<div class="jb-ans"><div><h4>차변</h4>' + col(st.d, "d") + "</div><div><h4>대변</h4>" + col(st.c, "c") + "</div></div>";
   }
   function draw() {
     var it = cur.items[cur.i], st = it.steps[cur.step], multi = it.steps.length > 1, lastStep = cur.step === it.steps.length - 1;
@@ -213,22 +305,25 @@
     var pct = Math.round((cur.i + (cur.finished ? 1 : 0)) / cur.items.length * 100);
     var h = '<div class="tq-prog"><i><u style="width:' + pct + '%"></u></i><span><b>' + (cur.i + 1) + "</b> / " + cur.items.length + "</span></div>" +
       '<div class="tq-meta"><span class="tq-no">' + (cur.i + 1) + '번 거래</span><span class="tq-sp"></span><span class="jd-lv">' + LV[it.lv] + "</span></div>" +
-      '<p class="tq-stem" id="jStem">' + esc(it.q) + "</p>" + '<div class="jd-pad padrow" id="jPad"></div>';
+      '<p class="tq-stem" id="jStem">' + esc(it.q) + "</p>";
+    h += '<section class="jb" id="jBox"><div class="jb-h"><h2>분개</h2>' + (multi ? '<span class="jb-tag">' + CIR[cur.step] + " " + (cur.step + 1) + " / " + it.steps.length + "</span>" : "") + '<span class="sp"></span>' +
+      (canType(it) && !cur.checked ? '<span class="jb-seg"><button type="button" data-m="pick" class="' + (cur.mode === "pick" ? "on" : "") + '">고르기</button><button type="button" data-m="type" class="' + (cur.mode === "type" ? "on" : "") + '">직접 치기</button></span>' : "") + "</div>";
     if (multi) {
       if (cur.past.length) h += '<p class="jd-past">' + cur.past.map(function (p, i) { return "<span>" + CIR[i] + " " + esc(it.steps[i].when || "") + " <b class=\"" + (p ? "ok" : "no") + '">' + (p ? "맞음" : "틀림") + "</b></span>"; }).join("") + "</p>";
-      h += '<p class="jd-when">' + CIR[cur.step] + " " + (cur.step + 1) + " / " + it.steps.length + (st.when ? " · " + esc(st.when) : "") + "</p>";
+      if (st.when) h += '<p class="jd-when">' + esc(st.when) + "</p>";
     }
-    h += sideHtml("d", "차변") + sideHtml("c", "대변");
+    h += (cur.checked ? "" : agentHtml()) + tableHtml() + '<div id="jCand">' + candHtml() + '</div><div class="jb-sum" id="jSum">' + sumHtml() + "</div>";
     if (!cur.checked) {
-      h += '<div class="jd-pool" id="jPool">' + cur.cands.map(function (n) { return '<button type="button" class="jd-chip" data-n="' + esc(n) + '">' + esc(n) + "</button>"; }).join("") + "</div>";
-      h += '<div class="jd-go"><button type="button" class="btn block" id="jCheck">확인</button></div>';
+      h += '<div class="jb-act"><span id="jPad" class="jd-pad"></span><button type="button" class="jb-go" id="jCheck">확인</button></div>';
     } else {
       var res = cur.checked;
-      h += '<p class="jd-verdict ' + (res.ok ? "ok" : "no") + '">' + (res.ok ? "맞음" : "틀림") + "</p>" + answerHtml(st, res);
-      if (st.calc) h += '<p class="jd-calc">' + esc(st.calc).replace(/ ; /g, "<br>") + "</p>";
+      h += '<div class="jb-res"><p class="jd-verdict ' + (res.ok ? "ok" : "no") + '">' + (res.ok ? "맞음" : "틀림") + '</p><div class="jb-agr">' + AGI + "<div><b>테라에이전트</b>" + agentSay(st, res) + "</div></div>" + answerHtml(st, res);
+      if (res.ok && st.calc) h += '<p class="jd-calc">' + esc(st.calc).replace(/ ; /g, "<br>") + "</p>";
       if (st.why) h += '<div class="jd-expl" id="jExpl">' + esc(st.why) + "</div>";
-      if (multi && !lastStep) h += '<div class="jd-go"><button type="button" class="btn block" id="jStepNext">다음 시점</button></div>';
+      h += "</div>";
+      if (multi && !lastStep) h += '<div class="jb-act"><button type="button" class="jb-go" id="jStepNext">다음 시점</button></div>';
     }
+    h += "</section>";
     $("main").innerHTML = h;
     wire();
     padButton(it);
@@ -245,30 +340,56 @@
     TERA_PAD.button(host, function () { return { key: "jd-" + it.id, title: it.a + " 분개" }; });
   }
 
-  function wire() {
-    var main = $("main");
-    Array.prototype.forEach.call(main.querySelectorAll(".jd-line"), function (ln) {
-      var side = ln.dataset.s, i = +ln.dataset.i, row = cur.rows[side][i];
-      var acc = ln.querySelector(".jd-acc"), amt = ln.querySelector(".jd-amt"), x = ln.querySelector(".jd-x");
-      acc.onclick = function () { cur.active = { side: side, idx: i }; Array.prototype.forEach.call(main.querySelectorAll(".jd-line"), function (l) { l.classList.remove("on"); }); ln.classList.add("on"); };
-      amt.addEventListener("focus", function () { cur.active = { side: side, idx: i }; Array.prototype.forEach.call(main.querySelectorAll(".jd-line"), function (l) { l.classList.remove("on"); }); ln.classList.add("on"); });
-      amt.addEventListener("input", function () {
-        var d = amt.value.replace(/[^0-9]/g, ""); row.amt = d ? Number(d).toLocaleString("ko-KR") : ""; amt.value = row.amt;
-      });
-      x.onclick = function () { cur.rows[side].splice(i, 1); if (cur.active.side === side) cur.active.idx = Math.max(0, Math.min(cur.active.idx, cur.rows[side].length - 1)); draw(); };
-    });
-    Array.prototype.forEach.call(main.querySelectorAll(".jd-add"), function (b) {
-      b.onclick = function () { var s = b.dataset.s; cur.rows[s].push({ acct: "", amt: "" }); cur.active = { side: s, idx: cur.rows[s].length - 1 }; draw(); };
-    });
-    Array.prototype.forEach.call(main.querySelectorAll(".jd-chip"), function (b) {
+  function setActive(side, idx) {
+    cur.active = { side: side, idx: idx };
+    Array.prototype.forEach.call(document.querySelectorAll(".jb-cell"), function (c) { c.classList.toggle("on", c.dataset.s === side && +c.dataset.i === idx); });
+    $("jCand").innerHTML = candHtml(); wireCands();
+  }
+  function afterPick() {
+    var s = cur.active.side, rows = cur.rows[s], nx = -1, k;
+    for (k = 0; k < rows.length; k++) if (!rows[k].acct) { nx = k; break; }
+    if (nx >= 0) { cur.active = { side: s, idx: nx }; return; }
+    var o = s === "d" ? "c" : "d";
+    for (k = 0; k < cur.rows[o].length; k++) if (!cur.rows[o][k].acct) { cur.active = { side: o, idx: k }; return; }
+    cur.active = null;
+  }
+  function wireCands() {
+    Array.prototype.forEach.call(document.querySelectorAll("#jCand .jb-chip"), function (b) {
       b.onclick = function () {
-        var s = cur.active.side, i = cur.active.idx; if (!cur.rows[s][i]) { cur.active = { side: "d", idx: 0 }; s = "d"; i = 0; }
-        cur.rows[s][i].acct = b.dataset.n;
-        var nx = -1; for (var k = 0; k < cur.rows[s].length; k++) { if (!cur.rows[s][k].acct) { nx = k; break; } }
-        if (nx >= 0) cur.active = { side: s, idx: nx };
+        if (!cur.active) return;
+        cur.rows[cur.active.side][cur.active.idx].acct = b.dataset.n; afterPick();
         var y = window.pageYOffset; draw(); window.scrollTo(0, y);
       };
     });
+  }
+  function wire() {
+    var main = $("main");
+    Array.prototype.forEach.call(main.querySelectorAll(".jb-cell"), function (ln) {
+      var side = ln.dataset.s, i = +ln.dataset.i, row = cur.rows[side][i];
+      var acc = ln.querySelector(".jb-acc"), inp = ln.querySelector(".jb-in"), amt = ln.querySelector(".jb-amt"), x = ln.querySelector(".jb-rm");
+      if (acc) acc.onclick = function () { setActive(side, i); };
+      if (inp) {
+        inp.addEventListener("focus", function () { setActive(side, i); });
+        inp.addEventListener("input", function () { row.acct = inp.value; $("jCand").innerHTML = candHtml(); wireCands(); inp.classList.remove("miss"); });
+      }
+      amt.addEventListener("focus", function () { if (!cur.active || cur.active.side !== side || cur.active.idx !== i) setActive(side, i); });
+      amt.addEventListener("input", function () {
+        var d = amt.value.replace(/[^0-9]/g, "").slice(0, 15); row.amt = d ? Number(d).toLocaleString("ko-KR") : ""; amt.value = row.amt;
+        var n = row.amt.length; amt.style.fontSize = n > 13 ? "12.5px" : n > 11 ? "14px" : ""; updateSums();
+      });
+      if (x) x.onclick = function () { cur.rows[side].splice(i, 1); cur.active = null; draw(); };
+    });
+    Array.prototype.forEach.call(main.querySelectorAll(".jb-add"), function (b) {
+      b.onclick = function () { var s = b.dataset.s; cur.rows[s].push({ acct: "", amt: "" }); cur.active = { side: s, idx: cur.rows[s].length - 1 }; var y = window.pageYOffset; draw(); window.scrollTo(0, y); };
+    });
+    Array.prototype.forEach.call(main.querySelectorAll(".jb-seg button"), function (b) {
+      b.onclick = function () { cur.mode = b.dataset.m; var y = window.pageYOffset; draw(); window.scrollTo(0, y); };
+    });
+    var hp = $("jHelp"); if (hp) hp.onclick = function () { cur.help = !cur.help; var y = window.pageYOffset; draw(); window.scrollTo(0, y); };
+    Array.prototype.forEach.call(main.querySelectorAll(".jb-agp .go2"), function (b) {
+      b.onclick = function () { cur.hshown = +b.dataset.k + 1; var y = window.pageYOffset; draw(); window.scrollTo(0, y); };
+    });
+    wireCands();
     var ck = $("jCheck"); if (ck) ck.onclick = check;
     var sn = $("jStepNext"); if (sn) sn.onclick = function () { cur.step++; newStep(); draw(); window.scrollTo(0, 0); };
   }
@@ -313,7 +434,7 @@
   /* ── 아래 줄 ── */
   $("jNext").onclick = next;
   $("jHalf").onclick = function () { if (!cur || cur.finished) return; cur.conf = !cur.conf; this.classList.toggle("is-on", cur.conf); };
-  $("jExp").onclick = function () { var e = $("jExpl") || document.querySelector(".jd-ans"); if (e) e.scrollIntoView({ behavior: "smooth", block: "center" }); };
+  $("jExp").onclick = function () { var e = $("jExpl") || document.querySelector(".jb-ans"); if (e) e.scrollIntoView({ behavior: "smooth", block: "center" }); };
   $("jPen").onclick = function () {
     if (!window.TERA_PAD || !TERA_PAD.pen || !cur) return;
     var self = this; TERA_PAD.pen({ key: "jd-" + cur.items[cur.i].id, onChange: function (on) { self.classList.toggle("is-on", !!on); } });

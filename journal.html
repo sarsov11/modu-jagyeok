@@ -2,13 +2,13 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="theme-color" content="#15803D">
+<meta name="theme-color" content="#0F766E">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>분개 드릴 — 모두의 자격</title>
 <link rel="icon" href="icons/favicon.svg">
 <link rel="manifest" href="manifest.webmanifest">
 <script>try{document.documentElement.dataset.skin=localStorage.getItem("mj.skin")||"white"}catch(e){document.documentElement.dataset.skin="white"}</script>
-<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/app.css?v=1111h">
 <style>
   /* 분개 드릴 — 화면표준 14절: 글자 26·20·16·14·13·11.5 / 굵기 500·600·700·800 / 모서리 18·14·12·999·50% */
   .jd-cards{display:grid;gap:12px;margin-top:6px}
@@ -32,32 +32,100 @@
   .jd-past{margin:0 0 8px;font-size:13px;font-weight:600;color:var(--ink-4);display:flex;flex-wrap:wrap;gap:6px 12px}
   .jd-past b{font-weight:700}
   .jd-past b.ok{color:var(--ok)} .jd-past b.no{color:var(--no)}
-  .jd-side{margin-top:14px}
-  .jd-side h3{margin:0 0 6px;font-size:14px;font-weight:700;color:var(--ink-3)}
-  .jd-line{display:grid;grid-template-columns:minmax(0,1fr) 172px 28px;gap:6px;margin-bottom:8px;align-items:center}
-  .jd-acc{appearance:none;min-height:48px;padding:6px 12px;border:1.5px solid var(--line-2);border-radius:12px;background:#fff;text-align:left;font:600 14px/1.25 var(--font);color:var(--ink-4);cursor:pointer;word-break:keep-all}
-  .jd-acc.has{color:var(--ink);font-weight:700}
-  .jd-line.on .jd-acc{border-color:var(--pt);background:var(--pt-soft)}
-  .jd-amt{width:100%;min-width:0;height:48px;padding:0 8px;border:1.5px solid var(--line-2);border-radius:12px;background:#fff;text-align:right;font:700 16px var(--font);color:var(--ink);font-variant-numeric:tabular-nums}
-  .jd-amt:focus{outline:none;border-color:var(--pt)}
-  .jd-x{appearance:none;width:28px;height:28px;border-radius:50%;border:1px solid var(--line-2);background:#fff;color:var(--ink-4);font-size:14px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
-  .jd-x[hidden]{visibility:hidden;display:grid}
-  .jd-line.ok .jd-acc,.jd-line.ok .jd-amt{border-color:var(--ok);background:var(--ok-soft)}
-  .jd-line.no .jd-acc,.jd-line.no .jd-amt{border-color:var(--no);background:var(--no-soft)}
-  .jd-why{grid-column:1/-1;margin:-4px 0 0;font-size:13px;font-weight:600;color:var(--no)}
-  .jd-add{appearance:none;width:100%;height:40px;border:1.5px dashed var(--line-2);border-radius:12px;background:none;font:600 14px var(--font);color:var(--ink-3);cursor:pointer}
-  .jd-pool{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-  .jd-chip{appearance:none;height:40px;padding:0 14px;border:1.5px solid var(--line-2);border-radius:999px;background:#fff;font:600 14px var(--font);color:var(--ink);cursor:pointer}
-  .jd-chip:hover{border-color:var(--pt)}
-  .jd-ans{margin-top:16px}
-  .jd-ans .tf{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line-2);border-radius:14px;overflow:hidden}
-  .jd-ans .tf>div{padding:10px 12px}
-  .jd-ans .tf>div:first-child{border-right:1px solid var(--line-2)}
-  .jd-ans h4{margin:0 0 6px;font-size:13px;font-weight:600;color:var(--ink-3)}
-  .jd-ans p{margin:0 0 4px;display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:600}
-  .jd-ans p b{font-weight:700;font-variant-numeric:tabular-nums}
-  .jd-ans .miss{color:var(--no)}
+  /* 분개 상자 · 분개 · T계정 판은 앱 색과 상관없이 청록 한 가지(1111 대표님 「다 청록색으로 통일」, 화면표준 16절) */
+  :root{--jd-p:#0F766E;--jd-p2:#0B5F59;--jd-ink:#0B4F4A;--jd-soft:#E3F2F0;--jd-line:#7FB8B2}
+  /* 분개 상자(안 C, 1111) — 큰 상자 하나에 머리 · 테라에이전트 · 표 · 후보 · 합 · 단추 · 결과가 다 들어간다 */
+  .jb{margin-top:4px;padding:14px;border-radius:18px;background:#fff;box-shadow:0 1px 2px rgba(17,20,25,.05),0 0 0 1.5px #D3D7DD}
+  .jb-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .jb-h h2{margin:0;font-size:18px;font-weight:900;letter-spacing:-.03em}
+  .jb-h .sp{flex:1}
+  .jb-tag{height:24px;padding:0 10px;border-radius:999px;background:var(--jd-soft);color:var(--jd-ink);font-size:12px;font-weight:800;line-height:24px}
+  .jb-seg{display:inline-flex;border:1px solid #D3D7DD;border-radius:999px;overflow:hidden}
+  .jb-seg button{height:30px;padding:0 11px;border:0;background:#fff;font:700 12.5px var(--font);color:#4B5563;cursor:pointer}
+  .jb-seg button.on{background:var(--jd-soft);color:var(--jd-ink)}
+  .jb .jd-when{margin:0 0 10px}.jb .jd-past{margin:0 0 6px}
+  .jb-ag{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 6px 6px 10px;margin-bottom:12px;border-radius:14px;background:#F7F8FA}
+  .jb-ag svg{flex:none;width:18px;height:18px;color:var(--jd-p)}
+  .jb-ag b{font-size:13.5px;font-weight:800}
+  .jb-ag .t{flex:1;min-width:0;font-size:13px;font-weight:600;color:#5F6670;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .jb-ag button{flex:none;height:32px;padding:0 13px;border-radius:999px;border:0;background:var(--jd-p);color:#fff;font:700 13px var(--font);cursor:pointer}
+  .jb-agp{margin:-4px 0 12px;padding:12px;border-radius:14px;background:var(--jd-soft)}
+  .jb-agp .st{padding:8px 0;border-top:1px solid var(--jd-line)}
+  .jb-agp .st:first-child{border-top:0;padding-top:0}
+  .jb-agp .q{font-size:14px;font-weight:800;color:var(--jd-ink)}
+  .jb-agp .a{margin-top:4px;font-size:14px;font-weight:600;color:#333941;word-break:keep-all}
+  .jb-agp .a i{font-style:normal;display:inline-block;height:22px;padding:0 8px;margin:2px 4px 2px 0;border-radius:999px;background:#fff;box-shadow:0 0 0 1px var(--jd-line);font-size:12.5px;font-weight:700;line-height:22px;color:var(--jd-ink)}
+  .jb-agp .go2{margin-top:6px;height:34px;padding:0 14px;border-radius:12px;border:1.5px solid var(--jd-p);background:#fff;color:var(--jd-ink);font:800 13.5px var(--font);cursor:pointer}
+  .jb-tb{border:1.5px solid #D3D7DD;border-radius:14px;overflow:hidden}
+  .jb-tr{display:grid;grid-template-columns:1fr 1fr}
+  .jb-tr>*{min-width:0}
+  .jb-tr+.jb-tr{border-top:1px solid #E6E8EC}
+  .jb-tr>*+*{border-left:1px solid #E6E8EC}
+  .jb-tr.th{background:#F7F8FA;height:34px;align-items:center;font-size:13px;font-weight:900}
+  .jb-tr.th>div{text-align:center}
+  .jb-tr.sum{background:#F7F8FA}
+  .jb-tr.sum>div{min-height:30px;padding:6px 10px;text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+  .jb-slot{min-height:70px}
+  .jb-cell{position:relative;display:flex;flex-direction:column;gap:6px;padding:8px}
+  .jb-acc{appearance:none;width:100%;min-height:44px;padding:6px 26px 6px 10px;border:1.5px solid #D3D7DD;border-radius:12px;background:#fff;text-align:left;font:600 15px/1.25 var(--font);color:#5F6670;cursor:pointer;word-break:keep-all}
+  .jb-acc.has{color:var(--ink);font-weight:800}
+  .jb-in{width:100%;height:44px;padding:0 26px 0 10px;border:1.5px solid #D3D7DD;border-radius:12px;background:#fff;font:700 15px var(--font);color:var(--ink)}
+  .jb-amt{width:100%;min-width:0;height:44px;padding:0 10px;border:1.5px solid #D3D7DD;border-radius:12px;background:#fff;text-align:right;font:800 16px var(--font);color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+  .jb-amt:focus,.jb-in:focus{outline:none;border-color:var(--jd-p)}
+  .jb-cell.on .jb-acc,.jb-cell.on .jb-in{border-color:var(--jd-p);background:var(--jd-soft)}
+  .jb-cell.ok .jb-acc,.jb-cell.ok .jb-amt{border-color:var(--ok);background:rgba(22,179,100,.08)}
+  .jb-cell.no .jb-acc,.jb-cell.no .jb-amt{border-color:var(--no);background:rgba(229,50,45,.06)}
+  .jb-rm{position:absolute;right:12px;top:14px;width:22px;height:22px;border:0;border-radius:50%;background:#EFF1F4;color:#4B5563;font-size:12px;line-height:1;cursor:pointer;padding:0}
+  .jb-why{margin:0;font-size:12.5px;font-weight:700;color:var(--no)}
+  .jb-add{margin:8px;height:40px;border:1.5px dashed #D3D7DD;border-radius:12px;background:none;font:700 13.5px var(--font);color:#4B5563;cursor:pointer}
+  .jb-tr.add>*+*{border-left:0}
+  .jb-cand{margin-top:12px;padding:12px;border-radius:14px;background:var(--jd-soft)}
+  .jb-cand h3{margin:0 0 8px;font-size:13px;font-weight:800;color:var(--jd-ink)}
+  .jb-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .jb-chip{height:40px;padding:0 14px;border:1.5px solid #D3D7DD;border-radius:999px;background:#fff;font:700 14.5px var(--font);color:var(--ink);cursor:pointer}
+  .jb-chip:hover{border-color:var(--jd-p)}
+  .jb-none{font-size:13px;font-weight:600;color:#5F6670}
+  .jb-sum{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;margin-top:12px;padding:10px 12px;border-radius:14px;background:#F7F8FA;font-size:13px;font-weight:700;color:#4B5563}
+  .jb-sum b{font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+  .jb-sum .st{margin-left:auto;font-weight:800}.jb-sum .st.ok{color:var(--ok)}.jb-sum .st.no{color:var(--no)}
+  .jb-act{display:flex;align-items:center;gap:8px;margin-top:12px}
+  .jb-act .jd-pad{margin:0;flex:none}.jb-act .jd-pad:empty{display:none}
+  .jb-go:active{background:var(--jd-p2)}
+  .jb-go{flex:1;height:54px;border:0;border-radius:16px;background:var(--jd-p);color:#fff;font:800 16.5px var(--font);cursor:pointer;box-shadow:0 14px 30px -14px color-mix(in srgb,var(--jd-p) 60%,transparent)}
+  .jb-res{margin-top:12px;padding-top:12px;border-top:1px solid #E6E8EC}
+  .jb-res .jd-verdict{margin:0 0 8px}
+  .jb-agr{display:flex;gap:8px;padding:10px 12px;border-radius:14px;background:var(--jd-soft);font-size:14px;font-weight:600;color:#333941;line-height:1.55;word-break:keep-all}
+  .jb-agr svg{flex:none;width:18px;height:18px;margin-top:2px;color:var(--jd-p)}
+  .jb-agr b{display:block;font-size:13px;font-weight:800;color:var(--jd-ink)}
+  .jb-ans{display:grid;gap:8px;margin-top:10px}
+  .jb-ans>div{padding:10px 12px;border-radius:14px;box-shadow:0 0 0 1px #E6E8EC}
+  .jb-ans h4{margin:0 0 4px;font-size:12.5px;font-weight:800;color:#5F6670}
+  .jb-ans p{margin:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;font-size:14px;font-weight:700;line-height:1.7}
+  .jb-ans p b{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:800}
+  .jb-ans p.miss{color:var(--no)}
   .jd-calc{margin:12px 0 0;font-size:14px;font-weight:600;color:var(--ink-3);line-height:1.6;word-break:keep-all}
+  /* 머리띠가 떠 있을 때 글이 비쳐 보이지 않게 불투명 바탕 + 본문 위 여백(1111) */
+  html body.focus .hd{background:#fff}
+  :root[data-skin="night"] body.focus .hd{background:var(--surface,#14171c)}
+  #main{padding-top:12px}
+  /* PC: 상자를 넓히고 글자 · 칸을 키운다. 계정과 금액은 한 칸 안에서 나란히 */
+  @media(min-width:960px){
+    html body .page{max-width:760px}
+    .jb{padding:22px}
+    .jb-h h2{font-size:21px}
+    .jb-cell{flex-direction:row;align-items:center;gap:8px;padding:10px}
+    .jb-acc,.jb-in{flex:1 1 38%;min-height:52px;font-size:16.5px}
+    .jb-amt{flex:1 1 62%;height:52px;font-size:19px}
+    .jb-acc.has{font-size:16.5px}
+    .jb-rm{position:static;flex:none}
+    .jb-why{display:none}
+    .jb-slot{min-height:76px}
+    .jb-chip{height:44px;font-size:15.5px;padding:0 18px}
+    .jb-go{height:58px;font-size:17px}
+    .jb-ans{grid-template-columns:1fr 1fr}
+    .jb-ans p{font-size:15.5px}
+    .jb-sum,.jb-tr.sum>div{font-size:14.5px}
+  }
   .jd-expl{margin-top:8px;padding:16px;border-radius:12px;background:var(--surface-2);font-size:16px;font-weight:500;line-height:1.65;word-break:keep-all}
   .jd-verdict{margin:16px 0 0;font-size:16px;font-weight:800}
   .jd-verdict.ok{color:var(--ok)} .jd-verdict.no{color:var(--no)}
@@ -82,18 +150,18 @@
   <span class="tq-sp"></span>
   <span class="tq-pos" id="jPos"></span><button type="button" class="tq-nav is-next" id="jNext" aria-label="다음">다음 ›</button>
 </div>
-<script src="js/catalog.js"></script>
-<script src="data/ready.js"></script>
-<script src="js/boot.js"></script>
-<script src="js/store.js"></script>
-<script src="js/tera-pad.js?v=1111c"></script>
-<script src="js/acct-data.js"></script>
-<script src="js/jd/base.js?v=1110v"></script>
-<script src="js/journal-rec.js"></script>
-<script src="js/journal.js"></script>
-<script src="js/zzsfx.js?v=1009a" defer></script><script src="js/zzajan.js?v=1009a" defer></script>
-<script src="js/terrahome.js?v=1021" data-slot=".nav .in" defer></script>
-<script src="js/supa.config.js"></script>
-<script src="js/research.js" data-service="jagyeok"></script>
+<script src="js/catalog.js?v=1111h"></script>
+<script src="data/ready.js?v=1111h"></script>
+<script src="js/boot.js?v=1111h"></script>
+<script src="js/store.js?v=1111h"></script>
+<script src="js/tera-pad.js?v=1111h"></script>
+<script src="js/acct-data.js?v=1111h"></script>
+<script src="js/jd/base.js?v=1111h"></script>
+<script src="js/journal-rec.js?v=1111h"></script>
+<script src="js/journal.js?v=1111h"></script>
+<script src="js/zzsfx.js?v=1111h" defer></script><script src="js/zzajan.js?v=1111h" defer></script>
+<script src="js/terrahome.js?v=1111h" data-slot=".nav .in" defer></script>
+<script src="js/supa.config.js?v=1111h"></script>
+<script src="js/research.js?v=1111h" data-service="jagyeok"></script>
 </body>
 </html>

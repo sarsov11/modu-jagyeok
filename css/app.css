@@ -1,4 +1,4 @@
-.gc{display:inline-block;font-style:normal;font-size:.72em;font-weight:700;line-height:1;padding:.32em .6em;margin-left:.35em;border-radius:999px;vertical-align:.12em;color:#fff;background:#E5484D;letter-spacing:.02em}
+.gc{display:inline-block;font-style:normal;font-size:.72em;font-weight:700;line-height:1;padding:.32em .6em;margin-left:.35em;border-radius:999px;vertical-align:.12em;color:#fff;background:#0F766E;letter-spacing:.02em}
 /* ═══════════════════════════════════════════════════════════
    진격의 공시 · 행정법 — 화면 공통 (2026-09-23)
 
@@ -12,12 +12,12 @@
   --bg:#FFFFFF; --bg-2:#FAFAFB; --surface:#FFFFFF; --surface-2:#F7F8FA; --surface-3:#EFF1F4;
   --line:#E6E8EC; --line-2:#D3D7DD; --line-3:#B4BAC3;
   --ink:#111419; --ink-2:#333941; --ink-3:#4B5563; --ink-4:#5F6670;
-  --cta:#15803D; --cta-2:#166534; --cta-soft:rgba(21,128,61,.10); --cta-line:rgba(21,128,61,.40);
+  --cta:#0F766E; --cta-2:#0B5F59; --cta-soft:rgba(15,118,110,.10); --cta-line:rgba(15,118,110,.40);
   --ok:#16B364; --ok-soft:rgba(22,179,100,.10);
   --no:#E5322D; --no-soft:rgba(229,50,45,.08);
   --warn:#C2410C; --warn-soft:rgba(194,65,12,.09);      /* 오개념(확신 오답) — 빨강과 다르게 */
-  --mark:rgba(21,128,61,.16);
-  --lv0:#EFF1F4; --lv1:#F7C9CD; --lv2:#EE7A83; --lv3:#E5202E;   /* 성취 계단 — 진할수록 잘한 것 */
+  --mark:rgba(15,118,110,.16);
+  --lv0:#EFF1F4; --lv1:#D4ECEA; --lv2:#96D2CD; --lv3:#0F766E;   /* 성취 계단 — 진할수록 잘한 것 */
   --font:"Pretendard Variable",Pretendard,"Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
   --r1:12px; --r2:12px; --r3:14px;
   --s1:8px; --s2:16px; --s3:24px; --s4:32px; --s5:48px;
@@ -186,8 +186,8 @@ mark{background:var(--mark);color:inherit;border-radius:12px;padding:0 1px}
   --title:var(--font); --kr:var(--font); --mono:var(--font); --tw:800; --tls:-.05em; --s6:64px;
   --red:var(--cta); --red-2:var(--cta-2); --red-soft:var(--cta-soft); --red-line:var(--cta-line);
   --stage:#FFFFFF; --stage-2:#FFFFFF; --stage-line:#DEE1E6; --stage-ink:#111419; --stage-ink-2:#6B717A;
-  --star:#E6E8EC; --neb-1:rgba(229,32,46,.07); --neb-2:rgba(17,20,25,.03); --core-glow:#E5202E;
-  --fam-geo:#E5202E; --fam-soc:#8E1420; --fam-eth:#FF6A74; --mint:#B0353A;
+  --star:#E6E8EC; --neb-1:rgba(15,118,110,.07); --neb-2:rgba(17,20,25,.03); --core-glow:#0F766E;
+  --fam-geo:#0F766E; --fam-soc:#148E84; --fam-eth:#97D2CD; --mint:#0F766E;
 }
 :root[data-skin="jelly"]{
   --stage:#FFFFFF; --stage-2:#FFF7FA; --stage-line:#F6D3E0; --stage-ink:#2A1420; --stage-ink-2:#6A4659;
@@ -432,8 +432,8 @@ html body .tm-go{color:#fff}
  * 색은 앱의 --pt. 클래스는 전부 tq- 로 시작한다. tera-q.js 와 같이 싣는다.
  * 화면 틀: .tq-top(머리) → .tq-prog(진행) → .tq-meta(번호 · 최빈출 · 단추) → .tq-stem(발문) → .tq-choices | .tq-ox → .tq-exp(해설) · .tq-bar(아래 줄) · .tq-omr(답안 번호판)
  */
-:root { --tq-p: var(--pt, var(--t-app, var(--cta, #E5202E))); --tq-ps: color-mix(in srgb, var(--tq-p) 8%, #fff); --tq-pi: color-mix(in srgb, var(--tq-p) 78%, #111419);
-  --tq-ink: #111827; --tq-ink2: #333941; --tq-sub: #5F6670; --tq-line: #E2E8F0; --tq-fill: #F1F5F9; --tq-ok: #16B364; --tq-no: #E5322D; }
+:root { --tq-p: var(--pt, var(--t-app, var(--cta, #0F766E))); --tq-ps: color-mix(in srgb, var(--tq-p) 8%, #fff); --tq-pi: color-mix(in srgb, var(--tq-p) 78%, #111419);
+  --tq-ink: #111827; --tq-ink2: #333941; --tq-sub: #5F6670; --tq-line: #DCE7E5; --tq-fill: #EFF5F4; --tq-ok: #16B364; --tq-no: #E5322D; }
 
 /* 머리: ‹ 과목 이름 …… 시간 */
 .tq-top { display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 16px; }
@@ -451,17 +451,17 @@ html body .tm-go{color:#fff}
 .tq-meta { display: flex; align-items: center; gap: 10px; min-height: 36px; margin-bottom: 10px; }
 .tq-meta .tq-no { font-weight:500;font-size:14px;line-height:1; color: #5F6670; }
 .tq-meta .tq-sp { flex: 1; }
-.tq-stars { font-size: 14px; line-height: 1; letter-spacing: 1px; } .tq-stars b { color: var(--tq-p); font-weight: 500; } .tq-stars i { color: #E2E8F0; font-style: normal; }
+.tq-stars { font-size: 14px; line-height: 1; letter-spacing: 1px; } .tq-stars b { color: var(--tq-p); font-weight: 500; } .tq-stars i { color: #DCE7E5; font-style: normal; }
 .tq-tier { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-weight: 800; font-size: 13px; line-height: 1; color: #fff; }
 .tq-tier-S { background: var(--tq-p); } .tq-tier-A { background: color-mix(in srgb, var(--tq-p) 55%, #fff); } .tq-tier-B { background: color-mix(in srgb, var(--tq-p) 18%, #fff); color: var(--tq-pi); } .tq-tier-C { background: #E9ECF0; color: #5F6670; }
 .tq-badge { display: inline-flex; align-items: center; gap: 3px; font-weight:500;font-size:13px;line-height:1; color: #4B5563; }
-.tq-badge svg { width: 14px; height: 14px; color: #F97316; } .tq-badge b { font-weight: 600; }
+.tq-badge svg { width: 14px; height: 14px; color: #0F766E; } .tq-badge b { font-weight: 600; }
 .tq-icon { flex: none; width: 32px; height: 32px; border-radius: 999px; border: 1px solid var(--tq-line); background: #fff; color: #5F6670; display: grid; place-items: center; cursor: pointer; padding: 0; }
 .tq-icon svg { width: 17px; height: 17px; } .tq-icon.is-on { background: var(--tq-p); border-color: var(--tq-p); color: #fff; }
 
 /* 발문 */
 .tq-stem { font-weight:600;font-size:20px;line-height:30px; color: var(--tq-ink); letter-spacing: -.5px; word-break: keep-all; overflow-wrap: anywhere; margin: 0 0 22px; }
-.tq-box { margin: -8px 0 22px; padding: 14px 16px; border-radius: 12px; background: #F8FAFC; border: 1px solid var(--tq-line); font-weight:500;font-size:16px;line-height:28px; color: var(--tq-ink2); }
+.tq-box { margin: -8px 0 22px; padding: 14px 16px; border-radius: 12px; background: #F4F9F8; border: 1px solid var(--tq-line); font-weight:500;font-size:16px;line-height:28px; color: var(--tq-ink2); }
 
 /* 개념어: 물결 밑줄 + 뜻 말풍선 */
 .tq-term { padding: 0 1px; border-radius: 0; cursor: help; color: inherit; text-decoration: none; outline: none;
@@ -469,9 +469,9 @@ html body .tm-go{color:#fff}
 .tq-term:hover, .tq-term:focus, .tq-term.is-on { background: color-mix(in srgb, var(--tq-p) 22%, #fff); }
 .tq-terms-off .tq-term { color: inherit; text-decoration: none; cursor: inherit; background: none; padding: 0; pointer-events: none; }
 .tq-bubble { --tail: 50%; position: fixed; z-index: 2147482000; max-width: min(320px, calc(100vw - 16px)); padding: 9px 14px; background: #fff; color: #1E293B; font: 600 13px/1.45 'Pretendard Variable', Pretendard, -apple-system, 'Malgun Gothic', sans-serif; letter-spacing: -.2px;
-  border: 0; border-radius: 14px; box-shadow: 0 14px 34px -14px rgba(15, 23, 42, .45), 0 0 0 1px #E2E8F0; word-break: keep-all; }
-.tq-bubble::after { content: ""; position: absolute; top: 100%; left: var(--tail); width: 10px; height: 10px; margin: -5px 0 0 -5px; background: #fff; box-shadow: 1px 1px 0 #E2E8F0; border-radius: 0 0 3px; transform: rotate(45deg); }
-.tq-bubble.is-below::after { top: 0; box-shadow: -1px -1px 0 #E2E8F0; border-radius: 3px 0 0; }
+  border: 0; border-radius: 14px; box-shadow: 0 14px 34px -14px rgba(15, 23, 42, .45), 0 0 0 1px #DCE7E5; word-break: keep-all; }
+.tq-bubble::after { content: ""; position: absolute; top: 100%; left: var(--tail); width: 10px; height: 10px; margin: -5px 0 0 -5px; background: #fff; box-shadow: 1px 1px 0 #DCE7E5; border-radius: 0 0 3px; transform: rotate(45deg); }
+.tq-bubble.is-below::after { top: 0; box-shadow: -1px -1px 0 #DCE7E5; border-radius: 3px 0 0; }
 
 /* 선지: 판 없이 줄로. 번호 동그라미 30px */
 .tq-choices { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
@@ -487,7 +487,7 @@ html body .tm-go{color:#fff}
 
 /* O·X: 높이 64px(화면표준 4절) */
 .tq-ox { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.tq-ox button { height: 64px; border-radius: 14px; border: 1.5px solid #CBD5E1; background: #fff; font-weight:800;font-size:26px;line-height:1; color: var(--tq-ink); cursor: pointer; }
+.tq-ox button { height: 64px; border-radius: 14px; border: 1.5px solid #C5D6D3; background: #fff; font-weight:800;font-size:26px;line-height:1; color: var(--tq-ink); cursor: pointer; }
 .tq-ox button.is-ok { border-color: var(--tq-ok); color: var(--tq-ok); background: color-mix(in srgb, var(--tq-ok) 10%, #fff); }
 .tq-ox button.is-no { border-color: var(--tq-no); color: var(--tq-no); background: color-mix(in srgb, var(--tq-no) 8%, #fff); }
 .tq-ox button.is-rest { color: #94A3B8; }
@@ -511,7 +511,7 @@ html body .tm-go{color:#fff}
 .tq-nav:disabled { opacity: .4; cursor: default; }
 
 /* 답안 번호판 + 안 푼 문제로 이동 */
-.tq-omr { padding: 15px; border-radius: 12px; background: #fff; border: 1px solid #EDF2F7; box-shadow: 0 10px 26px rgba(15, 23, 42, .07); }
+.tq-omr { padding: 15px; border-radius: 12px; background: #fff; border: 1px solid #EEF4F3; box-shadow: 0 10px 26px rgba(15, 23, 42, .07); }
 .tq-jump { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 42px; border-radius: 12px; border: 0; background: color-mix(in srgb, var(--tq-p) 9%, #fff); color: var(--tq-pi); font-weight:600;font-size:14px;line-height:1; cursor: pointer; }
 .tq-jump b { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--tq-p); color: #fff; font-weight:700;font-size:13px;line-height:1; }
 .tq-jump[hidden] { display: none; }
@@ -522,7 +522,7 @@ html body .tm-go{color:#fff}
 .tq-omr-row i.is-on { background: color-mix(in srgb, var(--tq-p) 70%, #fff); border-color: transparent; color: #fff; }
 
 /* 안내 말풍선 */
-.tq-coach { position: absolute; z-index: 2147481500; width: 250px; padding: 14px 14px 12px; border-radius: 14px; background: #fff; color: #333941; box-shadow: 0 18px 40px -16px rgba(15, 23, 42, .45), 0 0 0 1px #E2E8F0; font: 400 13px/1.55 'Pretendard Variable', Pretendard, -apple-system, 'Malgun Gothic', sans-serif; letter-spacing: -.3px; }
+.tq-coach { position: absolute; z-index: 2147481500; width: 250px; padding: 14px 14px 12px; border-radius: 14px; background: #fff; color: #333941; box-shadow: 0 18px 40px -16px rgba(15, 23, 42, .45), 0 0 0 1px #DCE7E5; font: 400 13px/1.55 'Pretendard Variable', Pretendard, -apple-system, 'Malgun Gothic', sans-serif; letter-spacing: -.3px; }
 .tq-coach b { display: block; font-weight:800;font-size:14px;line-height:1.3; margin-bottom: 6px; color: var(--tq-pi); } .tq-coach p { margin: 0 0 12px; color: #4B5563; word-break: keep-all; }
 .tq-coach div { display: flex; align-items: center; justify-content: space-between; }
 .tq-coach button { border: 0; cursor: pointer; font-weight:600;font-size:13px;line-height:1; } .tq-coach-off { background: none; color: #94A3B8; padding: 8px 6px; }
@@ -554,7 +554,7 @@ html body .qcard .src{margin-bottom:10px}
 html body .sent.tq-stem{font:600 20px/30px var(--font);letter-spacing:-.5px;color:#111827;margin:0 0 22px}
 @media (max-width:389px){html body .sent.tq-stem{font-size:16px;line-height:28px}}
 html body .stones{display:flex;align-items:center;gap:12px;position:static;height:auto;margin:10px 0 18px;background:none;overflow:visible;border-radius:0}
-html body .stones .trk{flex:1;height:8px;border-radius:999px;background:#F1F5F9;overflow:hidden}
+html body .stones .trk{flex:1;height:8px;border-radius:999px;background:#EFF5F4;overflow:hidden}
 html body .stones .trk i{display:block;height:100%;border-radius:999px;background:var(--cta);transition:width .3s}
 html body .stones .left{display:inline;font:500 13px/1 var(--font);color:#5F6670;white-space:nowrap}
 html body .stones .left b{font-weight:800;color:#111827}
@@ -608,3 +608,8 @@ details.fold>summary::-webkit-details-marker{display:none}
 details.fold>summary::after{content:"+"}
 details.fold[open]>summary::after{content:"−"}
 details.fold>div,details.fold>ul{margin:0 16px 14px}
+
+/* ════════ 1111h 청록 단일톤(대표님 확정 11-11 · 화면표준 16절): 색은 청록 하나, 진하기로만 구분. 정답 초록 · 오답 빨강만 남긴다 ════════ */
+html:root{--cta:#0F766E;--cta-2:#0B5F59;--cta-soft:rgba(15,118,110,.10);--cta-line:rgba(15,118,110,.40);--mark:rgba(15,118,110,.16);
+  --pt:#0F766E;--pt-2:#0B5F59;--pt-soft:rgba(15,118,110,.10);--pt-ink:#0B4F4A;--ink:#12302D;--line:#DCE7E5;
+  --tq-p:#0F766E;--tq-ps:#EEF7F6;--tq-pi:#0B4F4A;--zs-red:#0F766E}
