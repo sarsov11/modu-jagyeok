@@ -66,6 +66,7 @@
 <script src="data/ready.js"></script>
 <script src="js/boot.js"></script>
 <script src="js/store.js"></script>
+<script src="js/journal-rec.js?v=1110v"></script>
 <script src="js/strat.js?v=1110c"></script>
 <script>
 (function () {
@@ -132,8 +133,14 @@
       '<details style="margin-top:10px"><summary>' + (m + 1) + "월 출석</summary>" + '<div class="cal">' + 월 + "</div></details>";
   })();
 
-  var wrong = GB.wrongList().length;
-  $("alt").innerHTML =
+  var wrong = GB.wrongList().length + (window.JREC ? JREC.reviewCount() : 0);
+  /* 분개 드릴 — 회계 과목이면 목록 맨 위 줄 + 추천(오늘 목록의 추천 1번 자리) */
+  var jdRow = "";
+  try {
+    var jc = window.JREC && JREC.on() ? JREC.current() : null;
+    if (jc) jdRow = '<a class="row" href="' + JREC.href(jc.unit, jc.acct) + '"><span class="t"><b>분개 드릴 · ' + esc(jc.acct.n) + " " + jc.acct.ids.length + '거래<em class="recpill">추천</em></b><span style="font-size:13px">계정을 배웠으면 분개부터 하세요</span></span><span class="go">›</span></a>';
+  } catch (e) {}
+  $("alt").innerHTML = jdRow +
     '<a class="row" href="ox.html?mode=hard"><span class="t"><b>어려운 O·X</b><span>한두 마디만 바꾼 함정 문장</span></span><span class="go">›</span></a>' +
     '<a class="row" href="ox.html?mode=pair"><span class="t"><b>둘 중 맞는 문장</b><span>한두 마디만 다른 기출 두 문장</span></span><span class="go">›</span></a>' +
     (wrong ? '<a class="row" href="ox.html?mode=wrong"><span class="t"><b>복습</b><span>' + wrong + "개</span></span><span class=\"go\">›</span></a>" : "") +

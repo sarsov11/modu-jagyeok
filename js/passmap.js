@@ -128,6 +128,22 @@
     if (!no) return;
     location.href = "ox.html?s=" + encodeURIComponent(s) + "&node=" + no;
   }
+  /* 분개 드릴 — 회계 과목 카드의 판에 줄 하나(분개 드릴 N거래). 판은 공용 부품이 그리므로 열린 뒤에 끼워 넣는다 */
+  function jdrillRow(n, g, idOf) {
+    try {
+      var R = window.JREC, id = idOf[g.name]; if (!R || !R.unitsForKey) return;
+      var us = R.unitsForKey(id, n.nos || []); if (!us.length) return;
+      var pv = host.querySelector(".tm-pv"), go2 = pv && pv.querySelector(".tm-go"); if (!pv || !go2) return;
+      pv.querySelectorAll(".tm-jd").forEach(function (e) { e.remove(); });
+      us.forEach(function (u) {
+        var a = R.nextAcct(u) || u.accts[0], el = D.createElement("a");
+        el.className = "tm-jd"; el.href = R.href(u, a);
+        el.style.cssText = "flex:none;display:flex;justify-content:space-between;align-items:center;min-height:44px;margin:0 0 8px;padding:0 14px;border:1px solid #E6E8EC;border-radius:14px;color:var(--pt,var(--cta));font-weight:700;font-size:16px;text-decoration:none";
+        el.innerHTML = "<span>분개 드릴 · " + esc(u.name) + "</span><em style=\"font-style:normal;font-size:13px;font-weight:600;color:#4B5563\">" + R.count(u) + "거래</em>";
+        pv.insertBefore(el, go2);
+      });
+    } catch (e) {}
+  }
   function draw() {
     if (host.querySelector(".tm-pv.tm-open")) { clearTimeout(timer); timer = setTimeout(draw, 1200); return; }
     var groups = [], idOf = {};
@@ -138,6 +154,7 @@
       groups: groups, cap: 24,
       mark: "tier",
       onStart: function (n, g) { go(n, g, idOf); },
+      onNode: function (n, g) { jdrillRow(n, g, idOf); },
       onLeaf: function (l, n, g) { go({ leaves: [l], nos: l.nos }, g, idOf); }
     });
     if (!left && !shown) { shown = true; tiercard(); }

@@ -43,6 +43,7 @@
 
 <script src="js/tera-pad.js?v=1110p"></script>
 <script src="js/tera-q.js?v=1110p"></script>
+<script src="js/journal-rec.js?v=1110v"></script>
 <script src="js/catalog.js"></script>
 <script src="data/ready.js"></script>
 <script src="js/boot.js"></script>
@@ -409,7 +410,19 @@
     if (읽는중) { 읽는중 = null; if (mode === "today") GB.markToday(todayIdx[pos]); }
     next();
   }
+  /* 분개 드릴로 가는 주 단추 — 이 쟁점에 이어진 분개 단원이 있을 때만 */
+  function jdLink(nos) {
+    try {
+      var R = window.JREC; if (!R || !R.on()) return null;
+      nos = [].concat(nos); var us = [];
+      nos.forEach(function (no) { R.unitsFor(no).forEach(function (u) { if (us.indexOf(u) < 0) us.push(u); }); });
+      if (!us.length) return null;
+      var u = us[0], a = R.nextAcct(u) || u.accts[0];
+      return { a: '<a class="btn" href="' + R.href(u, a) + '">분개 드릴 ' + R.count(u) + "거래</a>" };
+    } catch (e) { return null; }
+  }
   function showRead(no, back) {
+    var JD = jdLink(no); if (window.JREC && JREC.on()) JREC.markRead(no);   /* 회계 과목이면 주 단추 자리에 「분개 드릴 N거래」 */
     /* 도식(2026-10-26 대표님 「모든 과목 개념을 도식으로」) — data/dosik/<과목>.js 가 있으면 위에 도식, 원래 글은 아래에 접는다 */
     var dkey = (window.TREE && TREE.key) || "";
     if (dkey && window.DIAGRAM && !(window.DOSIK && DOSIK[dkey]) && !showRead.불러봄) {
@@ -424,7 +437,7 @@
       $("stage").innerHTML = '<div class="readhd">' + (읽는중 ? '<span class="chip">개념</span>' : "") + '<h2>' + esc(nd.name) + '</h2></div>' + (도식 ? 도식 + '<details class="yodo-src"><summary>개념 카드 원문</summary>' + 카드 + '</details>' : 카드) +
         (os0.length ? '<details class="cardv-src"><summary>맞는 기출 문장 ' + os0.length + '개</summary><div class="readlist">' +
           os0.map(function (q) { return "<p>" + esc(q.t) + "<small>" + esc(GB.src(q)) + "</small></p>"; }).join("") + '</div></details>' : '') +
-        '<div class="acts">' + (back ? '<button class="btn" id="nx">시작</button>' : '<a class="btn" href="ox.html?node=' + no + '">이 쟁점 O·X 풀기</a>') + '</div>';
+        '<div class="acts">' + (JD ? JD.a : "") + (back ? '<button class="btn' + (JD ? " ghost" : "") + '" id="nx">시작</button>' : '<a class="btn' + (JD ? " ghost" : "") + '" href="ox.html?node=' + no + '">이 쟁점 O·X 풀기</a>') + '</div>';
       if (back) $("nx").onclick = 읽기끝;
       window.scrollTo(0, 0); return;
     }
@@ -433,8 +446,8 @@
     var h = '<div class="readhd">' + (읽는중 ? '<span class="chip">개념</span>' : "") + '<h2>' + esc(nd.name) + " — 맞는 기출 문장</h2></div>" +
       '<p class="muted" style="margin:4px 0 0;font-size:14px">시험에 맞는 문장으로 나온 것만 모았어요. 최근 것부터.</p>' +
       (도식 ? 도식 + '<details class="yodo-src"><summary>맞는 기출 문장 ' + os.length + '개</summary>' : "") + '<div class="readlist">' + os.map(function (q) { return "<p>" + esc(q.t) + "<small>" + esc(GB.src(q)) + "</small></p>"; }).join("") + "</div>" + (도식 ? "</details>" : "") +
-      '<div class="acts">' + (back ? '<button class="btn" id="nx">시작</button>'
-                                   : '<a class="btn" href="ox.html?node=' + no + '">이 쟁점 O·X 풀기</a>') + "</div>";
+      '<div class="acts">' + (JD ? JD.a : "") + (back ? '<button class="btn' + (JD ? " ghost" : "") + '" id="nx">시작</button>'
+                                   : '<a class="btn' + (JD ? " ghost" : "") + '" href="ox.html?node=' + no + '">이 쟁점 O·X 풀기</a>') + "</div>";
     $("stage").innerHTML = h;
     if (back) $("nx").onclick = 읽기끝;
     window.scrollTo(0, 0);
@@ -497,13 +510,15 @@
     $("prog").innerHTML = ""; $("cnt").textContent = "";
     var tb = document.getElementById("tqbar"); if (tb) tb.hidden = true; document.body.classList.remove("tq-on");
     var todayDone = mode === "today"; cheerEnd(ok, n);
+    var nodesDone = []; seq.forEach(function (x) { if (x.k === "ox") { var q0 = GB.item(x.id); if (q0 && nodesDone.indexOf(q0.n) < 0) nodesDone.push(q0.n); } }); if (nodeNo && nodesDone.indexOf(nodeNo) < 0) nodesDone.push(nodeNo);
+    var JD = jdLink(nodesDone);
     $("stage").innerHTML = '<div class="done">' +
       (n ? '<div class="big num">' + ok + " / " + n + "</div>" : '<div class="big">끝</div>') +
       '<p class="muted">' + (todayDone ? "오늘 분량 완료." : "이번 묶음을 다 풀었어요.") + "</p>" +
       '<div class="grid3" style="grid-template-columns:repeat(2,1fr)"><div><b class="num">' + ok + "</b><span>맞힘</span></div><div><b class=\"num\">" + mis +
       '</b><span>확신했는데 틀림</span></div></div>' +
-      '<div class="acts" style="margin-top:22px"><a class="btn ghost" href="index.html">오늘</a>' +
-      (mis ? '<a class="btn" href="ox.html?mode=hard">어려운 O·X</a>' : '<a class="btn" href="ox.html?mode=wrong">복습</a>') + "</div></div>";
+      '<div class="acts" style="margin-top:22px;flex-wrap:wrap">' + (JD ? JD.a.replace('class="btn"', 'class="btn" style="flex:1 1 100%"') : "") + '<a class="btn ghost" href="index.html">오늘</a>' +
+      (mis ? '<a class="btn' + (JD ? " ghost" : "") + '" href="ox.html?mode=hard">어려운 O·X</a>' : '<a class="btn' + (JD ? " ghost" : "") + '" href="ox.html?mode=wrong">복습</a>') + "</div></div>";
   }
 
   /* 키보드 — 1·2·3 확신도, O·X, Enter 다음 */
@@ -516,6 +531,12 @@
     else if (k === "enter") { var n = $("nx"); if (n) { e.preventDefault(); n.click(); } }
   });
 
+  if (mode === "wrong" && window.JREC && JREC.reviewCount() && !/[?&]nojd/.test(location.search)) {   /* 분개 복습: 「분개」 딱지 카드에서 그 거래 풀이로 */
+    $("prog").innerHTML = ""; $("cnt").textContent = "";
+    $("stage").innerHTML = '<div class="done"><div class="big num">' + JREC.reviewCount() + '</div><p class="muted">분개 복습 <span class="chip cta">분개</span></p><div class="acts" style="margin-top:22px;flex-wrap:wrap"><a class="btn" style="flex:1 1 100%" href="journal.html?review=1">시작</a>' +
+      (seq.length ? '<a class="btn ghost" style="flex:1 1 100%" href="ox.html?mode=wrong&nojd=1">문장 복습 ' + seq.length + '개</a>' : '') + '</div></div>';
+    return;
+  }
   if (mode === "read") { showRead(nodeNo, false); $("ttl").textContent = (window.CARD && (CARD["#" + nodeNo] || CARD[(GB.node(nodeNo) || {}).name])) ? "개념 카드" : "쟁점 요점"; return; }
   if (mode === "speed") { runSpeed(); return; }
   if (!seq.length) {
