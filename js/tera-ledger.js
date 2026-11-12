@@ -1,7 +1,7 @@
 /* 테라러닝 분개 · T계정 판 — 회계 문제를 풀면서 분개와 T계정을 연습하는 공용 판 (2026-11-11, 안 C 상자 문법)
  *   채점은 없다. 연습장이다. 문제 키별로 localStorage 에 저장한다(try/catch).
  * 쓰는 법
- *   <script src="js/tera-ledger.js?v=1111f" defer></script>
+ *   <script src="js/tera-ledger.js?v=1112k" defer></script>
  *   TERA_LEDGER.button(부모요소, { key:"문제 고유 키", accounts:["토지","건물","현금"] })   // 「분개 · T계정」 단추를 만들어 붙인다
  *   TERA_LEDGER.open({ key, accounts })  /  TERA_LEDGER.close()
  *   계정 목록 = accounts + 앱에 있는 JDRILL · ACCT 의 계정 + 기본 40개. ACCT 가 없으면 acct-data.js 를 열 때 불러온다.
@@ -48,7 +48,7 @@
     "#tled .add{margin:8px;height:38px;border:1.5px dashed #D3D7DD;border-radius:12px;background:none;font-weight:700;font-size:13px;color:#4B5563}",
     "#tled .chk{display:flex;align-items:center;flex-wrap:wrap;gap:3px 12px;margin-top:8px;padding:8px 10px;border-radius:12px;background:#F7F8FA;font-size:12.5px;font-weight:700;color:#4B5563}",
     "#tled .chk b{color:#111419;font-variant-numeric:tabular-nums}#tled .chk .st{margin-left:auto;font-weight:800}#tled .chk .ok{color:#16B364}#tled .chk .no{color:#E5322D}",
-    "#tled .cand{margin-top:10px;padding:10px;border-radius:14px;background:var(--ps)}#tled .cand h3{margin:0 0 8px;font-size:12.5px;font-weight:800;color:var(--pi)}",
+    "#tled .cand{margin-top:10px;padding:10px;border-radius:14px;background:var(--ps)}#tled .cand h3{margin:0 0 8px;font-size:12.5px;font-weight:800;color:#111419}",
     "#tled .chips{display:flex;flex-wrap:wrap;gap:7px}#tled .chip{height:38px;padding:0 13px;border:1.5px solid #D3D7DD;border-radius:999px;background:#fff;font-weight:700;font-size:14px}",
     "#tled .wide{display:block;width:100%;height:44px;margin-top:10px;border-radius:12px;border:1.5px solid var(--p);background:#fff;color:var(--pi);font-weight:800;font-size:14px}",
     "#tled .none{font-size:13px;font-weight:600;color:#5F6670}",

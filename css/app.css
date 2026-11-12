@@ -433,7 +433,7 @@ html body .tm-go{color:#fff}
  * 화면 틀: .tq-top(머리) → .tq-prog(진행) → .tq-meta(번호 · 최빈출 · 단추) → .tq-stem(발문) → .tq-choices | .tq-ox → .tq-exp(해설) · .tq-bar(아래 줄) · .tq-omr(답안 번호판)
  */
 :root { --tq-p: var(--pt, var(--t-app, var(--cta, #0F766E))); --tq-ps: color-mix(in srgb, var(--tq-p) 8%, #fff); --tq-pi: color-mix(in srgb, var(--tq-p) 78%, #111419);
-  --tq-ink: #111827; --tq-ink2: #333941; --tq-sub: #5F6670; --tq-line: #DCE7E5; --tq-fill: #EFF5F4; --tq-ok: #16B364; --tq-no: #E5322D; }
+  --tq-ink: #111419; --tq-ink2: #333941; --tq-sub: #5F6670; --tq-line: #E5E7EB; --tq-fill: #EFF5F4; --tq-ok: #16B364; --tq-no: #E5322D; }
 
 /* 머리: ‹ 과목 이름 …… 시간 */
 .tq-top { display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 16px; }
@@ -451,7 +451,7 @@ html body .tm-go{color:#fff}
 .tq-meta { display: flex; align-items: center; gap: 10px; min-height: 36px; margin-bottom: 10px; }
 .tq-meta .tq-no { font-weight:500;font-size:14px;line-height:1; color: #5F6670; }
 .tq-meta .tq-sp { flex: 1; }
-.tq-stars { font-size: 14px; line-height: 1; letter-spacing: 1px; } .tq-stars b { color: var(--tq-p); font-weight: 500; } .tq-stars i { color: #DCE7E5; font-style: normal; }
+.tq-stars { font-size: 14px; line-height: 1; letter-spacing: 1px; } .tq-stars b { color: var(--tq-p); font-weight: 500; } .tq-stars i { color: #E5E7EB; font-style: normal; }
 .tq-tier { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-weight: 800; font-size: 13px; line-height: 1; color: #fff; }
 .tq-tier-S { background: var(--tq-p); } .tq-tier-A { background: color-mix(in srgb, var(--tq-p) 55%, #fff); } .tq-tier-B { background: color-mix(in srgb, var(--tq-p) 18%, #fff); color: var(--tq-pi); } .tq-tier-C { background: #E9ECF0; color: #5F6670; }
 .tq-badge { display: inline-flex; align-items: center; gap: 3px; font-weight:500;font-size:13px;line-height:1; color: #4B5563; }
@@ -469,9 +469,9 @@ html body .tm-go{color:#fff}
 .tq-term:hover, .tq-term:focus, .tq-term.is-on { background: color-mix(in srgb, var(--tq-p) 22%, #fff); }
 .tq-terms-off .tq-term { color: inherit; text-decoration: none; cursor: inherit; background: none; padding: 0; pointer-events: none; }
 .tq-bubble { --tail: 50%; position: fixed; z-index: 2147482000; max-width: min(320px, calc(100vw - 16px)); padding: 9px 14px; background: #fff; color: #1E293B; font: 600 13px/1.45 'Pretendard Variable', Pretendard, -apple-system, 'Malgun Gothic', sans-serif; letter-spacing: -.2px;
-  border: 0; border-radius: 14px; box-shadow: 0 14px 34px -14px rgba(15, 23, 42, .45), 0 0 0 1px #DCE7E5; word-break: keep-all; }
-.tq-bubble::after { content: ""; position: absolute; top: 100%; left: var(--tail); width: 10px; height: 10px; margin: -5px 0 0 -5px; background: #fff; box-shadow: 1px 1px 0 #DCE7E5; border-radius: 0 0 3px; transform: rotate(45deg); }
-.tq-bubble.is-below::after { top: 0; box-shadow: -1px -1px 0 #DCE7E5; border-radius: 3px 0 0; }
+  border: 0; border-radius: 14px; box-shadow: 0 14px 34px -14px rgba(15, 23, 42, .45), 0 0 0 1px #E5E7EB; word-break: keep-all; }
+.tq-bubble::after { content: ""; position: absolute; top: 100%; left: var(--tail); width: 10px; height: 10px; margin: -5px 0 0 -5px; background: #fff; box-shadow: 1px 1px 0 #E5E7EB; border-radius: 0 0 3px; transform: rotate(45deg); }
+.tq-bubble.is-below::after { top: 0; box-shadow: -1px -1px 0 #E5E7EB; border-radius: 3px 0 0; }
 
 /* 선지: 판 없이 줄로. 번호 동그라미 30px */
 .tq-choices { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
@@ -522,8 +522,8 @@ html body .tm-go{color:#fff}
 .tq-omr-row i.is-on { background: color-mix(in srgb, var(--tq-p) 70%, #fff); border-color: transparent; color: #fff; }
 
 /* 안내 말풍선 */
-.tq-coach { position: absolute; z-index: 2147481500; width: 250px; padding: 14px 14px 12px; border-radius: 14px; background: #fff; color: #333941; box-shadow: 0 18px 40px -16px rgba(15, 23, 42, .45), 0 0 0 1px #DCE7E5; font: 400 13px/1.55 'Pretendard Variable', Pretendard, -apple-system, 'Malgun Gothic', sans-serif; letter-spacing: -.3px; }
-.tq-coach b { display: block; font-weight:800;font-size:14px;line-height:1.3; margin-bottom: 6px; color: var(--tq-pi); } .tq-coach p { margin: 0 0 12px; color: #4B5563; word-break: keep-all; }
+.tq-coach { position: absolute; z-index: 2147481500; width: 250px; padding: 14px 14px 12px; border-radius: 14px; background: #fff; color: #333941; box-shadow: 0 18px 40px -16px rgba(15, 23, 42, .45), 0 0 0 1px #E5E7EB; font: 400 13px/1.55 'Pretendard Variable', Pretendard, -apple-system, 'Malgun Gothic', sans-serif; letter-spacing: -.3px; }
+.tq-coach b { display: block; font-weight:800;font-size:14px;line-height:1.3; margin-bottom: 6px; color: #111419; } .tq-coach p { margin: 0 0 12px; color: #4B5563; word-break: keep-all; }
 .tq-coach div { display: flex; align-items: center; justify-content: space-between; }
 .tq-coach button { border: 0; cursor: pointer; font-weight:600;font-size:13px;line-height:1; } .tq-coach-off { background: none; color: #94A3B8; padding: 8px 6px; }
 .tq-coach-ok { height: 36px; padding: 0 14px; border-radius: 12px; background: var(--tq-p); color: #fff; font-weight: 700; }
@@ -551,19 +551,19 @@ html body .tm-go{color:#fff}
 .tq-coach { width: auto; max-width: min(340px, calc(100vw - 24px)); padding: 9px 8px 9px 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; align-items: center; border-radius: 14px; }
 .tq-coach b { grid-column: 1; margin: 0 0 1px; font-size: 13px; } .tq-coach p { grid-column: 1; margin: 0; font-size: 12.5px; line-height: 1.4; }
 .tq-coach div { grid-column: 2; grid-row: 1 / span 2; } .tq-coach-off { display: none; } .tq-coach-ok { height: 34px; }
-.tq-coach.tq-coach-flow { grid-column: 1 / -1; position: static; max-width: none; margin: 0 0 10px; box-shadow: 0 0 0 1px #DCE7E5; background: var(--tq-ps, #E3F2F0); }
+.tq-coach.tq-coach-flow { grid-column: 1 / -1; position: static; max-width: none; margin: 0 0 10px; box-shadow: 0 0 0 1px #E5E7EB; background: var(--tq-ps, #E3F2F0); }
 
 /* ══ 문제 화면 공용 부품(tera-q.css 값 그대로) — 기존 마크업에 맞춘 연결 규칙 ══ */
 :root{--pt:var(--cta)}
 html body .qcard{margin-top:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
 html body .qcard .src{margin-bottom:10px}
-html body .sent.tq-stem{font:600 20px/30px var(--font);letter-spacing:-.5px;color:#111827;margin:0 0 22px}
+html body .sent.tq-stem{font:600 20px/30px var(--font);letter-spacing:-.5px;color:#111419;margin:0 0 22px}
 @media (max-width:389px){html body .sent.tq-stem{font-size:16px;line-height:28px}}
 html body .stones{display:flex;align-items:center;gap:12px;position:static;height:auto;margin:10px 0 18px;background:none;overflow:visible;border-radius:0}
 html body .stones .trk{flex:1;height:8px;border-radius:999px;background:#EFF5F4;overflow:hidden}
 html body .stones .trk i{display:block;height:100%;border-radius:999px;background:var(--cta);transition:width .3s}
 html body .stones .left{display:inline;font:500 13px/1 var(--font);color:#5F6670;white-space:nowrap}
-html body .stones .left b{font-weight:800;color:#111827}
+html body .stones .left b{font-weight:800;color:#111419}
 html body.focus .hd .cnt{display:none}
 html body .step{display:none}
 html body #oxb.mcb{display:grid;gap:10px;margin-top:0}
@@ -617,5 +617,5 @@ details.fold>div,details.fold>ul{margin:0 16px 14px}
 
 /* ════════ 1111h 청록 단일톤(대표님 확정 11-11 · 화면표준 16절): 색은 청록 하나, 진하기로만 구분. 정답 초록 · 오답 빨강만 남긴다 ════════ */
 html:root{--cta:#0F766E;--cta-2:#0B5F59;--cta-soft:rgba(15,118,110,.10);--cta-line:rgba(15,118,110,.40);--mark:rgba(15,118,110,.16);
-  --pt:#0F766E;--pt-2:#0B5F59;--pt-soft:rgba(15,118,110,.10);--pt-ink:#0B4F4A;--ink:#12302D;--line:#DCE7E5;
+  --pt:#0F766E;--pt-2:#0B5F59;--pt-soft:rgba(15,118,110,.10);--pt-ink:#0B4F4A;--ink:#111419;--line:#E5E7EB;
   --tq-p:#0F766E;--tq-ps:#EEF7F6;--tq-pi:#0B4F4A;--zs-red:#0F766E}
