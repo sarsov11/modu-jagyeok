@@ -47,18 +47,24 @@
     return out;
   }
 
+  var CAP = 5;   // 한 문제에 띠 개수 한도
   function annotate(target) {
     var hosts = typeof target === "string" ? d.querySelectorAll(target) : target && target.length != null && !target.nodeType ? target : [target];
     if (!keys.length) return 0;
     var n = 0;
     Array.prototype.forEach.call(hosts, function (host) {
       if (!host) return;
-      var used = {}, w = d.createTreeWalker(host, NodeFilter.SHOW_TEXT, null), nodes = [], x;
+      var w = d.createTreeWalker(host, NodeFilter.SHOW_TEXT, null), nodes = [], x;
       while ((x = w.nextNode())) { if (x.nodeValue.trim() && !x.parentNode.closest(".tq-term,.tn-t,.dg,a,button,script,style,input,textarea")) nodes.push(x); }
       // 띠 붙이는 규칙(화면표준 15절): ① 법령·제도 이름 속 낱말에는 달지 않는다(그 이름이 통째로 개념어일 때만 단다)
-      // ② 한 낱말은 한 번만, 홀로 쓰인 자리(앞이 띄어 있고 뒤가 조사)를 먼저 고른다 ③ 홀로 쓰인 자리가 없으면 합친 말 속 첫 자리
-      var texts = nodes.map(function (x) { return x.nodeValue; }), masks = texts.map(lawRanges), all = texts.map(function () { return []; });
+      // ② 한 낱말은 한 문제에 한 번만, 홀로 쓰인 자리(앞이 띄어 있고 뒤가 조사)를 먼저 고른다 ③ 홀로 쓰인 자리가 없으면 합친 말 속 첫 자리
+      // ④ 두 글자 낱말은 홀로 쓰인 자리에만 단다(「정보통신망을 이용하여」의 이용에 예산 용어 뜻이 붙던 것, 11-12)
+      // ⑤ 한 문제(발문 + 선지 묶음)에 띠는 다섯 개까지. 선지마다 같은 낱말에 되풀이해 달지 않는다(회계 과목 띠 과다, 11-12)
+      var scope = host.closest("[data-tq-scope]") || host.closest("article,section,form,.card,.q,.question,.tq-card,.qcard,.quiz") || host.closest("main") || d.body, seen = {}, left = CAP;
+      Array.prototype.forEach.call(scope.querySelectorAll(".tq-term[data-k]"), function (t) { seen[t.getAttribute("data-k")] = 1; left--; });
+      var texts = nodes.map(function (x) { return x.nodeValue; }), masks = texts.map(lawRanges), all = texts.map(function () { return []; }), cand = [];
       keys.forEach(function (k) {
+        if (seen[k]) return;
         var best = null;
         for (var ni = 0; ni < texts.length && !(best && best.solo); ni++) {
           var s = texts[ni], i = -1;
@@ -68,11 +74,17 @@
             if (all[ni].some(function (h) { return i < h.e && e > h.s; })) continue;
             var solo = !/[가-힣A-Za-z0-9]/.test(s.charAt(i - 1)) && JOSA.test(s.slice(e));
             if (solo) { best = { ni: ni, s: i, e: e, k: k, solo: 1 }; break; }
+            if (k.length <= 2) continue;
             if (!best) best = { ni: ni, s: i, e: e, k: k };
           }
         }
-        if (best) all[best.ni].push(best);
+        if (best) { all[best.ni].push(best); cand.push(best); }
       });
+      if (cand.length > Math.max(left, 0)) {   // 자리가 모자라면 홀로 쓰인 것 · 긴 낱말 순으로 남긴다
+        cand.sort(function (a, b) { return (b.solo || 0) - (a.solo || 0) || b.k.length - a.k.length; });
+        var keep = cand.slice(0, Math.max(left, 0));
+        all = all.map(function (hs) { return hs.filter(function (h) { return keep.indexOf(h) >= 0; }); });
+      }
       nodes.forEach(function (node, ni) {
         var s = node.nodeValue, hits = all[ni];
         if (!hits.length) return;
@@ -80,7 +92,7 @@
         var frag = d.createDocumentFragment(), pos = 0;
         hits.forEach(function (h) {
           if (h.s > pos) frag.appendChild(d.createTextNode(s.slice(pos, h.s)));
-          var sp = el("span", "tq-term"); sp.tabIndex = 0; sp.setAttribute("data-d", T[h.k]); sp.textContent = s.slice(h.s, h.e); frag.appendChild(sp); pos = h.e; n++;
+          var sp = el("span", "tq-term"); sp.tabIndex = 0; sp.setAttribute("data-d", T[h.k]); sp.setAttribute("data-k", h.k); sp.textContent = s.slice(h.s, h.e); frag.appendChild(sp); pos = h.e; n++;
         });
         if (pos < s.length) frag.appendChild(d.createTextNode(s.slice(pos)));
         node.parentNode.replaceChild(frag, node);
@@ -130,13 +142,14 @@
   function coach(target, o) {
     o = o || {}; if (!target || get(K_COACH) === "1" || (o.key && get("tera_q_coach_" + o.key) === "1")) return null;
     var old = d.querySelector(".tq-coach"); if (old) old.remove();
-    var c = el("div", "tq-coach", "<b>" + esc(o.title) + "</b><p>" + esc(o.text) + '</p><div><button type="button" class="tq-coach-off">다시 안 보기</button><button type="button" class="tq-coach-ok">확인</button></div>');
+    var c = el("div", "tq-coach", "<b title=\"" + esc(o.text) + "\">" + esc(o.title) + "</b><p>" + esc(o.text) + '</p><div><button type="button" class="tq-coach-off">다시 안 보기</button><button type="button" class="tq-coach-ok">확인</button></div>');
     d.body.appendChild(c);
     var r = target.getBoundingClientRect(), b = c.getBoundingClientRect(), below = r.bottom + b.height + 14 < window.innerHeight;
     c.style.left = Math.max(12, Math.min(window.innerWidth - b.width - 12, r.left)) + "px";
     c.style.top = (window.scrollY + (below ? r.bottom + 10 : r.top - b.height - 10)) + "px";
     function done(all) { if (o.key) set("tera_q_coach_" + o.key, "1"); if (all) set(K_COACH, "1"); c.remove(); if (typeof o.onDone === "function") o.onDone(); }
     c.querySelector(".tq-coach-ok").onclick = function () { done(false); }; c.querySelector(".tq-coach-off").onclick = function () { done(true); };
+    setTimeout(function () { if (c.isConnected) done(false); }, o.ms || 8000);   // 가리는 시간을 줄인다(11-12)
     return c;
   }
 
